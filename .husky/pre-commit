@@ -6,5 +6,5 @@ if [[ "$OS" == "Windows_NT" ]]; then
     npm.cmd version patch --no-git-tag-version && git add package.json package-lock.json  
 else  
     # npx lint-staged  
-    npm version patch --no-git-tag-version && git add .  
+    npm version patch --no-git-tag-version && git add package.json package-lock.json
 fi

@@ -13,4 +13,4 @@ services:
         - APP_LLM_MODEL=openai
 
     environment:
-      - API_URL=https://speranskiy-test.aimpulse.ru/speransky/v1/
+      - API_URL=https://app-test.speransky.legal/speransky/v1/

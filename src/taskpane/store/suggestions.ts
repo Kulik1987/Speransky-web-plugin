@@ -1,8 +1,9 @@
+/* global process, console */
 import { makeAutoObservable, runInAction } from "mobx";
 import type RootStore from ".";
 import { ProviderLLMEnums, ReviewTypesEnums } from "../enums";
 import api from "../api/v1";
-import { ContractRecommendationResponseT } from "../api/v1/contract";
+import { ContractRecommendationResponseT, ContractType } from "../api/v1/contract";
 import mockParties from "./mock/mockParties";
 import mockSuggestions from "./mock/mockSuggestions_1";
 
@@ -23,6 +24,8 @@ class SuggestionsStore {
   suggestionsNew: SuggestionT[] | null = null;
 
   parties: string[] | null = null;
+
+  contractType: ContractType | null = null;
 
   formPartySelected: string | null = null;
 
@@ -88,6 +91,7 @@ class SuggestionsStore {
             id: idQuery,
             text_contract: textContract,
             partie: party,
+            contract_type: this.contractType,
           });
       const { part_contract: partContract, part_modified: partModified, id } = response.data[0];
       const isNeedRepeatQuery = partContract === null || partModified === null;
@@ -127,6 +131,7 @@ class SuggestionsStore {
             manual_requrement: manualRequrement,
             text_contract: textContract,
             partie: party,
+            contract_type: this.contractType,
           });
       const { part_contract: partContract, part_modified: partModified, id } = response.data[0];
       const isNeedRepeatQuery = partContract === null || partModified === null;
@@ -171,9 +176,10 @@ class SuggestionsStore {
               llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
               text_contract: textContract,
             });
-        const { parties } = response.data;
+        const { parties, contract_type } = response.data;
         runInAction(() => {
           this.parties = parties || null;
+          this.contractType = contract_type || null;
           this.formPartySelected = parties?.[0] ?? null;
         });
       }

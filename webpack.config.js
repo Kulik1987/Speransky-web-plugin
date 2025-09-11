@@ -103,7 +103,7 @@ module.exports = async (env, options) => {
         "process.env.APP_SET_MOCK": JSON.stringify(process.env.APP_SET_MOCK),
         "process.env.APP_SET_ANONYMIZER": JSON.stringify(process.env.APP_SET_ANONYMIZER),
         "process.env.appBuildNumber": JSON.stringify(appVersion()),
-        "process.env.APP_LLM_MODEL": JSON.stringify(process.env.APP_LLM_MODEL),
+        "process.env.APP_LLM_MODEL": JSON.stringify(process.env.APP_LLM_MODEL) || "openai",
       }),
     ],
     devServer: {

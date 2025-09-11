@@ -77,7 +77,7 @@ class SuggestionsStore {
   };
 
   getSuggestionGeneral = async (idQuery: string = undefined, repeatCount = 0) => {
-    const REPEAT_LIMIT = 10; /** Количество повторных запросов при ожидании ответа */
+    const REPEAT_LIMIT = 60; /** Количество повторных запросов при ожидании ответа */
     try {
       const { textContractSource, textContractAnonymized } = this.rootStore.documentStore;
       const textContract = APP_SET_ANONYMIZER ? textContractAnonymized : textContractSource;
@@ -115,7 +115,7 @@ class SuggestionsStore {
   };
 
   getSuggestionsCustom = async (idQuery: string = undefined, repeatCount = 0) => {
-    const REPEAT_LIMIT = 10; /** Количество повторных запросов при ожидании ответа */
+    const REPEAT_LIMIT = 60; /** Количество повторных запросов при ожидании ответа */
     try {
       const { textContractSource, textContractAnonymized } = this.rootStore.documentStore;
       const textContract = APP_SET_ANONYMIZER ? textContractAnonymized : textContractSource;

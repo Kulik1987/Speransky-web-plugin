@@ -14,6 +14,12 @@ const mockParties: ContractPartiesResponseT = {
     "9. Как регулируется трансграничная передача персональных данных по данному договору?",
     "10. Какие меры обязательны для защиты персональных данных в рамках договора?",
   ],
+  contract_type: {
+    contract_type: "Договор возмездного оказания услуг",
+    contract_subtype: null,
+    mixed: false,
+    components: [],
+  },
 };
 
 export default mockParties;

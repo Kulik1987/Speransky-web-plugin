@@ -11,11 +11,19 @@ export type ContractPartiesPayloadT = {
   text_contract: string;
 };
 
+export type ContractType = {
+  contract_type: string;
+  contract_subtype: string | null;
+  mixed: boolean;
+  components: any[];
+};
+
 export type ContractRecommendationGeneralPayloadT = {
   llm_provider: ProviderLLMEnums;
   id?: string | undefined;
   partie: string;
   text_contract: string;
+  contract_type: ContractType;
 };
 
 export type ContractRecommendationCustomPayloadT = {
@@ -24,11 +32,13 @@ export type ContractRecommendationCustomPayloadT = {
   partie: string;
   text_contract: string;
   manual_requrement: string;
+  contract_type: ContractType;
 };
 
 export type ContractPartiesResponseT = {
   parties: string[];
   questions: string[];
+  contract_type: ContractType;
 };
 
 export type ContractRecommendationResponseT = {

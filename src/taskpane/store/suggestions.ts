@@ -1,7 +1,10 @@
 /* global process, console */
 import { makeAutoObservable, runInAction } from "mobx";
 import type RootStore from ".";
-import { ProviderLLMEnums, ReviewTypesEnums } from "../enums";
+import {
+  // ProviderLLMEnums,
+  ReviewTypesEnums,
+} from "../enums";
 import api from "../api/v1";
 import { ContractRecommendationResponseT, ContractType } from "../api/v1/contract";
 import mockParties from "./mock/mockParties";
@@ -87,7 +90,7 @@ class SuggestionsStore {
         ? { data: mockSuggestions, idQuery }
         : await api.contract.recommendationGeneral({
             // llm_provider: this.rootStore.menuStore.providerLLM,
-            llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
+            // llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
             id: idQuery,
             text_contract: textContract,
             partie: party,
@@ -126,7 +129,7 @@ class SuggestionsStore {
         ? { data: mockSuggestions, idQuery }
         : await api.contract.recommendationCustom({
             // llm_provider: this.rootStore.menuStore.providerLLM,
-            llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
+            // llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
             id: idQuery,
             manual_requrement: manualRequrement,
             text_contract: textContract,
@@ -173,7 +176,7 @@ class SuggestionsStore {
           ? { data: mockParties }
           : await api.contract.parties({
               // llm_provider: this.rootStore.menuStore.providerLLM,
-              llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
+              // llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
               text_contract: textContract,
             });
         const { parties, contract_type } = response.data;

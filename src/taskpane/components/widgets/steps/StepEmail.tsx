@@ -40,10 +40,10 @@ const StepEmail = () => {
       setIsLoading(true);
       setError("");
       await authStore.runSignIn(email);
-      console.log("Sign in initiated successfully");
     } catch (error) {
-      console.error("Sign in error:", error);
-      setError("Произошла ошибка. Попробуйте еще раз.");
+      if (error?.type === "NOT_FOUND") {
+        setError("Не существует клиента с указанным email. Проверьте правильность ввода.");
+      }
     } finally {
       setIsLoading(false);
     }

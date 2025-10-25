@@ -12,25 +12,6 @@ const AuthProvider = () => {
   const { authStatus, isClientVerify, hasPluginAccess, isClientDataLoaded } = authStore;
   const styles = useAuthProviderStyles();
 
-  useEffect(() => {
-    const initAuth = async () => {
-      const savedStatus = localStorage.getItem("authStatus");
-      if (savedStatus && Object.values(AuthStepperEnum).includes(savedStatus as AuthStepperEnum)) {
-        authStore.setAuthStatus(savedStatus as AuthStepperEnum);
-      }
-
-      if (isClientVerify && !isClientDataLoaded) {
-        await authStore.initAuth();
-      }
-    };
-
-    initAuth();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("authStatus", authStatus);
-  }, [authStatus]);
-
   if (isClientVerify && !isClientDataLoaded) {
     return (
       <div className={styles.container}>

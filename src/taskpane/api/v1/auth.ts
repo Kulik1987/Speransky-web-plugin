@@ -94,7 +94,7 @@ const auth = {
 
   /** @description Обновление access-токена по действующему refresh-токену */
   jwtRefresh: (refresh_token: string) => {
-    return axios.post<JwtRefreshResponseT>(PLUGIN_AUTH_JWT_REFRESH, {
+    return axios.post<JwtRefreshResponseT>(PLUGIN_AUTH_JWT_REFRESH, null, {
       params: {
         refresh_token,
       },
@@ -103,7 +103,7 @@ const auth = {
 
   /** @description Деактивация refresh-токена (выход из системы) */
   jwtLogout: (refresh_token: string) => {
-    return axios.post<string>(PLUGIN_AUTH_JWT_LOGOUT, {
+    return axios.post<string>(PLUGIN_AUTH_JWT_LOGOUT, null, {
       params: {
         refresh_token,
       },

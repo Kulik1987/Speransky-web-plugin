@@ -68,7 +68,7 @@ const PinCode = forwardRef<PinCodeRef, PinCodeProps>(({ onSuccess }, ref) => {
     if (code.length === PIN_LENGTH) {
       onSuccess?.(code);
     }
-  }, [values, onSuccess]);
+  }, [values]);
 
   return (
     <div className={styles.codeRow}>

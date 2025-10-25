@@ -7,7 +7,6 @@ import { JwtClientDataResponseT } from "../api/v1/auth";
 export enum AuthStepperEnum {
   EMAIL = "auth.email", // экран запроса email
   PIN = "auth.pin", // экран запроса pin
-  LOGIN = "auth.login", // экран успешной авторизации
   ACCESSED = "access.success", // есть доступ к анализу договора
   FORBIDDEN = "access.forbidden", // отсутствует доступ к анализу договора
   ERROR = "request.error", // ошибка авторизации
@@ -183,8 +182,14 @@ class AuthStore {
       }
     } catch (error) {
       console.error("clientCheck", error);
-      this.setAuthStatus(AuthStepperEnum.ERROR);
-      throw error;
+
+      const status = error?.response?.status;
+      if (status === 404) {
+        throw { type: "NOT_FOUND", message: error.message };
+      } else {
+        this.setAuthStatus(AuthStepperEnum.ERROR);
+        throw error;
+      }
     } finally {
       this.setIsFetchingRunSignIn(false);
     }
@@ -213,20 +218,19 @@ class AuthStore {
         runInAction(() => {
           this.setAccessToken(data.access_token);
           this.setRefreshToken(data.refresh_token);
-          this.setAuthStatus(AuthStepperEnum.LOGIN);
-          this.setIsClientVerify(true);
         });
 
         await this.runGetClientData();
+
+        runInAction(() => {
+          this.setIsClientVerify(true);
+        });
 
         return { status: "success", message: "Проверка otp кода прошла успешно" };
       } else {
         throw new Error("No access token received");
       }
     } catch (error) {
-      runInAction(() => {
-        this.setAuthStatus(AuthStepperEnum.ERROR);
-      });
       return { status: "error", message: "Ошибка проверки otp кода", error };
     }
   };
@@ -282,6 +286,9 @@ class AuthStore {
           this.setHasPluginAccess(true);
           this.setAuthStatus(AuthStepperEnum.ACCESSED);
         });
+      } else {
+        this.setHasPluginAccess(false);
+        this.setAuthStatus(AuthStepperEnum.ERROR);
       }
     } catch (error) {
       console.error("createPluginAccess", error);
@@ -297,7 +304,8 @@ class AuthStore {
     } catch (error) {
       console.error("logout error", error);
     } finally {
-      localStorage.removeItem(this.STORAGE_KEY);
+      this.setAccessToken("");
+      this.setRefreshToken("");
       this.resetStore();
     }
   };

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { Text, makeStyles, shorthands } from "@fluentui/react-components";
 import { useStores } from "../../../store";
@@ -13,21 +13,24 @@ const StepPinCode = () => {
   const [isLoading, setIsLoading] = useState(false);
   const pinCodeRef = useRef<PinCodeRef>(null);
 
-  const handleEnteredPinCode = async (code: string) => {
-    try {
+  const handleEnteredPinCode = useCallback(
+    async (code: string) => {
       if (isLoading) return;
-      setIsLoading(true);
-      const response = await authStore.checkOtpCode(code);
-      if (response?.status === "error") {
-        setErrorPinCode(true);
-        pinCodeRef.current?.clearPinCode();
-      } else {
-        console.log("OTP успешно подтверждён");
+      try {
+        setIsLoading(true);
+        const response = await authStore.checkOtpCode(code);
+        if (response?.status === "error") {
+          setErrorPinCode(true);
+          pinCodeRef.current?.clearPinCode();
+        } else {
+          console.log("OTP успешно подтверждён");
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [authStore, isLoading]
+  );
 
   return (
     <div className={styles.container}>

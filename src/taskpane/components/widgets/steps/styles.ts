@@ -34,6 +34,9 @@ export const useStepStyles = makeStyles({
   error: {
     color: tokens.colorPaletteRedForeground1,
     fontSize: "16px",
+    lineHeight: "130%",
+    whiteSpace: "pre-line",
+    textAlign: "center",
   },
   headerBlock: {
     width: "100%",

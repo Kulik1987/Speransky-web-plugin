@@ -5,9 +5,25 @@ import { useStores } from "../../../store";
 import PinCode, { PinCodeRef } from "../../organisms/pinCode/PinCode";
 import { useStepStyles } from "./styles";
 
+const T = {
+  title: {
+    ru: "Вход",
+    en: "Sign in",
+  },
+  description: {
+    ru: "Используйте код из электронной почты",
+    en: "Enter the code from the email",
+  },
+  errorPinCode: {
+    ru: "Код введён неверно. Введите код заново.",
+    en: "The code is incorrect. Please enter it again.",
+  },
+};
+
 const StepPinCode = () => {
-  const { authStore } = useStores();
+  const { authStore, menuStore } = useStores();
   const styles = useStepStyles();
+  const { locale } = menuStore;
 
   const [errorPinCode, setErrorPinCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,8 +38,6 @@ const StepPinCode = () => {
         if (response?.status === "error") {
           setErrorPinCode(true);
           pinCodeRef.current?.clearPinCode();
-        } else {
-          console.log("OTP успешно подтверждён");
         }
       } finally {
         setIsLoading(false);
@@ -36,21 +50,17 @@ const StepPinCode = () => {
     <div className={styles.container}>
       <div className={styles.block}>
         <Text as="h1" className={styles.title}>
-          Вход
+          {T.title[locale]}
         </Text>
 
         <Text block className={styles.description}>
-          Используйте код из электронной почты
+          {T.description[locale]}
         </Text>
       </div>
 
       <PinCode ref={pinCodeRef} onSuccess={handleEnteredPinCode} />
 
-      {errorPinCode && (
-        <Text size={300} className={styles.error}>
-          Код введён неверно. Введите код заново.
-        </Text>
-      )}
+      {errorPinCode && <Text className={styles.error}>{T.errorPinCode[locale]}</Text>}
     </div>
   );
 };

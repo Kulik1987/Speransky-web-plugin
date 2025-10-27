@@ -4,9 +4,41 @@ import { Button, Input, InputProps, Text } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { useStepStyles } from "./styles";
 
+const T = {
+  title: {
+    ru: "Вход",
+    en: "Sign in",
+  },
+  description: {
+    ru: "На указанный адрес электронной почты будет отправлен код",
+    en: "A code will be sent to the specified email address",
+  },
+  btnSubmit: {
+    ru: "Получить код",
+    en: "Get code",
+  },
+  btnSubmiting: {
+    ru: "Отправка...",
+    en: "Sending...",
+  },
+  errorEmpty: {
+    ru: "Введите email",
+    en: "Enter your email",
+  },
+  errorFormat: {
+    ru: "Неверный формат email",
+    en: "Invalid email format",
+  },
+  errorNotFound: {
+    ru: "Не существует клиента с указанным email. Проверьте правильность ввода.",
+    en: "No client found with this email. Please check your input.",
+  },
+};
+
 const StepEmail = () => {
-  const { authStore } = useStores();
+  const { authStore, menuStore } = useStores();
   const styles = useStepStyles();
+  const { locale } = menuStore;
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -21,11 +53,11 @@ const StepEmail = () => {
 
   const handleBlur = (_: React.FocusEvent<HTMLInputElement>) => {
     if (!email) {
-      setError("Введите email");
+      setError(T.errorEmpty[locale]);
       return;
     }
     if (!validateEmail(email)) {
-      setError("Неверный формат email");
+      setError(T.errorFormat[locale]);
       return;
     }
   };
@@ -42,7 +74,7 @@ const StepEmail = () => {
       await authStore.runSignIn(email);
     } catch (error) {
       if (error?.type === "NOT_FOUND") {
-        setError("Не существует клиента с указанным email. Проверьте правильность ввода.");
+        setError(T.errorNotFound[locale]);
       }
     } finally {
       setIsLoading(false);
@@ -62,11 +94,11 @@ const StepEmail = () => {
     <div className={styles.container}>
       <div className={styles.block}>
         <Text as="h1" className={styles.title}>
-          Вход
+          {T.title[locale]}
         </Text>
 
         <Text block className={styles.description}>
-          На указанный адрес электронной почты будет отправлен код
+          {T.description[locale]}
         </Text>
       </div>
 
@@ -80,7 +112,7 @@ const StepEmail = () => {
           placeholder="example@gmail.com"
           type="email"
           disabled={isLoading}
-          autoFocus
+          // autoFocus
           appearance="outline"
           size="large"
         />
@@ -93,7 +125,7 @@ const StepEmail = () => {
       </div>
 
       <Button appearance="primary" onClick={handleSubmit} disabled={isDisabled} className={styles.button}>
-        {isLoading ? "Отправка..." : "Получить код"}
+        {isLoading ? T.btnSubmiting[locale] : T.btnSubmit[locale]}
       </Button>
     </div>
   );

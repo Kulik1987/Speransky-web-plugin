@@ -5,9 +5,25 @@ import { observer } from "mobx-react";
 import { AuthStepperEnum } from "../../../store/auth";
 import { useStepStyles } from "./styles";
 
+const T = {
+  title: {
+    ru: "К сожалению, произошла ошибка...",
+    en: "Unfortunately, an error occurred...",
+  },
+  errorDescription: {
+    ru: "Ошибка авторизации.\n Попробуйте ещё раз.",
+    en: "Authorization error.\n Please try again.",
+  },
+  btnLogin: {
+    ru: "Вход",
+    en: "Sign in",
+  },
+};
+
 const StepError = () => {
   const styles = useStepStyles();
-  const { authStore } = useStores();
+  const { authStore, menuStore } = useStores();
+  const { locale } = menuStore;
 
   const handleTryAgain = () => {
     authStore.setAuthStatus(AuthStepperEnum.EMAIL);
@@ -18,18 +34,16 @@ const StepError = () => {
     <div className={styles.container}>
       <div className={styles.block}>
         <Text as="h1" className={styles.title}>
-          К сожалению, произошла ошибка...
+          {T.title[locale]}
         </Text>
 
         <Text block className={styles.error}>
-          Ошибка авторизации.
-          <br />
-          Попробуйте еще раз.
+          {T.errorDescription[locale]}
         </Text>
       </div>
 
       <Button appearance="primary" onClick={handleTryAgain} className={styles.button}>
-        Вход
+        {T.btnLogin[locale]}
       </Button>
     </div>
   );

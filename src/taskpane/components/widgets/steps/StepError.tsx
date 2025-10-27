@@ -1,12 +1,12 @@
 import React from "react";
-import { Text, makeStyles, shorthands, Button } from "@fluentui/react-components";
+import { Text, Button } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { observer } from "mobx-react";
 import { AuthStepperEnum } from "../../../store/auth";
-import { useStepErrorStyles } from "./styles";
+import { useStepStyles } from "./styles";
 
 const StepError = () => {
-  const styles = useStepErrorStyles();
+  const styles = useStepStyles();
   const { authStore } = useStores();
 
   const handleTryAgain = () => {
@@ -16,14 +16,20 @@ const StepError = () => {
 
   return (
     <div className={styles.container}>
-      <Text as="h1" weight="bold" size={400}>
-        Произошла ошибка
-      </Text>
-      <Text size={300} className={styles.errorText}>
-        К сожалению, произошла ошибка при авторизации или проверке доступа. Пожалуйста, попробуйте еще раз.
-      </Text>
-      <Button appearance="primary" onClick={handleTryAgain}>
-        Войти
+      <div className={styles.block}>
+        <Text as="h1" className={styles.title}>
+          К сожалению, произошла ошибка...
+        </Text>
+
+        <Text block className={styles.error}>
+          Ошибка авторизации.
+          <br />
+          Попробуйте еще раз.
+        </Text>
+      </div>
+
+      <Button appearance="primary" onClick={handleTryAgain} className={styles.button}>
+        Вход
       </Button>
     </div>
   );

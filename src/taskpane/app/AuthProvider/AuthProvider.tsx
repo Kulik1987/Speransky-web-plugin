@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { makeStyles, shorthands, Text } from "@fluentui/react-components";
+import React from "react";
+import { Spinner } from "@fluentui/react-components";
 import { AuthStepperEnum } from "../../store/auth";
 import { useStores } from "../../store";
 import { observer } from "mobx-react";
@@ -15,7 +15,7 @@ const AuthProvider = () => {
   if (isClientVerify && !isClientDataLoaded) {
     return (
       <div className={styles.container}>
-        <Text>Загрузка...</Text>
+        <Spinner />
       </div>
     );
   }

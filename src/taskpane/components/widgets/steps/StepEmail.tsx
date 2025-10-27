@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
-import { Button, Input, InputProps, Text, makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { Button, Input, InputProps, Text } from "@fluentui/react-components";
 import { useStores } from "../../../store";
-import { useStepEmailStyles } from "./styles";
+import { useStepStyles } from "./styles";
 
 const StepEmail = () => {
   const { authStore } = useStores();
-  const styles = useStepEmailStyles();
+  const styles = useStepStyles();
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +25,7 @@ const StepEmail = () => {
       return;
     }
     if (!validateEmail(email)) {
-      setError("Введите корректный email");
+      setError("Неверный формат email");
       return;
     }
   };
@@ -60,41 +60,41 @@ const StepEmail = () => {
 
   return (
     <div className={styles.container}>
-      <Text as="h1" weight="bold" size={400} className={styles.title}>
-        Войти
-      </Text>
+      <div className={styles.block}>
+        <Text as="h1" className={styles.title}>
+          Вход
+        </Text>
 
-      <Text size={300} className={styles.description}>
-        Используйте адрес электронной почты для авторизации
-      </Text>
+        <Text block className={styles.description}>
+          На указанный адрес электронной почты будет отправлен код
+        </Text>
+      </div>
 
-      <Input
-        className={styles.input}
-        value={email}
-        onChange={handleEmailChange}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        placeholder="example@email.com"
-        type="email"
-        disabled={isLoading}
-        autoFocus
-        appearance="outline"
-        size="large"
-      />
+      <div className={styles.block}>
+        <Input
+          className={styles.input}
+          value={email}
+          onChange={handleEmailChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder="example@gmail.com"
+          type="email"
+          disabled={isLoading}
+          autoFocus
+          appearance="outline"
+          size="large"
+        />
 
-      <Button onClick={handleSubmit} disabled={isDisabled} appearance="primary" size="large">
+        {isDisplayErrorMessage && (
+          <Text block className={styles.error}>
+            {error}
+          </Text>
+        )}
+      </div>
+
+      <Button appearance="primary" onClick={handleSubmit} disabled={isDisabled} className={styles.button}>
         {isLoading ? "Отправка..." : "Получить код"}
       </Button>
-
-      {isDisplayErrorMessage && (
-        <Text size={400} className={styles.error}>
-          {error}
-        </Text>
-      )}
-
-      <Text size={200} className={styles.description}>
-        На указанный адрес электронной почты будет отправлен код
-      </Text>
     </div>
   );
 };

@@ -44,7 +44,8 @@ const DrawerModal = (props: DrawerModalT) => {
     onClose();
   };
 
-  const isDisplayButtonLogout = authStore.authStatus === AuthStepperEnum.ACCESSED;
+  const isDisplayButtonLogout =
+    authStore.authStatus === AuthStepperEnum.ACCESSED || authStore.authStatus === AuthStepperEnum.FORBIDDEN;
 
   return (
     <Drawer separator open={isOpen} onOpenChange={() => onClose()}>

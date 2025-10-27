@@ -1,13 +1,13 @@
 import React, { useCallback, useRef, useState } from "react";
 import { observer } from "mobx-react";
-import { Text, makeStyles, shorthands } from "@fluentui/react-components";
+import { Text } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import PinCode, { PinCodeRef } from "../../organisms/pinCode/PinCode";
-import { useStepPinCodeStyles } from "./styles";
+import { useStepStyles } from "./styles";
 
 const StepPinCode = () => {
   const { authStore } = useStores();
-  const styles = useStepPinCodeStyles();
+  const styles = useStepStyles();
 
   const [errorPinCode, setErrorPinCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,11 +34,15 @@ const StepPinCode = () => {
 
   return (
     <div className={styles.container}>
-      <Text as="h1" weight="bold" size={400}>
-        Войти
-      </Text>
+      <div className={styles.block}>
+        <Text as="h1" className={styles.title}>
+          Вход
+        </Text>
 
-      <Text size={300}>Используйте код из электронной почты</Text>
+        <Text block className={styles.description}>
+          Используйте код из электронной почты
+        </Text>
+      </div>
 
       <PinCode ref={pinCodeRef} onSuccess={handleEnteredPinCode} />
 

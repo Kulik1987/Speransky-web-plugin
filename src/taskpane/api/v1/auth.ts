@@ -8,6 +8,7 @@ import {
   PLUGIN_AUTH_JWT_REFRESH,
   PLUGIN_AUTH_OTP_SEND,
   PLUGIN_AUTH_OTP_VERIFY,
+  PLUGIN_CLIENT_CAN_USE_PLUGIN,
 } from "../routes";
 
 export type AuthCheckAccessResponseT = {
@@ -53,6 +54,10 @@ export type JwtClientDataResponseT = {
   unlimited_until: string | null;
   can_use_plugin: boolean;
   create_date: string | null;
+};
+
+export type CanUsePluginResponseT = {
+  can_use: boolean;
 };
 
 const auth = {
@@ -113,6 +118,11 @@ const auth = {
   /** @description Проверка JWT-токена и возвращение информации о клиенте */
   jwtClientData: () => {
     return axios.get<JwtClientDataResponseT>(PLUGIN_AUTH_JWT_CLIENT_DATA);
+  },
+
+  /** @description Проверка доступен ли клиенту плагин */
+  canUsePlugin: () => {
+    return axios.get<CanUsePluginResponseT>(PLUGIN_CLIENT_CAN_USE_PLUGIN);
   },
 };
 

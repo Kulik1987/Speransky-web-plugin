@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction, autorun } from "mobx";
 import type RootStore from ".";
 import api from "../api/v1";
 import { setAuthRefreshFunction } from "../api/instanceAxios";
-import { JwtClientDataResponseT } from "../api/v1/auth";
+// import { JwtClientDataResponseT } from "../api/v1/auth";
 
 export enum AuthStepperEnum {
   EMAIL = "auth.email", // экран запроса email
@@ -15,7 +15,7 @@ export enum AuthStepperEnum {
 const initialState = {
   clientId: null as string | null,
   clientEmail: "",
-  clientData: null as JwtClientDataResponseT | null,
+  // clientData: null as JwtClientDataResponseT | null,
   authStatus: AuthStepperEnum.EMAIL,
   isClientVerify: false,
   isClientDataLoaded: false,
@@ -74,10 +74,10 @@ class AuthStore {
     this.clientEmail = email;
   };
 
-  clientData: JwtClientDataResponseT | null = initialState.clientData;
-  setClientData = (data: JwtClientDataResponseT) => {
-    this.clientData = data;
-  };
+  // clientData: JwtClientDataResponseT | null = initialState.clientData;
+  // setClientData = (data: JwtClientDataResponseT) => {
+  //   this.clientData = data;
+  // };
 
   authStatus: AuthStepperEnum = initialState.authStatus;
   setAuthStatus = (step: AuthStepperEnum) => {
@@ -114,13 +114,15 @@ class AuthStore {
 
     try {
       if (this.accessToken) {
-        await this.runGetClientData();
+        await this.runCheckCanUsePlugin();
+        // await this.runGetClientData();
       } else {
         const { data } = await this.authApi.jwtRefresh(this.refreshToken);
         runInAction(() => {
           this.setAccessToken(data.access_token);
         });
-        await this.runGetClientData();
+        await this.runCheckCanUsePlugin();
+        // await this.runGetClientData();
       }
     } catch (error) {
       console.error("initAuth: Error fetching client data", error);
@@ -220,7 +222,8 @@ class AuthStore {
           this.setRefreshToken(data.refresh_token);
         });
 
-        await this.runGetClientData();
+        await this.runCheckCanUsePlugin();
+        // await this.runGetClientData();
 
         runInAction(() => {
           this.setIsClientVerify(true);
@@ -235,30 +238,43 @@ class AuthStore {
     }
   };
 
-  /** @description получение данных клиента и проверка доступа к плагину */
-  runGetClientData = async () => {
+  /** @description проверка доступа к плагину */
+  runCheckCanUsePlugin = async () => {
     try {
-      const { data } = await this.authApi.jwtClientData();
+      const { data } = await this.authApi.canUsePlugin();
       runInAction(() => {
-        this.setClientData(data as JwtClientDataResponseT);
         this.setIsClientDataLoaded(true);
       });
 
       await this.checkPluginAccess();
 
-      // Если у клиента can_use_plugin = true, даем доступ к полному анализу договора
+      // Если у клиента can_use = true, даем доступ к полному анализу договора
       if (!this.hasPluginAccess) {
-        if (data.can_use_plugin) {
+        if (data.can_use) {
           await this.createPluginAccess();
         } else {
           this.setAuthStatus(AuthStepperEnum.FORBIDDEN);
         }
       }
     } catch (error) {
-      console.error("getClientData", error);
+      console.error("checkCanUsePlugin", error);
       throw error;
     }
   };
+
+  // /** @description получение данных клиента */
+  // runGetClientData = async () => {
+  //   try {
+  //     const { data } = await this.authApi.jwtClientData();
+  //     runInAction(() => {
+  //       this.setClientData(data as JwtClientDataResponseT);
+  //       this.setIsClientDataLoaded(true);
+  //     });
+  //   } catch (error) {
+  //     console.error("getClientData", error);
+  //     throw error;
+  //   }
+  // };
 
   /** @description проверка доступа к полному анализу договора */
   checkPluginAccess = async () => {

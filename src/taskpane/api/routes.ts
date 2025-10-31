@@ -13,3 +13,5 @@ export const PLUGIN_AUTH_OTP_VERIFY = "/v1/auth/verify";
 export const PLUGIN_AUTH_JWT_REFRESH = "/v1/auth/jwt/refresh";
 export const PLUGIN_AUTH_JWT_LOGOUT = "/v1/auth/jwt/logout";
 export const PLUGIN_AUTH_JWT_CLIENT_DATA = "/v1/auth/jwt/me";
+
+export const PLUGIN_CLIENT_CAN_USE_PLUGIN = "/v1/client/can-use-plugin";

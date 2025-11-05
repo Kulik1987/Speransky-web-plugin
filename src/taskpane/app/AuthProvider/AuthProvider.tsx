@@ -9,7 +9,7 @@ import { useAuthProviderStyles } from "./styles";
 
 const AuthProvider = () => {
   const { authStore } = useStores();
-  const { authStatus, isClientVerify, hasPluginAccess, isClientDataLoaded } = authStore;
+  const { authStatus, isClientVerify, isClientDataLoaded } = authStore;
   const styles = useAuthProviderStyles();
 
   if (isClientVerify && !isClientDataLoaded) {
@@ -20,7 +20,7 @@ const AuthProvider = () => {
     );
   }
 
-  if (isClientVerify && hasPluginAccess && authStatus === AuthStepperEnum.ACCESSED) {
+  if (isClientVerify && authStatus === AuthStepperEnum.ACCESSED) {
     return <Outlet />;
   }
 

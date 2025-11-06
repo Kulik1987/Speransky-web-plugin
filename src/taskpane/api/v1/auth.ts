@@ -1,8 +1,6 @@
 import axios from "../instanceAxios";
 import {
-  PLUGIN_AUTH_CHECK_ACCESS,
   PLUGIN_AUTH_CLIENT_EXISTS,
-  PLUGIN_AUTH_CREATE_ACCESS,
   PLUGIN_AUTH_JWT_CLIENT_DATA,
   PLUGIN_AUTH_JWT_LOGOUT,
   PLUGIN_AUTH_JWT_REFRESH,
@@ -10,17 +8,6 @@ import {
   PLUGIN_AUTH_OTP_VERIFY,
   PLUGIN_CLIENT_CAN_USE_PLUGIN,
 } from "../routes";
-
-export type AuthCheckAccessResponseT = {
-  is_access: boolean;
-  success: boolean;
-  message: string;
-};
-
-export type AuthCreateAccessResponseT = {
-  message: string;
-  success: boolean;
-};
 
 export type ClientCheckResponseT = {
   exists: boolean;
@@ -61,16 +48,6 @@ export type CanUsePluginResponseT = {
 };
 
 const auth = {
-  /** @description Проверка доступен ли клиенту полный анализ договора */
-  checkAccess: (email: string) => {
-    return axios.get<AuthCheckAccessResponseT>(PLUGIN_AUTH_CHECK_ACCESS + `?email=${email}`);
-  },
-
-  /** @description Изменение статуса доступности полного анализа договора */
-  createAccess: (email: string) => {
-    return axios.post<AuthCreateAccessResponseT>(PLUGIN_AUTH_CREATE_ACCESS, { email });
-  },
-
   /** @description Проверка существования клиента по email */
   clientCheck: (email: string) => {
     return axios.get<ClientCheckResponseT>(PLUGIN_AUTH_CLIENT_EXISTS, {

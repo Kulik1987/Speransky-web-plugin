@@ -20,7 +20,6 @@ const initialState = {
   isClientVerify: false,
   isClientDataLoaded: false,
   isFetchingRunSignIn: false,
-  hasPluginAccess: false,
 };
 
 class AuthStore {
@@ -99,11 +98,6 @@ class AuthStore {
     this.isFetchingRunSignIn = value;
   };
 
-  hasPluginAccess: boolean = initialState.hasPluginAccess;
-  setHasPluginAccess = (value: boolean) => {
-    this.hasPluginAccess = value;
-  };
-
   /** @description инициализация авторизации при загрузке плагина */
   initAuth = async () => {
     const hasRefreshToken = !!this.refreshToken;
@@ -142,14 +136,13 @@ class AuthStore {
       }
 
       const storage = JSON.parse(storageRaw);
-      const { isClientVerify, clientEmail, authStatus, hasPluginAccess } = storage;
+      const { isClientVerify, clientEmail, authStatus } = storage;
 
       if (isClientVerify) {
         runInAction(() => {
           this.setIsClientVerify(isClientVerify);
           this.setClientEmail(clientEmail);
           this.setAuthStatus(authStatus);
-          this.setHasPluginAccess(hasPluginAccess);
         });
       }
     } catch (error) {
@@ -166,7 +159,6 @@ class AuthStore {
         isClientVerify: this.isClientVerify,
         clientEmail: this.clientEmail,
         authStatus: this.authStatus,
-        hasPluginAccess: this.hasPluginAccess,
       })
     );
   };
@@ -246,15 +238,10 @@ class AuthStore {
         this.setIsClientDataLoaded(true);
       });
 
-      await this.checkPluginAccess();
-
-      // Если у клиента can_use = true, даем доступ к полному анализу договора
-      if (!this.hasPluginAccess) {
-        if (data.can_use) {
-          await this.createPluginAccess();
-        } else {
-          this.setAuthStatus(AuthStepperEnum.FORBIDDEN);
-        }
+      if (data.can_use) {
+        this.setAuthStatus(AuthStepperEnum.ACCESSED);
+      } else {
+        this.setAuthStatus(AuthStepperEnum.FORBIDDEN);
       }
     } catch (error) {
       console.error("checkCanUsePlugin", error);
@@ -275,41 +262,6 @@ class AuthStore {
   //     throw error;
   //   }
   // };
-
-  /** @description проверка доступа к полному анализу договора */
-  checkPluginAccess = async () => {
-    try {
-      const { data } = await this.authApi.checkAccess(this.clientEmail);
-      runInAction(() => {
-        if (data.is_access) {
-          this.setHasPluginAccess(true);
-          this.setAuthStatus(AuthStepperEnum.ACCESSED);
-        } else {
-          this.setHasPluginAccess(false);
-        }
-      });
-    } catch (error) {
-      console.error("checkPluginAccess", error);
-    }
-  };
-
-  /** @description создание доступа к полному анализу договора */
-  createPluginAccess = async () => {
-    try {
-      const { data } = await this.authApi.createAccess(this.clientEmail);
-      if (data.success) {
-        runInAction(() => {
-          this.setHasPluginAccess(true);
-          this.setAuthStatus(AuthStepperEnum.ACCESSED);
-        });
-      } else {
-        this.setHasPluginAccess(false);
-        this.setAuthStatus(AuthStepperEnum.ERROR);
-      }
-    } catch (error) {
-      console.error("createPluginAccess", error);
-    }
-  };
 
   /** @description выход из системы */
   logout = async () => {

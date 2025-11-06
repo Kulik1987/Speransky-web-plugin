@@ -25,6 +25,10 @@ const T = {
     ru: "Введите email",
     en: "Enter your email",
   },
+  errorMaxLength: {
+    ru: "Электронная почта не может превышать 100 символов",
+    en: "Email cannot exceed 100 characters",
+  },
   errorFormat: {
     ru: "Неверный формат email",
     en: "Invalid email format",
@@ -45,10 +49,14 @@ const StepEmail = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleEmailChange: InputProps["onChange"] = (_, data) => {
-    setError("");
-    if (data.value.length <= 50) {
-      setEmail(data.value.trim());
+    const value = data.value;
+    setEmail(value);
+
+    if (value.length > 100) {
+      setError(T.errorMaxLength[locale]);
+      return;
     }
+    setError("");
   };
 
   const handleBlur = (_: React.FocusEvent<HTMLInputElement>) => {
@@ -60,10 +68,16 @@ const StepEmail = () => {
       setError(T.errorFormat[locale]);
       return;
     }
+    if (email.length > 100) {
+      setError(T.errorMaxLength[locale]);
+      return;
+    }
+    setError("");
   };
 
   const validateEmail = (email: string): boolean => {
-    const emailRegexp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegexp =
+      /^(?!.*\.\.)(?!\.)(?!.*\.$)([a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*)@([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+)$/;
     return emailRegexp.test(email);
   };
 
@@ -82,13 +96,16 @@ const StepEmail = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !isDisabled) {
+    if (e.key === " ") {
+      e.preventDefault();
+    }
+    if (e.key === "Enter" && isEmailValid) {
       handleSubmit();
     }
   };
 
-  const isDisabled = !email || !validateEmail(email) || isLoading;
   const isDisplayErrorMessage = !!error;
+  const isEmailValid = email && validateEmail(email) && email.length <= 100;
 
   return (
     <div className={styles.container}>
@@ -112,7 +129,7 @@ const StepEmail = () => {
           placeholder="example@gmail.com"
           type="email"
           disabled={isLoading}
-          // autoFocus
+          autoFocus
           appearance="outline"
           size="large"
         />
@@ -124,7 +141,12 @@ const StepEmail = () => {
         )}
       </div>
 
-      <Button appearance="primary" onClick={handleSubmit} disabled={isDisabled} className={styles.button}>
+      <Button
+        appearance="primary"
+        onClick={handleSubmit}
+        disabled={!isEmailValid || isLoading}
+        className={styles.button}
+      >
         {isLoading ? T.btnSubmiting[locale] : T.btnSubmit[locale]}
       </Button>
     </div>

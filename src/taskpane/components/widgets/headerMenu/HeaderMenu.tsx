@@ -6,6 +6,7 @@ import { useStores } from "../../../store";
 import { ArrowLeftRegular, ListRtlRegular } from "@fluentui/react-icons";
 import { RoutePathEnum } from "../../../app/navigation/Navigation";
 import { DrawerModal } from "../../organisms";
+import { AuthStepperEnum } from "../../../store/auth";
 
 const T = {
   tooltipBack: {
@@ -35,7 +36,7 @@ const T = {
 };
 
 const HeaderMenu = () => {
-  const { menuStore } = useStores();
+  const { menuStore, authStore } = useStores();
   const { locale } = menuStore;
 
   const location = useLocation();
@@ -44,12 +45,25 @@ const HeaderMenu = () => {
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
-  const isDisableGoBack = location.pathname === "/";
+
+  const isAuthorizationSteps = authStore.authStatus !== AuthStepperEnum.ACCESSED;
+  const isDisableGoBack = isAuthorizationSteps
+    ? authStore.authStatus === AuthStepperEnum.EMAIL
+    : location.pathname === "/";
 
   const handleOpenModal = () => setIsOpen(true);
   const handleCloseModal = () => setIsOpen(false);
 
-  const handleClickBack = () => navigate(-1);
+  const handleClickBack = () => {
+    if (isAuthorizationSteps) {
+      if (authStore.authStatus === AuthStepperEnum.FORBIDDEN) {
+        authStore.logout();
+      }
+      authStore.setAuthStatus(AuthStepperEnum.EMAIL);
+    } else {
+      navigate(-1);
+    }
+  };
 
   const title = ((path) => {
     switch (path) {

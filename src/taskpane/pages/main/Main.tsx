@@ -2,12 +2,13 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react";
 import { DraftsRegular, TextBulletListSquareSearchRegular } from "@fluentui/react-icons";
-import { Button, Divider, Text } from "@fluentui/react-components";
+import { Button, Divider, makeStyles, shorthands, Text, tokens } from "@fluentui/react-components";
 import {
   SelectionLang,
   // SelectionModelAi
 } from "../../components/widgets";
 import { useStores } from "../../store";
+import { useMainStyles } from "./styles";
 
 const T = {
   actionsLabel: {
@@ -32,6 +33,7 @@ const Main = () => {
   const { menuStore, documentStore } = useStores();
   const { locale } = menuStore;
   const navigate = useNavigate();
+  const styles = useMainStyles();
 
   const handleNavigateToDraft = () => navigate("./draft");
   const handleNavigateToReview = async () => navigate("./review");
@@ -47,61 +49,41 @@ const Main = () => {
   }, []);
 
   return (
-    <>
-      <div style={{ display: "flex", gap: "32px", flexDirection: "column", flexWrap: "wrap" }}>
-        <div
-          style={{
-            border: "1px solid rgba(0, 0, 0, 0.02)",
-            borderRadius: "8px",
-            padding: "24px 16px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            boxShadow: "0 0px 7px rgba(0, 0, 0, 0.25)",
-          }}
-        >
-          <Divider alignContent="center" inset style={{ paddingBottom: "6px" }}>
-            <Text size={300} weight="medium">
-              {T.actionsLabel[locale]}
-            </Text>
-          </Divider>
-          <Button
-            style={{ width: "100%" }}
-            appearance="primary"
-            size="large"
-            onClick={handleNavigateToReview}
-            icon={<TextBulletListSquareSearchRegular color="#fff" />}
-          >
-            {T.btnReview[locale]}
-          </Button>
-          <Button
-            style={{ width: "100%" }}
-            appearance="primary"
-            size="large"
-            onClick={handleNavigateToDraft}
-            icon={<DraftsRegular color="#fff" />}
-            disabled
-          >
-            {T.btnDraft[locale]}
-          </Button>
-        </div>
+    <div className={styles.root}>
+      <div className={styles.card}>
+        <Divider alignContent="center" inset className={styles.divider}>
+          <Text size={300} weight="medium">
+            {T.actionsLabel[locale]}
+          </Text>
+        </Divider>
 
-        <div
-          style={{
-            // border: "1px solid rgba(0, 0, 0, 0.05)",
-            borderRadius: "8px",
-            padding: "24px 16px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "36px",
-            // boxShadow: "0 2px 3px rgba(0, 0, 0, 0.25)",
-          }}
+        <Button
+          className={styles.buttonFull}
+          appearance="primary"
+          size="large"
+          onClick={handleNavigateToReview}
+          icon={<TextBulletListSquareSearchRegular />}
         >
-          <SelectionLang />
-          {/* <SelectionModelAi /> */}
-        </div>
+          {T.btnReview[locale]}
+        </Button>
+
+        <Button
+          className={styles.buttonFull}
+          appearance="primary"
+          size="large"
+          onClick={handleNavigateToDraft}
+          icon={<DraftsRegular color="#fff" />} //?
+          disabled
+        >
+          {T.btnDraft[locale]}
+        </Button>
       </div>
-    </>
+
+      <div className={styles.section}>
+        <SelectionLang />
+        {/* <SelectionModelAi /> */}
+      </div>
+    </div>
   );
 };
 

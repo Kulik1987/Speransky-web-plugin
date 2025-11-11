@@ -3,6 +3,7 @@ import { Button, Text } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { useStepStyles } from "./styles";
 import { useStores } from "../../../store";
+import { WebUrlEnums } from "../../../enums";
 
 const T = {
   title: {
@@ -21,11 +22,26 @@ const T = {
 
 const StepForbidden = () => {
   const styles = useStepStyles();
-  const { menuStore } = useStores();
+  const { authStore, menuStore } = useStores();
   const { locale } = menuStore;
 
   const handleBuyPlan = () => {
-    window.open("https://app.speransky.legal", "_blank");
+    const host = window.location.origin;
+    const email = authStore.clientEmail || "";
+    const params = `?from-plugin=true&email=${encodeURIComponent(email)}`;
+
+    let baseUrl: string;
+
+    if (host.includes("localhost")) {
+      baseUrl = WebUrlEnums.WEB_URL_LOCAL;
+    } else if (host.includes("plugin-test")) {
+      baseUrl = WebUrlEnums.WEB_URL_TEST;
+    } else {
+      baseUrl = WebUrlEnums.WEB_URL_PROD;
+    }
+
+    const url = `${baseUrl}/${params}`;
+    window.open(url, "_blank");
   };
 
   return (

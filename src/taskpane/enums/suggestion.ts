@@ -20,3 +20,9 @@ export enum ProviderLLMEnums {
   "GIGA_CHAT" = "gigachat",
   "MISTRAL" = "mistral",
 }
+
+export enum WebUrlEnums {
+  "WEB_URL_LOCAL" = "http://localhost:5173",
+  "WEB_URL_TEST" = "https://app-test.speransky.legal",
+  "WEB_URL_PROD" = "https://app.speransky.legal",
+}

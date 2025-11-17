@@ -7,6 +7,7 @@ import { ArrowLeftRegular, ListRtlRegular } from "@fluentui/react-icons";
 import { RoutePathEnum } from "../../../app/navigation/Navigation";
 import { DrawerModal } from "../../organisms";
 import { AuthStepperEnum } from "../../../store/auth";
+import { PopoverWarning } from "../../molecules";
 
 const T = {
   tooltipBack: {
@@ -33,6 +34,10 @@ const T = {
     ru: "Сперанский",
     en: "Speransky",
   },
+  popoverMessage: {
+    ru: "Рекомендации будут потеряны.\n Уйти со страницы?",
+    en: "Recommendations will be lost.\n Leave the page?",
+  },
 };
 
 const HeaderMenu = () => {
@@ -45,6 +50,9 @@ const HeaderMenu = () => {
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const isSummaryPage = location.pathname === "/summary";
 
   const isAuthorizationSteps = authStore.authStatus !== AuthStepperEnum.ACCESSED;
   const isDisableGoBack = isAuthorizationSteps
@@ -65,6 +73,11 @@ const HeaderMenu = () => {
     }
   };
 
+  const handleConfirmLeave = () => {
+    setIsPopoverOpen(false);
+    navigate(-1);
+  };
+
   const title = ((path) => {
     switch (path) {
       case RoutePathEnum.DRAFT:
@@ -83,15 +96,27 @@ const HeaderMenu = () => {
       <DrawerModal isOpen={isOpen} onClose={handleCloseModal} />
 
       <div style={{ display: "flex", gap: "8px" }}>
-        <Tooltip content={T.tooltipBack[locale]} withArrow relationship="label">
-          <Button
-            appearance="transparent"
-            size="large"
-            onClick={handleClickBack}
-            disabled={isDisableGoBack}
-            icon={<ArrowLeftRegular />}
+        {isSummaryPage ? (
+          <PopoverWarning
+            message={T.popoverMessage[locale]}
+            trigger={
+              <Button appearance="transparent" size="large" disabled={isDisableGoBack} icon={<ArrowLeftRegular />} />
+            }
+            isOpen={isPopoverOpen}
+            setIsOpen={setIsPopoverOpen}
+            onConfirm={handleConfirmLeave}
           />
-        </Tooltip>
+        ) : (
+          <Tooltip content={T.tooltipBack[locale]} withArrow relationship="label">
+            <Button
+              appearance="transparent"
+              size="large"
+              onClick={handleClickBack}
+              disabled={isDisableGoBack}
+              icon={<ArrowLeftRegular />}
+            />
+          </Tooltip>
+        )}
 
         <div style={{ display: "flex", width: "100%", justifyContent: "center", alignItems: "center" }}>
           <Text as="h1" weight="bold" size={400}>

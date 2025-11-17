@@ -2,7 +2,7 @@ import React from "react";
 import { Skeleton, SkeletonItem } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 
-const SuggestionItemSkeleton = () => {
+const ItemSkeleton = () => {
   return (
     <div
       style={{
@@ -33,4 +33,4 @@ const SuggestionItemSkeleton = () => {
   );
 };
 
-export default observer(SuggestionItemSkeleton);
+export default observer(ItemSkeleton);

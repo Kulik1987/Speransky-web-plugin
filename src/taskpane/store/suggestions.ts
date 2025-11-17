@@ -1,4 +1,4 @@
-/* global process, console */
+/* global process */
 import { makeAutoObservable, runInAction } from "mobx";
 import type RootStore from ".";
 import {
@@ -27,6 +27,8 @@ class SuggestionsStore {
   suggestionsNew: SuggestionT[] | null = null;
 
   parties: string[] | null = null;
+
+  getPartiesProcessing: boolean = false;
 
   contractType: ContractType | null = null;
 
@@ -166,6 +168,7 @@ class SuggestionsStore {
 
   requestParties = async () => {
     try {
+      this.getPartiesProcessing = true;
       const { textContractSource, textContractAnonymized } = this.rootStore.documentStore;
       const textContract = APP_SET_ANONYMIZER ? textContractAnonymized : textContractSource;
 
@@ -188,8 +191,10 @@ class SuggestionsStore {
       }
       return "";
     } catch (error) {
+      this.getPartiesProcessing = false;
       return "error";
     } finally {
+      this.getPartiesProcessing = false;
       console.log("requestParties [final]");
     }
   };

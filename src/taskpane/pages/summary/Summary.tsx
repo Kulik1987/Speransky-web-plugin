@@ -3,12 +3,12 @@ import { useStores } from "../../store";
 import { SuggestionCard } from "../../components/widgets";
 import { Button, Divider, Text } from "@fluentui/react-components";
 import { observer } from "mobx-react";
-import { SuggestionItemSkeleton } from "./suggestionItemSkeleton";
 import { ApplyService } from "../../services/applyService";
+import { ItemSkeleton } from "../../components/molecules";
 
 const T = {
   waitingNotification: {
-    ru: "Идет подготовка рекомендаций",
+    ru: "Идёт подготовка рекомендаций",
     en: "Please await",
   },
   buttonApplyAll: {
@@ -66,9 +66,7 @@ const Summary = () => {
               {T.waitingNotification[locale]}
             </Text>
           </Divider>
-          <div>
-            <SuggestionItemSkeleton />
-          </div>
+          <ItemSkeleton />
         </div>
       )}
       {isDisplaySuggestions &&

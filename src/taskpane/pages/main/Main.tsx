@@ -72,7 +72,7 @@ const Main = () => {
           appearance="primary"
           size="large"
           onClick={handleNavigateToDraft}
-          icon={<DraftsRegular color="#fff" />} //?
+          icon={<DraftsRegular color="#fff" />}
           disabled
         >
           {T.btnDraft[locale]}

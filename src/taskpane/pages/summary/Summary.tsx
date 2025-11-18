@@ -3,12 +3,13 @@ import { useStores } from "../../store";
 import { SuggestionCard } from "../../components/widgets";
 import { Button, Divider, Text } from "@fluentui/react-components";
 import { observer } from "mobx-react";
-import { SuggestionItemSkeleton } from "./suggestionItemSkeleton";
 import { ApplyService } from "../../services/applyService";
+import { ItemSkeleton } from "../../components/molecules";
+import { useSummaryStyles } from "./styles";
 
 const T = {
   waitingNotification: {
-    ru: "Идет подготовка рекомендаций",
+    ru: "Идёт подготовка рекомендаций",
     en: "Please await",
   },
   buttonApplyAll: {
@@ -22,6 +23,7 @@ const Summary = () => {
   const { locale } = menuStore;
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
+  const styles = useSummaryStyles();
 
   const {
     // computedIsExistUntouchedSuggestions,
@@ -58,17 +60,15 @@ const Summary = () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+    <div className={styles.container}>
       {isProcessing && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className={styles.block}>
           <Divider alignContent="center" inset>
             <Text size={300} weight="medium">
               {T.waitingNotification[locale]}
             </Text>
           </Divider>
-          <div>
-            <SuggestionItemSkeleton />
-          </div>
+          <ItemSkeleton />
         </div>
       )}
       {isDisplaySuggestions &&
@@ -79,12 +79,7 @@ const Summary = () => {
         // computedIsExistUntouchedSuggestions &&
         !isProcessing && (
           <div>
-            <Button
-              appearance="primary"
-              size="medium"
-              onClick={handleApplyAll}
-              style={{ borderColor: "#0f6cbd", borderWidth: "2px", whiteSpace: "nowrap" }}
-            >
+            <Button appearance="primary" size="medium" onClick={handleApplyAll} className={styles.button}>
               {T.buttonApplyAll[locale]}
             </Button>
           </div>

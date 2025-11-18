@@ -1,23 +1,14 @@
-import { tokens } from "@fluentui/react-components";
+import { makeStyles, shorthands } from "@fluentui/react-components";
 
-const styles = {
-  instructions: {
-    fontWeight: tokens.fontWeightSemibold,
-    marginTop: "20px",
-    marginBottom: "10px",
-  },
-  textPromptAndInsertion: {
+export const useReviewStyles = makeStyles({
+  container: {
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    ...shorthands.gap("32px"),
   },
-  textAreaField: {
-    marginLeft: "20px",
-    marginTop: "30px",
-    marginBottom: "20px",
-    marginRight: "20px",
-    maxWidth: "50%",
+  block: {
+    display: "flex",
+    flexDirection: "column",
+    ...shorthands.gap("16px"),
   },
-};
-
-export default styles;
+});

@@ -8,6 +8,7 @@ import { RoutePathEnum } from "../../../app/navigation/Navigation";
 import { DrawerModal } from "../../organisms";
 import { AuthStepperEnum } from "../../../store/auth";
 import { PopoverWarning } from "../../molecules";
+import { useHeaderMenuStyles } from "./styles";
 
 const T = {
   tooltipBack: {
@@ -43,6 +44,7 @@ const T = {
 const HeaderMenu = () => {
   const { menuStore, authStore } = useStores();
   const { locale } = menuStore;
+  const styles = useHeaderMenuStyles();
 
   const location = useLocation();
   const { pathname } = location;
@@ -95,7 +97,7 @@ const HeaderMenu = () => {
     <>
       <DrawerModal isOpen={isOpen} onClose={handleCloseModal} />
 
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div className={styles.container}>
         {isSummaryPage ? (
           <PopoverWarning
             message={T.popoverMessage[locale]}
@@ -118,7 +120,7 @@ const HeaderMenu = () => {
           </Tooltip>
         )}
 
-        <div style={{ display: "flex", width: "100%", justifyContent: "center", alignItems: "center" }}>
+        <div className={styles.block}>
           <Text as="h1" weight="bold" size={400}>
             {title?.toLocaleUpperCase() ?? title}
           </Text>

@@ -1,32 +1,25 @@
 import React from "react";
 import { Skeleton, SkeletonItem } from "@fluentui/react-components";
 import { observer } from "mobx-react";
+import { useSkeletonStyles } from "./styles";
 
 const ItemSkeleton = () => {
+  const styles = useSkeletonStyles();
+
   return (
-    <div
-      style={{
-        border: "1px solid rgba(0, 0, 0, 0.1)",
-        borderRadius: "8px",
-        padding: "16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
-        boxShadow: "0 3px 5px rgba(0, 0, 0, 0.25)",
-      }}
-    >
-      <Skeleton style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
-          <SkeletonItem size={24} style={{ maxWidth: "64px" }} />
-          <SkeletonItem size={24} style={{ maxWidth: "64px" }} />
+    <div className={styles.container}>
+      <Skeleton className={styles.skeletonBlock}>
+        <div className={styles.block}>
+          <SkeletonItem size={24} className={styles.item64} />
+          <SkeletonItem size={24} className={styles.item64} />
         </div>
         <SkeletonItem size={72} />
         <SkeletonItem size={72} />
 
-        <div style={{ display: "flex", gap: "12px" }}>
-          <SkeletonItem size={32} shape="rectangle" style={{ maxWidth: "32px" }} />
-          <SkeletonItem size={32} shape="rectangle" style={{ maxWidth: "96px" }} />
-          <SkeletonItem size={32} shape="rectangle" style={{ maxWidth: "96px" }} />
+        <div className={styles.block}>
+          <SkeletonItem size={32} shape="rectangle" className={styles.item32} />
+          <SkeletonItem size={32} shape="rectangle" className={styles.item96} />
+          <SkeletonItem size={32} shape="rectangle" className={styles.item96} />
         </div>
       </Skeleton>
     </div>

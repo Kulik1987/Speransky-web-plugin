@@ -1,23 +1,32 @@
-import { tokens } from "@fluentui/react-components";
+import { makeStyles, shorthands } from "@fluentui/react-components";
 
-const styles = {
-  instructions: {
-    fontWeight: tokens.fontWeightSemibold,
-    marginTop: "20px",
-    marginBottom: "10px",
-  },
-  textPromptAndInsertion: {
+export const useSkeletonStyles = makeStyles({
+  container: {
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    ...shorthands.borderRadius("8px"),
+    ...shorthands.padding("16px"),
+    ...shorthands.gap("12px"),
+    ...shorthands.border("1px solid rgba(0, 0, 0, 0.1)"),
+    boxShadow: "0 3px 5px rgba(0, 0, 0, 0.25)",
   },
-  textAreaField: {
-    marginLeft: "20px",
-    marginTop: "30px",
-    marginBottom: "20px",
-    marginRight: "20px",
-    maxWidth: "50%",
+  skeletonBlock: {
+    display: "flex",
+    flexDirection: "column",
+    ...shorthands.gap("16px"),
   },
-};
-
-export default styles;
+  block: {
+    display: "flex",
+    justifyContent: "space-between",
+    ...shorthands.gap("12px"),
+  },
+  item32: {
+    maxWidth: "32px",
+  },
+  item64: {
+    maxWidth: "64px",
+  },
+  item96: {
+    maxWidth: "96px",
+  },
+});

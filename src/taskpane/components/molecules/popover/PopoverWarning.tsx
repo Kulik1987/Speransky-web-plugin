@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Popover, PopoverSurface, PopoverTrigger, Text } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
+import { usePopoverStyles } from "./style";
 
 interface PopoverWarningProps {
   trigger: React.ReactElement;
@@ -25,6 +26,7 @@ const T = {
 const PopoverWarning: React.FC<PopoverWarningProps> = ({ trigger, message, onConfirm, isOpen, setIsOpen }) => {
   const { menuStore } = useStores();
   const { locale } = menuStore;
+  const styles = usePopoverStyles();
 
   const handleCancel = () => {
     setIsOpen(false);
@@ -34,19 +36,10 @@ const PopoverWarning: React.FC<PopoverWarningProps> = ({ trigger, message, onCon
     <Popover open={isOpen} onOpenChange={(_, data) => setIsOpen(data.open)} positioning="above-end">
       <PopoverTrigger disableButtonEnhancement>{trigger}</PopoverTrigger>
 
-      <PopoverSurface
-        style={{
-          borderRadius: "8px",
-          width: "220px",
-          padding: "16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-        }}
-      >
-        <Text style={{ whiteSpace: "pre-line" }}>{message}</Text>
+      <PopoverSurface className={styles.container}>
+        <Text className={styles.title}>{message}</Text>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+        <div className={styles.block}>
           <Button appearance="secondary" onClick={handleCancel}>
             {T.buttonNo[locale]}
           </Button>

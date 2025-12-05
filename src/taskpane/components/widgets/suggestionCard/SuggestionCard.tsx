@@ -140,8 +140,13 @@ const SuggestionCard = (props: SuggestionPropT) => {
       {isChangeExist && (
         <div>
           <Text weight="bold">{T.labelChange[locale]} </Text>
-          <div dangerouslySetInnerHTML={{ __html: htmlChangesMatchingText || changeText }} />
-          {/* <Text>{changeText}</Text> */}
+          {type === "new" ? (
+            <Text weight="bold" block style={{ color: "green" }}>
+              {changeText}
+            </Text>
+          ) : (
+            <div dangerouslySetInnerHTML={{ __html: htmlChangesMatchingText || changeText }} />
+          )}
         </div>
       )}
       {isCommentExist && (

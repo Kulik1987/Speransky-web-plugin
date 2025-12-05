@@ -1,4 +1,4 @@
-/* global Word console */
+/* global Word */
 /// <reference types="office-js" />
 import { OptionsSupportedCurrentApiI } from "../store/config";
 import { getDifferencesSemantic } from "../helpers/diff";
@@ -42,7 +42,7 @@ export class ApplyService {
   static async applyChangeAddNewParagraph(searchText: string, newParagraphText: string) {
     await Word.run(async (context) => {
       const range = await SearchService.findRange(context, searchText);
-      range.insertText(newParagraphText, "After");
+      range.insertParagraph(newParagraphText, Word.InsertLocation.after);
       await context.sync();
     }).catch((error) => {
       console.log("Error [applyChangeAddNewParagraph]: " + error);

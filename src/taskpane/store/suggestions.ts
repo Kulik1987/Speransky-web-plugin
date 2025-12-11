@@ -6,7 +6,7 @@ import {
   ReviewTypesEnums,
 } from "../enums";
 import api from "../api/v1";
-import { ContractRecommendationResponseT, ContractType } from "../api/v1/contract";
+import { ContractAllRecommendationsResponseT, ContractType } from "../api/v1/contract";
 import mockParties from "./mock/mockParties";
 import mockSuggestions from "./mock/mockSuggestions_1";
 
@@ -19,7 +19,7 @@ type SuggestionPropertyT = {
   isApplyComment?: boolean;
 };
 
-export type SuggestionT = ContractRecommendationResponseT & SuggestionPropertyT;
+export type SuggestionT = ContractAllRecommendationsResponseT & SuggestionPropertyT;
 
 class SuggestionsStore {
   rootStore: RootStore;
@@ -31,6 +31,8 @@ class SuggestionsStore {
   getPartiesProcessing: boolean = false;
 
   contractType: ContractType | null = null;
+
+  contractId: string | null = null;
 
   formPartySelected: string | null = null;
 
@@ -63,100 +65,155 @@ class SuggestionsStore {
     this.suggestionsNew = expand;
   };
 
-  startReviewGeneral = async () => {
-    this.clearSuggestions();
-    runInAction(() => {
-      this.reviewTypeActive = ReviewTypesEnums.GENERAL;
-      this.reviewGeneralProcessing = true;
-    });
-    this.getSuggestionGeneral();
-  };
-
-  startReviewCustom = async () => {
-    this.clearSuggestions();
-    runInAction(() => {
-      this.reviewCustomProcessing = true;
-      this.reviewTypeActive = ReviewTypesEnums.CUSTOM;
-    });
-    this.getSuggestionsCustom();
-  };
-
-  getSuggestionGeneral = async (idQuery: string = undefined, repeatCount = 0) => {
+  getSuggestions = async (type: ReviewTypesEnums, repeatCount = 0) => {
     const REPEAT_LIMIT = 60; /** Количество повторных запросов при ожидании ответа */
-    try {
-      const { textContractSource, textContractAnonymized } = this.rootStore.documentStore;
-      const textContract = APP_SET_ANONYMIZER ? textContractAnonymized : textContractSource;
+    const POLLING_INTERVAL = 20000; /** Интервал запроса 20 секунд */
 
-      const party = this.formPartySelected;
+    if (!this.contractId) {
+      runInAction(() => {
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
+      });
+      return;
+    }
+
+    try {
       const response = APP_SET_MOCK
-        ? { data: mockSuggestions, idQuery }
-        : await api.contract.recommendationGeneral({
-            // llm_provider: this.rootStore.menuStore.providerLLM,
-            // llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
-            id: idQuery,
-            text_contract: textContract,
-            partie: party,
-            contract_type: this.contractType,
-          });
-      const { part_contract: partContract, part_modified: partModified, id } = response.data[0];
-      const isNeedRepeatQuery = partContract === null || partModified === null;
+        ? { data: mockSuggestions }
+        : await api.contract.getRecommendations(this.contractId);
+
+      if (!response.data || response.data.length === 0) {
+        if (repeatCount < REPEAT_LIMIT) {
+          setTimeout(() => {
+            this.getSuggestions(type, repeatCount + 1);
+          }, POLLING_INTERVAL);
+        }
+        return;
+      }
+
+      const { part_contract: partContract, part_modified: partModified } = response.data[0];
+
+      const isNeedRepeatQuery =
+        partContract === null || partContract === undefined || partModified === null || partModified === undefined;
+
       if (isNeedRepeatQuery && REPEAT_LIMIT > repeatCount) {
-        // eslint-disable-next-line no-undef
         setTimeout(() => {
-          this.getSuggestionGeneral(id, repeatCount + 1);
-        }, 20000);
+          this.getSuggestions(type, repeatCount + 1);
+        }, POLLING_INTERVAL);
       } else {
         runInAction(() => {
           this.suggestionsNew = response.data;
-          this.reviewGeneralProcessing = false;
+          this.contractId = null;
+
+          if (type === ReviewTypesEnums.GENERAL) {
+            this.reviewGeneralProcessing = false;
+          } else {
+            this.reviewCustomProcessing = false;
+          }
         });
       }
     } catch (error) {
+      console.error(`Error getting recommendations for doc_id ${this.contractId}:`, error);
+
       runInAction(() => {
         this.suggestionsNew = null;
-        this.reviewGeneralProcessing = false;
+        this.contractId = null;
+
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
       });
     }
   };
 
-  getSuggestionsCustom = async (idQuery: string = undefined, repeatCount = 0) => {
-    const REPEAT_LIMIT = 60; /** Количество повторных запросов при ожидании ответа */
+  createReviewTask = async (type: ReviewTypesEnums): Promise<boolean> => {
+    this.clearSuggestions();
+
+    runInAction(() => {
+      this.contractId = null;
+      this.reviewTypeActive = type;
+
+      if (type === ReviewTypesEnums.GENERAL) {
+        this.reviewGeneralProcessing = true;
+      } else {
+        this.reviewCustomProcessing = true;
+      }
+    });
+
     try {
       const { textContractSource, textContractAnonymized } = this.rootStore.documentStore;
       const textContract = APP_SET_ANONYMIZER ? textContractAnonymized : textContractSource;
-
-      const manualRequrement = this.formCustomInstructions;
       const party = this.formPartySelected;
-      const response = APP_SET_MOCK
-        ? { data: mockSuggestions, idQuery }
-        : await api.contract.recommendationCustom({
-            // llm_provider: this.rootStore.menuStore.providerLLM,
-            // llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
-            id: idQuery,
-            manual_requrement: manualRequrement,
-            text_contract: textContract,
-            partie: party,
-            contract_type: this.contractType,
-          });
-      const { part_contract: partContract, part_modified: partModified, id } = response.data[0];
-      const isNeedRepeatQuery = partContract === null || partModified === null;
 
-      if (isNeedRepeatQuery && REPEAT_LIMIT > repeatCount) {
-        // eslint-disable-next-line no-undef
-        setTimeout(() => {
-          this.getSuggestionsCustom(id, repeatCount + 1);
-        }, 20000);
+      const basePayload = {
+        text_contract: textContract,
+        partie: party,
+        contract_type: this.contractType,
+      };
+
+      let response;
+
+      if (type === ReviewTypesEnums.GENERAL) {
+        response = await api.contract.createRecommendationGeneral(basePayload);
       } else {
-        runInAction(() => {
-          this.suggestionsNew = response.data;
-          this.reviewCustomProcessing = false;
+        response = await api.contract.createRecommendationCustom({
+          ...basePayload,
+          manual_requrement: this.formCustomInstructions,
         });
       }
+
+      const id = response.data?.id;
+
+      if (id) {
+        runInAction(() => {
+          this.contractId = id;
+        });
+        return true;
+      } else {
+        throw new Error("Task ID not received from server");
+      }
     } catch (error) {
+      console.error(`Error creating ${type} review task:`, error);
+
       runInAction(() => {
+        this.contractId = null;
         this.suggestionsNew = null;
-        this.reviewCustomProcessing = false;
+
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
       });
+
+      return false;
+    }
+  };
+
+  cancelReview = () => {
+    runInAction(() => {
+      this.contractId = null;
+      this.reviewGeneralProcessing = false;
+      this.reviewCustomProcessing = false;
+    });
+  };
+
+  startReviewGeneral = async () => {
+    const success = await this.createReviewTask(ReviewTypesEnums.GENERAL);
+    if (success && this.contractId) {
+      await this.getSuggestions(ReviewTypesEnums.GENERAL);
+    }
+  };
+
+  startReviewCustom = async () => {
+    const success = await this.createReviewTask(ReviewTypesEnums.CUSTOM);
+    if (success && this.contractId) {
+      await this.getSuggestions(ReviewTypesEnums.CUSTOM);
     }
   };
 

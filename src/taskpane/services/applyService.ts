@@ -3,12 +3,13 @@
 import { OptionsSupportedCurrentApiI } from "../store/config";
 import { getDifferencesSemantic } from "../helpers/diff";
 import { SearchService } from "./searchService";
+import { RecommendationTypeEnum } from "../enums";
 
 interface ApplyChangeI {
   sourceText: string;
   changeText: string;
   optionsSupportedCurrentApi: OptionsSupportedCurrentApiI;
-  type: string;
+  type: RecommendationTypeEnum;
 }
 
 interface ApplyCommentI {
@@ -24,8 +25,10 @@ export class ApplyService {
       console.log("[applyChange]", { searchText, editText, type });
 
       const { isAccessToRangeInsertText, isAccessToRangeInsertTextSemantic } = optionsSupportedCurrentApi;
-      if (type === "new") {
+      if (type === RecommendationTypeEnum.ADD) {
         await this.applyChangeAddNewParagraph(searchText, editText);
+      } else if (type === RecommendationTypeEnum.DELETE) {
+        await this.applyChangeDeleteParagraph(searchText);
       } else {
         if (isAccessToRangeInsertTextSemantic) {
           this.applyChangeSemantic(searchText, editText);
@@ -50,10 +53,27 @@ export class ApplyService {
       const range = await SearchService.findRange(context, searchText);
       if (!range) return;
 
-      range.insertParagraph(newParagraphText, Word.InsertLocation.after);
+      const newText = "\n" + newParagraphText;
+      range.insertText(newText, Word.InsertLocation.after);
+
       await context.sync();
     }).catch((error) => {
       console.log("Error [applyChangeAddNewParagraph]: " + error);
+    });
+  }
+
+  static async applyChangeDeleteParagraph(searchText: string) {
+    await Word.run(async (context) => {
+      const range = await SearchService.findRange(context, searchText);
+      if (!range) return;
+
+      range.load("text");
+      await context.sync();
+
+      range.delete();
+      await context.sync();
+    }).catch((error) => {
+      console.log("Error [applyChangeDeleteParagraph]: ", error);
     });
   }
 

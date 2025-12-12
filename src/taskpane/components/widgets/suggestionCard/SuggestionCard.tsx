@@ -9,6 +9,7 @@ import { ApplyService } from "../../../services/applyService";
 import { SearchService } from "../../../services/searchService";
 import { SuggestionT } from "../../../store/suggestions";
 import { htmlChangesMatching } from "../../../helpers/diff";
+import { RecommendationTypeEnum } from "../../../enums";
 
 type SuggestionPropT = {
   index: number;
@@ -64,22 +65,27 @@ const SuggestionCard = (props: SuggestionPropT) => {
     return htmlChangesMatching(sourceText, changeText);
   })();
 
-  const isChangeExist = !!changeText;
+  const isTypeDelete = type === RecommendationTypeEnum.DELETE;
+  const isTypeAdd = type === RecommendationTypeEnum.ADD;
+
+  const isChangeExist = !!changeText || isTypeDelete;
   const isCommentExist = !!commentText;
 
   const handleShowInDocument = async () => {
-    Word.run(async (context) => {
+    await Word.run(async (context) => {
       try {
         let findRange = await SearchService.findRange(context, changeText);
-        if (findRange === null) {
+        if (findRange === null || isTypeDelete) {
           findRange = await SearchService.findRange(context, sourceText);
         }
         console.log("[handleShowInDocument] findRange", findRange);
 
-        if (findRange) findRange.select();
-        return null;
+        if (findRange === null) return;
+
+        findRange.select();
+        await context.sync();
       } catch (error) {
-        console.log("!", error);
+        throw error;
       }
     }).catch((error) => {
       console.log("Error [handleShowInDocument]: " + error);
@@ -140,9 +146,13 @@ const SuggestionCard = (props: SuggestionPropT) => {
       {isChangeExist && (
         <div>
           <Text weight="bold">{T.labelChange[locale]} </Text>
-          {type === "new" ? (
-            <Text weight="bold" block style={{ color: "green" }}>
+          {isTypeAdd ? (
+            <Text weight="bold" block style={{ color: "#099e1a" }}>
               {changeText}
+            </Text>
+          ) : isTypeDelete ? (
+            <Text block style={{ textDecoration: "line-through", color: "#db690d" }}>
+              {sourceText}
             </Text>
           ) : (
             <div dangerouslySetInnerHTML={{ __html: htmlChangesMatchingText || changeText }} />

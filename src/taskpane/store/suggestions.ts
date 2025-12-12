@@ -94,7 +94,8 @@ class SuggestionsStore {
         return;
       }
 
-      const { part_contract: partContract, part_modified: partModified } = response.data[0];
+      const partContract = response.data[0]?.part_contract;
+      const partModified = response.data[0]?.part_modified;
 
       const isNeedRepeatQuery =
         partContract === null || partContract === undefined || partModified === null || partModified === undefined;

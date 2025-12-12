@@ -72,18 +72,20 @@ const SuggestionCard = (props: SuggestionPropT) => {
   const isCommentExist = !!commentText;
 
   const handleShowInDocument = async () => {
-    Word.run(async (context) => {
+    await Word.run(async (context) => {
       try {
         let findRange = await SearchService.findRange(context, changeText);
-        if (findRange === null) {
+        if (findRange === null || isTypeDelete) {
           findRange = await SearchService.findRange(context, sourceText);
         }
         console.log("[handleShowInDocument] findRange", findRange);
 
-        if (findRange) findRange.select();
-        return null;
+        if (findRange === null) return;
+
+        findRange.select();
+        await context.sync();
       } catch (error) {
-        console.log("!", error);
+        throw error;
       }
     }).catch((error) => {
       console.log("Error [handleShowInDocument]: " + error);

@@ -8,7 +8,7 @@ import {
 import api from "../api/v1";
 import { ContractAllRecommendationsResponseT, ContractType } from "../api/v1/contract";
 import mockParties from "./mock/mockParties";
-import mockSuggestions from "./mock/mockSuggestions_1";
+import mockSuggestions, { MOCK_CONTRACT_ID } from "./mock/mockSuggestions_1";
 
 const APP_SET_MOCK = process.env.APP_SET_MOCK === "true";
 const APP_SET_ANONYMIZER = process.env.APP_SET_ANONYMIZER === "true";
@@ -25,6 +25,8 @@ class SuggestionsStore {
   rootStore: RootStore;
 
   suggestionsNew: SuggestionT[] | null = null;
+
+  suggestionsError: string | null = null;
 
   parties: string[] | null = null;
 
@@ -66,8 +68,14 @@ class SuggestionsStore {
   };
 
   getSuggestions = async (type: ReviewTypesEnums, repeatCount = 0) => {
-    const REPEAT_LIMIT = 60; /** Количество повторных запросов при ожидании ответа */
-    const POLLING_INTERVAL = 20000; /** Интервал запроса 20 секунд */
+    const REPEAT_LIMIT = 60; // Количество повторных запросов при ожидании ответа
+    const POLLING_INTERVAL = 20000; // Интервал запроса 20 секунд
+
+    if (repeatCount === 0) {
+      runInAction(() => {
+        this.suggestionsError = null;
+      });
+    }
 
     if (!this.contractId) {
       runInAction(() => {
@@ -80,48 +88,76 @@ class SuggestionsStore {
       return;
     }
 
-    try {
-      const response = APP_SET_MOCK
-        ? { data: mockSuggestions }
-        : await api.contract.getRecommendations(this.contractId);
+    if (APP_SET_MOCK) {
+      runInAction(() => {
+        this.suggestionsNew = mockSuggestions;
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
+      });
+      return;
+    }
 
-      if (!response.data || response.data.length === 0) {
+    try {
+      const response = await api.contract.getRecommendations(this.contractId);
+
+      const hasData = response.data && response.data.length > 0;
+      const partContract = response.data?.[0]?.part_contract;
+      const partModified = response.data?.[0]?.part_modified;
+
+      const isDataReady =
+        partContract !== null && partContract !== undefined && partModified !== null && partModified !== undefined;
+
+      if (!hasData || !isDataReady) {
         if (repeatCount < REPEAT_LIMIT) {
           setTimeout(() => {
             this.getSuggestions(type, repeatCount + 1);
           }, POLLING_INTERVAL);
+        } else {
+          runInAction(() => {
+            this.suggestionsNew = null;
+            this.contractId = null;
+            this.suggestionsError = "timeout-error";
+
+            if (type === ReviewTypesEnums.GENERAL) {
+              this.reviewGeneralProcessing = false;
+            } else {
+              this.reviewCustomProcessing = false;
+            }
+          });
         }
         return;
       }
 
-      const partContract = response.data[0]?.part_contract;
-      const partModified = response.data[0]?.part_modified;
+      runInAction(() => {
+        this.suggestionsNew = response.data;
+        this.contractId = null;
 
-      const isNeedRepeatQuery =
-        partContract === null || partContract === undefined || partModified === null || partModified === undefined;
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
+      });
+    } catch (error) {
+      const status = error?.response?.status ?? error?.status;
+      const isPolling404 = status === 404 && repeatCount < REPEAT_LIMIT;
 
-      if (isNeedRepeatQuery && REPEAT_LIMIT > repeatCount) {
+      if (isPolling404) {
         setTimeout(() => {
           this.getSuggestions(type, repeatCount + 1);
         }, POLLING_INTERVAL);
-      } else {
-        runInAction(() => {
-          this.suggestionsNew = response.data;
-          this.contractId = null;
-
-          if (type === ReviewTypesEnums.GENERAL) {
-            this.reviewGeneralProcessing = false;
-          } else {
-            this.reviewCustomProcessing = false;
-          }
-        });
+        return;
       }
-    } catch (error) {
+
       console.error(`Error getting recommendations for doc_id ${this.contractId}:`, error);
 
       runInAction(() => {
         this.suggestionsNew = null;
         this.contractId = null;
+        this.suggestionsError = "failed-request";
 
         if (type === ReviewTypesEnums.GENERAL) {
           this.reviewGeneralProcessing = false;
@@ -147,6 +183,13 @@ class SuggestionsStore {
     });
 
     try {
+      if (APP_SET_MOCK) {
+        runInAction(() => {
+          this.contractId = MOCK_CONTRACT_ID;
+        });
+        return true;
+      }
+
       const { textContractSource, textContractAnonymized } = this.rootStore.documentStore;
       const textContract = APP_SET_ANONYMIZER ? textContractAnonymized : textContractSource;
       const party = this.formPartySelected;
@@ -184,6 +227,7 @@ class SuggestionsStore {
       runInAction(() => {
         this.contractId = null;
         this.suggestionsNew = null;
+        this.suggestionsError = "failed-request";
 
         if (type === ReviewTypesEnums.GENERAL) {
           this.reviewGeneralProcessing = false;
@@ -204,17 +248,18 @@ class SuggestionsStore {
     });
   };
 
-  startReviewGeneral = async () => {
-    const success = await this.createReviewTask(ReviewTypesEnums.GENERAL);
-    if (success && this.contractId) {
-      await this.getSuggestions(ReviewTypesEnums.GENERAL);
-    }
-  };
+  startReview = async (reviewType: ReviewTypesEnums) => {
+    const INITIAL_DELAY = 5000;
+    const success = await this.createReviewTask(reviewType);
 
-  startReviewCustom = async () => {
-    const success = await this.createReviewTask(ReviewTypesEnums.CUSTOM);
     if (success && this.contractId) {
-      await this.getSuggestions(ReviewTypesEnums.CUSTOM);
+      if (APP_SET_MOCK) {
+        this.getSuggestions(reviewType);
+      } else {
+        setTimeout(() => {
+          this.getSuggestions(reviewType);
+        }, INITIAL_DELAY);
+      }
     }
   };
 

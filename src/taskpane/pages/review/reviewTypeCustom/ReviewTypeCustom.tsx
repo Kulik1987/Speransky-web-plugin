@@ -5,6 +5,7 @@ import { useStores } from "../../../store";
 import { Settings24Regular } from "@fluentui/react-icons";
 import { Button, Field, Select, Textarea } from "@fluentui/react-components";
 import { ReviewTypeItem } from "../../../components/organisms";
+import { ReviewTypesEnums } from "../../../enums";
 
 const ReviewTypeCustom = () => {
   const { suggestionsStore, menuStore } = useStores();
@@ -14,9 +15,9 @@ const ReviewTypeCustom = () => {
 
   const isPartiesExist = Array.isArray(parties) && parties?.length > 0;
 
-  const handleStartReviewCustom = () => {
+  const handleStartReviewCustom = async () => {
+    await suggestionsStore.startReview(ReviewTypesEnums.CUSTOM);
     navigate("/summary");
-    suggestionsStore.startReviewCustom();
   };
 
   const handleChangeParty = (_event: React.SyntheticEvent, item: any) => {

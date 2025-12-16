@@ -3,6 +3,8 @@
 import { ContractAllRecommendationsResponseT } from "../../api/v1/contract";
 import { LevelOfCriticalEnum, RecommendationTypeEnum } from "../../enums";
 
+export const MOCK_CONTRACT_ID = "93623e74-2f06-4e44-87c4-f758a7b3225d";
+
 const mockSuggestions: ContractAllRecommendationsResponseT[] = [
   {
     level_risk: LevelOfCriticalEnum.LOW,

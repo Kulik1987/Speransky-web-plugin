@@ -1,5 +1,6 @@
 import {
   LevelOfCriticalEnum,
+  RecommendationTypeEnum,
   // ProviderLLMEnums
 } from "../../enums";
 import axios from "../instanceAxios";
@@ -23,19 +24,13 @@ export type ContractType = {
 
 export type ContractRecommendationGeneralPayloadT = {
   // llm_provider: ProviderLLMEnums;
-  id?: string | undefined;
   partie: string;
   text_contract: string;
   contract_type: ContractType;
 };
 
-export type ContractRecommendationCustomPayloadT = {
-  // llm_provider: ProviderLLMEnums;
-  id?: string | undefined;
-  partie: string;
-  text_contract: string;
+type ContractRecommendationCustomPayloadT = ContractRecommendationGeneralPayloadT & {
   manual_requrement: string;
-  contract_type: ContractType;
 };
 
 export type ContractPartiesResponseT = {
@@ -44,26 +39,37 @@ export type ContractPartiesResponseT = {
   contract_type: ContractType;
 };
 
-export type ContractRecommendationResponseT = {
-  id?: string;
+export type ContractRecommendationIdResponseT = {
+  id: string;
+};
+
+export type ContractAllRecommendationsResponseT = {
   level_risk: LevelOfCriticalEnum;
   part_contract: string;
   part_modified: string;
   comment: string;
-  type: string;
+  type: RecommendationTypeEnum;
 };
 
 const contract = {
+  /** @description Извлечение сторон договора */
   parties: (data: ContractPartiesPayloadT) => {
     return axios.post<ContractPartiesResponseT>(PLUGIN_CONTRACT_PARTIES, data);
   },
 
-  recommendationGeneral: (data: ContractRecommendationGeneralPayloadT) => {
-    return axios.post<ContractRecommendationResponseT[]>(PLUGIN_CONTRACT_RECOMMENDATION_GENERAL, data);
+  /** @description Создание задачи анализа договора */
+  createRecommendationGeneral: (data: ContractRecommendationGeneralPayloadT) => {
+    return axios.post<ContractRecommendationIdResponseT>(PLUGIN_CONTRACT_RECOMMENDATION_GENERAL, data);
   },
 
-  recommendationCustom: (data: ContractRecommendationCustomPayloadT) => {
-    return axios.post<ContractRecommendationResponseT[]>(PLUGIN_CONTRACT_RECOMMENDATION_CUSTOM, data);
+  /** @description Создание задачи анализа договора с пользовательскими инструкциями */
+  createRecommendationCustom: (data: ContractRecommendationCustomPayloadT) => {
+    return axios.post<ContractRecommendationIdResponseT>(PLUGIN_CONTRACT_RECOMMENDATION_CUSTOM, data);
+  },
+
+  /** @description Получение готовых рекомендаций по id */
+  getRecommendations: (task_id: string) => {
+    return axios.get<ContractAllRecommendationsResponseT[]>(`${PLUGIN_CONTRACT_RECOMMENDATION_GENERAL}/${task_id}`);
   },
 };
 

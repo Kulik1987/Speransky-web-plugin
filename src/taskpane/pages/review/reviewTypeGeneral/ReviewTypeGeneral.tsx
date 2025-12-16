@@ -5,6 +5,7 @@ import { Fire24Regular } from "@fluentui/react-icons";
 import { Button, Select } from "@fluentui/react-components";
 import { ReviewTypeItem } from "../../../components/organisms";
 import { useStores } from "../../../store";
+import { ReviewTypesEnums } from "../../../enums";
 
 const ReviewTypeGeneral = () => {
   const { suggestionsStore, menuStore } = useStores();
@@ -14,9 +15,9 @@ const ReviewTypeGeneral = () => {
 
   const isPartiesExist = Array.isArray(parties) && parties?.length > 0;
 
-  const handleStartReviewGeneral = () => {
+  const handleStartReviewGeneral = async () => {
+    await suggestionsStore.startReview(ReviewTypesEnums.GENERAL);
     navigate("/summary");
-    suggestionsStore.startReviewGeneral();
   };
 
   const handleChangeParty = (_event: React.SyntheticEvent, item: any) => {

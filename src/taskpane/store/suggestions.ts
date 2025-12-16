@@ -6,9 +6,9 @@ import {
   ReviewTypesEnums,
 } from "../enums";
 import api from "../api/v1";
-import { ContractRecommendationResponseT, ContractType } from "../api/v1/contract";
+import { ContractAllRecommendationsResponseT, ContractType } from "../api/v1/contract";
 import mockParties from "./mock/mockParties";
-import mockSuggestions from "./mock/mockSuggestions_1";
+import mockSuggestions, { MOCK_CONTRACT_ID } from "./mock/mockSuggestions_1";
 
 const APP_SET_MOCK = process.env.APP_SET_MOCK === "true";
 const APP_SET_ANONYMIZER = process.env.APP_SET_ANONYMIZER === "true";
@@ -19,18 +19,22 @@ type SuggestionPropertyT = {
   isApplyComment?: boolean;
 };
 
-export type SuggestionT = ContractRecommendationResponseT & SuggestionPropertyT;
+export type SuggestionT = ContractAllRecommendationsResponseT & SuggestionPropertyT;
 
 class SuggestionsStore {
   rootStore: RootStore;
 
   suggestionsNew: SuggestionT[] | null = null;
 
+  suggestionsError: string | null = null;
+
   parties: string[] | null = null;
 
   getPartiesProcessing: boolean = false;
 
   contractType: ContractType | null = null;
+
+  contractId: string | null = null;
 
   formPartySelected: string | null = null;
 
@@ -63,100 +67,199 @@ class SuggestionsStore {
     this.suggestionsNew = expand;
   };
 
-  startReviewGeneral = async () => {
-    this.clearSuggestions();
-    runInAction(() => {
-      this.reviewTypeActive = ReviewTypesEnums.GENERAL;
-      this.reviewGeneralProcessing = true;
-    });
-    this.getSuggestionGeneral();
-  };
+  getSuggestions = async (type: ReviewTypesEnums, repeatCount = 0) => {
+    const REPEAT_LIMIT = 60; // Количество повторных запросов при ожидании ответа
+    const POLLING_INTERVAL = 20000; // Интервал запроса 20 секунд
 
-  startReviewCustom = async () => {
-    this.clearSuggestions();
-    runInAction(() => {
-      this.reviewCustomProcessing = true;
-      this.reviewTypeActive = ReviewTypesEnums.CUSTOM;
-    });
-    this.getSuggestionsCustom();
-  };
+    if (repeatCount === 0) {
+      runInAction(() => {
+        this.suggestionsError = null;
+      });
+    }
 
-  getSuggestionGeneral = async (idQuery: string = undefined, repeatCount = 0) => {
-    const REPEAT_LIMIT = 60; /** Количество повторных запросов при ожидании ответа */
-    try {
-      const { textContractSource, textContractAnonymized } = this.rootStore.documentStore;
-      const textContract = APP_SET_ANONYMIZER ? textContractAnonymized : textContractSource;
-
-      const party = this.formPartySelected;
-      const response = APP_SET_MOCK
-        ? { data: mockSuggestions, idQuery }
-        : await api.contract.recommendationGeneral({
-            // llm_provider: this.rootStore.menuStore.providerLLM,
-            // llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
-            id: idQuery,
-            text_contract: textContract,
-            partie: party,
-            contract_type: this.contractType,
-          });
-      const { part_contract: partContract, part_modified: partModified, id } = response.data[0];
-      const isNeedRepeatQuery = partContract === null || partModified === null;
-      if (isNeedRepeatQuery && REPEAT_LIMIT > repeatCount) {
-        // eslint-disable-next-line no-undef
-        setTimeout(() => {
-          this.getSuggestionGeneral(id, repeatCount + 1);
-        }, 20000);
-      } else {
-        runInAction(() => {
-          this.suggestionsNew = response.data;
+    if (!this.contractId) {
+      runInAction(() => {
+        if (type === ReviewTypesEnums.GENERAL) {
           this.reviewGeneralProcessing = false;
-        });
+        } else {
+          this.reviewCustomProcessing = false;
+        }
+      });
+      return;
+    }
+
+    if (APP_SET_MOCK) {
+      runInAction(() => {
+        this.suggestionsNew = mockSuggestions;
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
+      });
+      return;
+    }
+
+    try {
+      const response = await api.contract.getRecommendations(this.contractId);
+
+      const hasData = response.data && response.data.length > 0;
+      const partContract = response.data?.[0]?.part_contract;
+      const partModified = response.data?.[0]?.part_modified;
+
+      const isDataReady =
+        partContract !== null && partContract !== undefined && partModified !== null && partModified !== undefined;
+
+      if (!hasData || !isDataReady) {
+        if (repeatCount < REPEAT_LIMIT) {
+          setTimeout(() => {
+            this.getSuggestions(type, repeatCount + 1);
+          }, POLLING_INTERVAL);
+        } else {
+          runInAction(() => {
+            this.suggestionsNew = null;
+            this.contractId = null;
+            this.suggestionsError = "timeout-error";
+
+            if (type === ReviewTypesEnums.GENERAL) {
+              this.reviewGeneralProcessing = false;
+            } else {
+              this.reviewCustomProcessing = false;
+            }
+          });
+        }
+        return;
       }
+
+      runInAction(() => {
+        this.suggestionsNew = response.data;
+        this.contractId = null;
+
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
+      });
     } catch (error) {
+      const status = error?.response?.status ?? error?.status;
+      const isPolling404 = status === 404 && repeatCount < REPEAT_LIMIT;
+
+      if (isPolling404) {
+        setTimeout(() => {
+          this.getSuggestions(type, repeatCount + 1);
+        }, POLLING_INTERVAL);
+        return;
+      }
+
+      console.error(`Error getting recommendations for doc_id ${this.contractId}:`, error);
+
       runInAction(() => {
         this.suggestionsNew = null;
-        this.reviewGeneralProcessing = false;
+        this.contractId = null;
+        this.suggestionsError = "failed-request";
+
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
       });
     }
   };
 
-  getSuggestionsCustom = async (idQuery: string = undefined, repeatCount = 0) => {
-    const REPEAT_LIMIT = 60; /** Количество повторных запросов при ожидании ответа */
+  createReviewTask = async (type: ReviewTypesEnums): Promise<boolean> => {
+    this.clearSuggestions();
+
+    runInAction(() => {
+      this.contractId = null;
+      this.reviewTypeActive = type;
+
+      if (type === ReviewTypesEnums.GENERAL) {
+        this.reviewGeneralProcessing = true;
+      } else {
+        this.reviewCustomProcessing = true;
+      }
+    });
+
     try {
+      if (APP_SET_MOCK) {
+        runInAction(() => {
+          this.contractId = MOCK_CONTRACT_ID;
+        });
+        return true;
+      }
+
       const { textContractSource, textContractAnonymized } = this.rootStore.documentStore;
       const textContract = APP_SET_ANONYMIZER ? textContractAnonymized : textContractSource;
-
-      const manualRequrement = this.formCustomInstructions;
       const party = this.formPartySelected;
-      const response = APP_SET_MOCK
-        ? { data: mockSuggestions, idQuery }
-        : await api.contract.recommendationCustom({
-            // llm_provider: this.rootStore.menuStore.providerLLM,
-            // llm_provider: (process.env.APP_LLM_MODEL as ProviderLLMEnums) ?? this.rootStore.menuStore.providerLLM,
-            id: idQuery,
-            manual_requrement: manualRequrement,
-            text_contract: textContract,
-            partie: party,
-            contract_type: this.contractType,
-          });
-      const { part_contract: partContract, part_modified: partModified, id } = response.data[0];
-      const isNeedRepeatQuery = partContract === null || partModified === null;
 
-      if (isNeedRepeatQuery && REPEAT_LIMIT > repeatCount) {
-        // eslint-disable-next-line no-undef
-        setTimeout(() => {
-          this.getSuggestionsCustom(id, repeatCount + 1);
-        }, 20000);
+      const basePayload = {
+        text_contract: textContract,
+        partie: party,
+        contract_type: this.contractType,
+      };
+
+      let response;
+
+      if (type === ReviewTypesEnums.GENERAL) {
+        response = await api.contract.createRecommendationGeneral(basePayload);
       } else {
-        runInAction(() => {
-          this.suggestionsNew = response.data;
-          this.reviewCustomProcessing = false;
+        response = await api.contract.createRecommendationCustom({
+          ...basePayload,
+          manual_requrement: this.formCustomInstructions,
         });
       }
+
+      const id = response.data?.id;
+
+      if (id) {
+        runInAction(() => {
+          this.contractId = id;
+        });
+        return true;
+      } else {
+        throw new Error("Task ID not received from server");
+      }
     } catch (error) {
+      console.error(`Error creating ${type} review task:`, error);
+
       runInAction(() => {
+        this.contractId = null;
         this.suggestionsNew = null;
-        this.reviewCustomProcessing = false;
+        this.suggestionsError = "failed-request";
+
+        if (type === ReviewTypesEnums.GENERAL) {
+          this.reviewGeneralProcessing = false;
+        } else {
+          this.reviewCustomProcessing = false;
+        }
       });
+
+      return false;
+    }
+  };
+
+  cancelReview = () => {
+    runInAction(() => {
+      this.contractId = null;
+      this.reviewGeneralProcessing = false;
+      this.reviewCustomProcessing = false;
+    });
+  };
+
+  startReview = async (reviewType: ReviewTypesEnums) => {
+    const INITIAL_DELAY = 5000;
+    const success = await this.createReviewTask(reviewType);
+
+    if (success && this.contractId) {
+      if (APP_SET_MOCK) {
+        this.getSuggestions(reviewType);
+      } else {
+        setTimeout(() => {
+          this.getSuggestions(reviewType);
+        }, INITIAL_DELAY);
+      }
     }
   };
 

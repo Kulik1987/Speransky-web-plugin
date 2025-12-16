@@ -1,14 +1,15 @@
-/* global Word console */
+/* global Word */
 /// <reference types="office-js" />
 import { OptionsSupportedCurrentApiI } from "../store/config";
 import { getDifferencesSemantic } from "../helpers/diff";
 import { SearchService } from "./searchService";
+import { RecommendationTypeEnum } from "../enums";
 
 interface ApplyChangeI {
   sourceText: string;
   changeText: string;
   optionsSupportedCurrentApi: OptionsSupportedCurrentApiI;
-  type: string;
+  type: RecommendationTypeEnum;
 }
 
 interface ApplyCommentI {
@@ -24,8 +25,10 @@ export class ApplyService {
       console.log("[applyChange]", { searchText, editText, type });
 
       const { isAccessToRangeInsertText, isAccessToRangeInsertTextSemantic } = optionsSupportedCurrentApi;
-      if (type === "new") {
+      if (type === RecommendationTypeEnum.ADD) {
         await this.applyChangeAddNewParagraph(searchText, editText);
+      } else if (type === RecommendationTypeEnum.DELETE) {
+        await this.applyChangeDeleteParagraph(searchText);
       } else {
         if (isAccessToRangeInsertTextSemantic) {
           this.applyChangeSemantic(searchText, editText);
@@ -41,18 +44,52 @@ export class ApplyService {
 
   static async applyChangeAddNewParagraph(searchText: string, newParagraphText: string) {
     await Word.run(async (context) => {
+      const existedRange = await SearchService.findRange(context, newParagraphText);
+      if (existedRange !== null) {
+        console.log("Правка уже применена");
+        return;
+      }
+
       const range = await SearchService.findRange(context, searchText);
-      range.insertText(newParagraphText, "After");
+      if (!range) return;
+
+      const newText = "\n" + newParagraphText;
+      range.insertText(newText, Word.InsertLocation.after);
+
       await context.sync();
     }).catch((error) => {
       console.log("Error [applyChangeAddNewParagraph]: " + error);
     });
   }
 
-  static async applyChangeBasic(searchText: string, changeText: string) {
+  static async applyChangeDeleteParagraph(searchText: string) {
     await Word.run(async (context) => {
       const range = await SearchService.findRange(context, searchText);
+      if (!range) return;
+
+      range.load("text");
+      await context.sync();
+
+      range.delete();
+      await context.sync();
+    }).catch((error) => {
+      console.log("Error [applyChangeDeleteParagraph]: ", error);
+    });
+  }
+
+  static async applyChangeBasic(searchText: string, changeText: string) {
+    await Word.run(async (context) => {
+      const existedRange = await SearchService.findRange(context, changeText);
+      if (existedRange !== null) {
+        console.log("Правка уже применена");
+        return;
+      }
+
+      const range = await SearchService.findRange(context, searchText);
+      if (!range) return;
+
       range.insertText(changeText, "Replace");
+      await context.sync();
     }).catch((error) => {
       console.log("Error [handleShowInDocument]: " + error);
     });
@@ -64,47 +101,51 @@ export class ApplyService {
 
     await Word.run(async (context) => {
       const rangeAppliedChanges = await SearchService.findRange(context, changeText);
+      if (rangeAppliedChanges !== null) {
+        console.log("Правка уже применена");
+        return;
+      }
 
-      if (rangeAppliedChanges === null) {
-        const findRange = await SearchService.findRange(context, searchText);
-        findRange.clear();
-        const trackedChangeR = findRange.getTrackedChanges();
-        context.load(trackedChangeR, "items");
-        await context.sync();
-        trackedChangeR.items[0].accept();
+      const findRange = await SearchService.findRange(context, searchText);
+      if (!findRange) return;
 
-        for (const diffItem of differencesArray) {
-          try {
-            let isStable = diffItem[0] === 0;
-            let isCreate = diffItem[0] === 1;
-            let isDelete = diffItem[0] === -1;
-            let inputText = diffItem[1];
+      findRange.clear();
+      const trackedChangeR = findRange.getTrackedChanges();
+      context.load(trackedChangeR, "items");
+      await context.sync();
+      trackedChangeR.items[0].accept();
 
-            const insertedItem = findRange.insertText(inputText, Word.InsertLocation.end);
-            context.load(insertedItem, "text");
+      for (const diffItem of differencesArray) {
+        try {
+          let isStable = diffItem[0] === 0;
+          let isCreate = diffItem[0] === 1;
+          let isDelete = diffItem[0] === -1;
+          let inputText = diffItem[1];
+
+          const insertedItem = findRange.insertText(inputText, Word.InsertLocation.end);
+          context.load(insertedItem, "text");
+          await context.sync();
+
+          if (isStable) {
+            const trackedChangeItem = insertedItem.getTrackedChanges();
+            context.load(trackedChangeItem, "items");
             await context.sync();
-
-            if (isStable) {
-              const trackedChangeItem = insertedItem.getTrackedChanges();
-              context.load(trackedChangeItem, "items");
-              await context.sync();
-              trackedChangeItem.items[0].accept();
-            }
-
-            if (isCreate) {
-              // новый элемент отобразится как правка в режиме рецензирования
-            }
-
-            if (isDelete) {
-              const trackedChangeItem = insertedItem.getTrackedChanges();
-              context.load(trackedChangeItem, "items");
-              await context.sync();
-              trackedChangeItem.items[0].accept();
-              insertedItem.clear();
-            }
-          } catch (error) {
-            console.log("error", error);
+            trackedChangeItem.items[0].accept();
           }
+
+          if (isCreate) {
+            // новый элемент отобразится как правка в режиме рецензирования
+          }
+
+          if (isDelete) {
+            const trackedChangeItem = insertedItem.getTrackedChanges();
+            context.load(trackedChangeItem, "items");
+            await context.sync();
+            trackedChangeItem.items[0].accept();
+            insertedItem.clear();
+          }
+        } catch (error) {
+          console.log("error", error);
         }
       }
     }).catch((error) => {

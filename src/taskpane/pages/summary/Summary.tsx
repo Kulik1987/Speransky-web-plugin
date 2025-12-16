@@ -16,6 +16,10 @@ const T = {
     ru: "Применить все",
     en: "Apply All",
   },
+  errorDescription: {
+    ru: "Ошибка получения рекомендаций.\n Попробуйте ещё раз.",
+    en: "Error getting recommendations.\n Please try again.",
+  },
 };
 
 const Summary = () => {
@@ -25,15 +29,12 @@ const Summary = () => {
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
   const styles = useSummaryStyles();
 
-  const {
-    // computedIsExistUntouchedSuggestions,
-    suggestionsNew,
-  } = suggestionsStore;
-
-  const { reviewTypeActive, reviewCustomProcessing, reviewGeneralProcessing } = suggestionsStore;
+  const { suggestionsNew, suggestionsError, reviewTypeActive, reviewCustomProcessing, reviewGeneralProcessing } =
+    suggestionsStore;
 
   const isProcessing = reviewCustomProcessing || reviewGeneralProcessing;
   const isDisplaySuggestions = reviewTypeActive !== null && !isProcessing;
+  const isError = Boolean(suggestionsError);
 
   const handleApplyAll = async () => {
     suggestionsNew.forEach(async (itemSuggestion, indexSuggestion) => {
@@ -59,6 +60,14 @@ const Summary = () => {
     });
   };
 
+  if (isError || (!isProcessing && !suggestionsNew?.length)) {
+    return (
+      <Text block className={styles.error}>
+        {T.errorDescription[locale]}
+      </Text>
+    );
+  }
+
   return (
     <div className={styles.container}>
       {isProcessing && (
@@ -77,7 +86,7 @@ const Summary = () => {
         })}
       {
         // computedIsExistUntouchedSuggestions &&
-        !isProcessing && (
+        isDisplaySuggestions && (
           <div>
             <Button appearance="primary" size="medium" onClick={handleApplyAll} className={styles.button}>
               {T.buttonApplyAll[locale]}

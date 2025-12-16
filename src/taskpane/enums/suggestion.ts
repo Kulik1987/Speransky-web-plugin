@@ -4,6 +4,12 @@ export enum LevelOfCriticalEnum {
   "LOW" = "low",
 }
 
+export enum RecommendationTypeEnum {
+  "EDIT" = "edit",
+  "DELETE" = "delete",
+  "ADD" = "add",
+}
+
 export enum InsertPlaceEnum {
   "AFTER" = "After",
   "BEFORE" = "Before",

@@ -1,75 +1,77 @@
-import {
-  LevelOfCriticalEnum,
-  RecommendationTypeEnum,
-  // ProviderLLMEnums
-} from "../../enums";
 import axios from "../instanceAxios";
+import { CONTRACT_ROUTES } from "../routes";
 import {
-  PLUGIN_CONTRACT_PARTIES,
-  PLUGIN_CONTRACT_RECOMMENDATION_GENERAL,
-  PLUGIN_CONTRACT_RECOMMENDATION_CUSTOM,
-} from "../routes";
-
-export type ContractPartiesPayloadT = {
-  // llm_provider: ProviderLLMEnums;
-  text_contract: string;
-};
-
-export type ContractType = {
-  contract_type: string;
-  contract_subtype: string | null;
-  mixed: boolean;
-  components: any[];
-};
-
-export type ContractRecommendationGeneralPayloadT = {
-  // llm_provider: ProviderLLMEnums;
-  partie: string;
-  text_contract: string;
-  contract_type: ContractType;
-};
-
-type ContractRecommendationCustomPayloadT = ContractRecommendationGeneralPayloadT & {
-  manual_requrement: string;
-};
-
-export type ContractPartiesResponseT = {
-  parties: string[];
-  questions: string[];
-  contract_type: ContractType;
-};
-
-export type ContractRecommendationIdResponseT = {
-  id: string;
-};
-
-export type ContractAllRecommendationsResponseT = {
-  level_risk: LevelOfCriticalEnum;
-  part_contract: string;
-  part_modified: string;
-  comment: string;
-  type: RecommendationTypeEnum;
-};
+  PayloadContractAnalyzeDto,
+  PayloadContractDetectTypeDto,
+  ResponseContractAnalyzeDto,
+  ResponseContractDetectTypeDto,
+  ResponseContractPartiesDto,
+  ResponseContractRecommendationDto,
+} from "../types";
 
 const contract = {
+  /** @description Загрузка договора и определение его типа */
+  detectType: (data: PayloadContractDetectTypeDto) => {
+    return axios.post<ResponseContractDetectTypeDto>(CONTRACT_ROUTES.detectType, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  /** @description Запуск анализа договора */
+  analyze: (data: PayloadContractAnalyzeDto) => {
+    const body = new URLSearchParams();
+
+    body.append("document_id", data.document_id);
+    body.append("llm_provider", data.llm_provider);
+    body.append("source", data.source);
+
+    if (data.selected_party) {
+      body.append("selected_party", data.selected_party);
+    }
+
+    if (data.user_comment) {
+      body.append("user_comment", data.user_comment);
+    }
+
+    return axios.post<ResponseContractAnalyzeDto>(CONTRACT_ROUTES.analyze, body, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+  },
+
   /** @description Извлечение сторон договора */
-  parties: (data: ContractPartiesPayloadT) => {
-    return axios.post<ContractPartiesResponseT>(PLUGIN_CONTRACT_PARTIES, data);
+  parties: (legal_case_id: string) => {
+    return axios.get<ResponseContractPartiesDto>(CONTRACT_ROUTES.parties(legal_case_id));
   },
 
-  /** @description Создание задачи анализа договора */
-  createRecommendationGeneral: (data: ContractRecommendationGeneralPayloadT) => {
-    return axios.post<ContractRecommendationIdResponseT>(PLUGIN_CONTRACT_RECOMMENDATION_GENERAL, data);
+  /** @description Получение JSON-рекомендаций по id */
+  recommendation: (document_id: string) => {
+    return axios.get<ResponseContractRecommendationDto>(CONTRACT_ROUTES.recommendation(document_id));
   },
 
-  /** @description Создание задачи анализа договора с пользовательскими инструкциями */
-  createRecommendationCustom: (data: ContractRecommendationCustomPayloadT) => {
-    return axios.post<ContractRecommendationIdResponseT>(PLUGIN_CONTRACT_RECOMMENDATION_CUSTOM, data);
-  },
-
-  /** @description Получение готовых рекомендаций по id */
-  getRecommendations: (task_id: string) => {
-    return axios.get<ContractAllRecommendationsResponseT[]>(`${PLUGIN_CONTRACT_RECOMMENDATION_GENERAL}/${task_id}`);
+  /** @description Получение ZIP-архива с результатами анализа */
+  archive: (
+    document_id: string,
+    includeReport?: boolean,
+    includeReview?: boolean,
+    includeProtocol?: boolean,
+    config?: { signal?: AbortSignal }
+  ) => {
+    return axios.get<Blob>(CONTRACT_ROUTES.archive(document_id), {
+      params: {
+        includeReport,
+        includeReview,
+        includeProtocol,
+      },
+      headers: {
+        Accept: "application/json",
+      },
+      responseType: "blob",
+      signal: config?.signal,
+    });
   },
 };
 

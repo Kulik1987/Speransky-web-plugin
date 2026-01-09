@@ -8,6 +8,7 @@ import { Anonymizer } from "./anonymizer";
 import { PlayBook } from "./playBook";
 import { ItemSkeleton } from "../../components/molecules";
 import { useReviewStyles } from "./styles";
+import { useNavigate } from "react-router-dom";
 
 const APP_SET_ANONYMIZER = process.env.APP_SET_ANONYMIZER;
 
@@ -35,13 +36,27 @@ const T = {
 };
 
 const Review = () => {
-  const { menuStore, suggestionsStore } = useStores();
+  const { menuStore, documentStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
-  const { getPartiesProcessing } = suggestionsStore;
+  const { isPartiesProcessing } = suggestionsStore;
+  const navigate = useNavigate();
   const styles = useReviewStyles();
 
   useEffect(() => {
     console.log("navigate to [page review]");
+
+    const loadParties = async () => {
+      if (!documentStore.legalCaseId) {
+        navigate("/main");
+        return;
+      }
+
+      if (!suggestionsStore.parties && !suggestionsStore.isPartiesProcessing) {
+        await suggestionsStore.requestParties(documentStore.legalCaseId);
+      }
+    };
+
+    loadParties();
   }, []);
 
   const isDisplayAnonymizer = APP_SET_ANONYMIZER === "true";
@@ -51,10 +66,10 @@ const Review = () => {
       <div className={styles.block}>
         <Divider alignContent="center" inset>
           <Text size={300} weight="medium">
-            {getPartiesProcessing ? T.waitingNotification[locale] : T.dividerSelectReviewType[locale]}
+            {isPartiesProcessing ? T.waitingNotification[locale] : T.dividerSelectReviewType[locale]}
           </Text>
         </Divider>
-        {getPartiesProcessing ? (
+        {isPartiesProcessing ? (
           <ItemSkeleton />
         ) : (
           <>
@@ -64,7 +79,7 @@ const Review = () => {
         )}
       </div>
 
-      {!getPartiesProcessing && (
+      {!isPartiesProcessing && (
         <>
           <div className={styles.block}>
             <Divider alignContent="center" inset>

@@ -17,7 +17,7 @@ class MenuStore {
 
   locale: LocaleEnums = LocaleEnums.RU;
 
-  providerLLM: ProviderLLMEnums = ProviderLLMEnums.GIGA_CHAT;
+  providerLLM: ProviderLLMEnums = ProviderLLMEnums.OPEN_AI;
 
   currentMenuItem: MenuItemsEnums | null = MenuItemsEnums.REVIEW;
 

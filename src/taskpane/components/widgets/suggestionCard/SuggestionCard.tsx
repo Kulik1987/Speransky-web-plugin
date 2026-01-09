@@ -48,18 +48,24 @@ const SuggestionCard = (props: SuggestionPropT) => {
   const { locale } = menuStore;
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
-  // const [htmlString, setHtmlString] = useState<string | null>(null);
 
   const { data, index: indexSuggestion } = props;
 
   const {
-    level_risk,
-    comment: commentText,
-    part_contract: sourceText,
-    part_modified: changeText,
+    risk_description: commentText,
+    risk_level,
+    new_clause_wording: changeText,
+    target_snippet_full: sourceText,
+    is_new_clause,
+    is_removed_clause,
     isDismiss,
-    type,
   } = data;
+
+  const type = is_new_clause
+    ? RecommendationTypeEnum.ADD
+    : is_removed_clause
+    ? RecommendationTypeEnum.DELETE
+    : RecommendationTypeEnum.EDIT;
 
   const htmlChangesMatchingText = (() => {
     return htmlChangesMatching(sourceText, changeText);
@@ -132,7 +138,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <PriorityFlag flag={level_risk} />
+        <PriorityFlag flag={risk_level} />
         <Button
           appearance="subtle"
           size="small"

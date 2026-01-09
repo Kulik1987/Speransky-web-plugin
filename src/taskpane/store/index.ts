@@ -1,8 +1,6 @@
-/* global Word console */
+/* global */
 
 import React from "react";
-import { autorun } from "mobx";
-
 import Auth from "./auth";
 import Config from "./config";
 import Menu from "./menu";
@@ -22,7 +20,6 @@ class RootStore {
     this.documentStore = new Document(this);
     this.menuStore = new Menu(this);
     this.suggestionsStore = new Suggestions(this);
-
   }
 }
 

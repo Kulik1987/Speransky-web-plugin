@@ -123,6 +123,7 @@ class SuggestionsStore {
       runInAction(() => {
         this.suggestionsNew = response.data.risks;
         this.isAnalysisProcessing = false;
+        this.rootStore.documentStore.setDocumentName(response.data.contract_name);
       });
     } catch (error) {
       const status = error?.response?.status ?? error?.status;

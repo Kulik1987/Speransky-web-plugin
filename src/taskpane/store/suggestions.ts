@@ -123,12 +123,13 @@ class SuggestionsStore {
       runInAction(() => {
         this.suggestionsNew = response.data.risks;
         this.isAnalysisProcessing = false;
+        this.rootStore.documentStore.setDocumentName(response.data.contract_name);
       });
     } catch (error) {
       const status = error?.response?.status ?? error?.status;
-      const isPolling404 = status === 404 && retryCount < MAX_RETRIES;
+      const isPolling409 = status === 409 && retryCount < MAX_RETRIES;
 
-      if (isPolling404) {
+      if (isPolling409) {
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
         return this.getSuggestions(retryCount + 1);
       }

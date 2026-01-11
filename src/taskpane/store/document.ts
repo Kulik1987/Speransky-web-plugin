@@ -22,6 +22,7 @@ class DocumentStore {
   docxFile: Blob | null = null;
   legalCaseId: string | null = null;
   documentId: string | null = null;
+  documentName: string = "";
 
   constructor(rootStore: RootStore) {
     makeAutoObservable(this);
@@ -46,6 +47,10 @@ class DocumentStore {
       }
     );
   }
+
+  setDocumentName = (value: string | null) => {
+    this.documentName = value;
+  };
 
   /**
    * @description Создает анонимизированный текст контракта и обновляет им textContractAnonymized в сторе
@@ -183,6 +188,7 @@ class DocumentStore {
       // Сохраняем в стор
       runInAction(() => {
         this.docxFile = blob;
+        this.documentName = fileName;
       });
 
       // Конвертируем Blob в File
@@ -213,6 +219,34 @@ class DocumentStore {
   };
 
   /**
+   * @description Скачивает архив результатов анализа
+   */
+  downloadArchive = async () => {
+    if (!this.documentId) return;
+
+    try {
+      const response = await api.contract.archive(this.documentId, true, true, true);
+      const blob = response.data;
+
+      const filename = "Результат проверки _ " + this.documentName || "Результат проверки.zip";
+
+      // Создаем URL для скачивания
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log("downloadArchive [success]");
+    } catch (error) {
+      console.error("downloadArchive [error]", error);
+    }
+  };
+
+  /**
    * @description Очищает стор
    */
   reset = () => {
@@ -220,6 +254,7 @@ class DocumentStore {
       this.textContractSource = null;
       this.textContractAnonymized = null;
       this.docxFile = null;
+      this.documentName = "";
     });
   };
 }

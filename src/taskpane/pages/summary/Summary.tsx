@@ -17,6 +17,10 @@ const T = {
     ru: "Применить все",
     en: "Apply All",
   },
+  buttonDownloadArchive: {
+    ru: "Скачать архив результатов",
+    en: "Download archive",
+  },
   errorDescription: {
     ru: "Ошибка получения рекомендаций.\n Попробуйте ещё раз.",
     en: "Error getting recommendations.\n Please try again.",
@@ -24,7 +28,7 @@ const T = {
 };
 
 const Summary = () => {
-  const { suggestionsStore, menuStore, configStore } = useStores();
+  const { documentStore, suggestionsStore, menuStore, configStore } = useStores();
   const { locale } = menuStore;
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
@@ -83,6 +87,10 @@ const Summary = () => {
     });
   };
 
+  const handleDownloadArchive = async () => {
+    await documentStore.downloadArchive();
+  };
+
   if (isError || (!isAnalysisProcessing && !isSuggestionExist)) {
     return (
       <Text block className={styles.error}>
@@ -110,9 +118,13 @@ const Summary = () => {
       {
         // computedIsExistUntouchedSuggestions &&
         !isAnalysisProcessing && (
-          <div>
+          <div className={styles.block}>
             <Button appearance="primary" size="medium" onClick={handleApplyAll} className={styles.button}>
               {T.buttonApplyAll[locale]}
+            </Button>
+            <Divider />
+            <Button appearance="primary" size="medium" onClick={handleDownloadArchive} className={styles.button}>
+              {T.buttonDownloadArchive[locale]}
             </Button>
           </div>
         )

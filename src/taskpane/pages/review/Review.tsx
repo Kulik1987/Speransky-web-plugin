@@ -47,7 +47,7 @@ const Review = () => {
 
     const loadParties = async () => {
       if (!documentStore.legalCaseId) {
-        navigate("/main");
+        navigate("/");
         return;
       }
 
@@ -58,6 +58,12 @@ const Review = () => {
 
     loadParties();
   }, []);
+
+  useEffect(() => {
+    if (suggestionsStore.partiesError && !suggestionsStore.isPartiesProcessing) {
+      navigate("/");
+    }
+  }, [suggestionsStore.partiesError, suggestionsStore.isPartiesProcessing]);
 
   const isDisplayAnonymizer = APP_SET_ANONYMIZER === "true";
 

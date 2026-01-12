@@ -39,10 +39,10 @@ class SuggestionsStore {
     this.rootStore = rootStore;
 
     reaction(
-      () => this.rootStore.documentStore.legalCaseId,
-      (legalCaseId) => {
-        if (legalCaseId) {
-          this.requestParties(legalCaseId);
+      () => this.rootStore.documentStore.documentId,
+      (documentId) => {
+        if (documentId) {
+          this.requestParties(documentId);
         }
       }
     );
@@ -231,9 +231,9 @@ class SuggestionsStore {
   // };
 
   /**
-   * @description Запрашивает стороны договора по legal_case_id
+   * @description Запрашивает стороны договора по document_id
    */
-  requestParties = async (legalCaseId: string, retryCount = 0) => {
+  requestParties = async (documentId: string, retryCount = 0) => {
     const MAX_RETRIES = 10; // Количество повторных запросов при ожидании ответа
     const RETRY_DELAY = 5000; // Интервал запроса 5 секунд
 
@@ -245,13 +245,13 @@ class SuggestionsStore {
     }
 
     try {
-      console.log(`requestParties [start] attempt ${retryCount + 1}/${MAX_RETRIES + 1}`, { legalCaseId });
+      console.log(`requestParties [start] attempt ${retryCount + 1}/${MAX_RETRIES + 1}`);
 
-      if (!legalCaseId) {
-        throw new Error("legal_case_id is required");
+      if (!documentId) {
+        throw new Error("document_id is required");
       }
 
-      const response = APP_SET_MOCK ? { data: mockParties } : await api.contract.parties(legalCaseId);
+      const response = APP_SET_MOCK ? { data: mockParties } : await api.contract.parties(documentId);
       const parties = response.data;
 
       runInAction(() => {
@@ -269,7 +269,7 @@ class SuggestionsStore {
 
       if (is409Error) {
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-        return this.requestParties(legalCaseId, retryCount + 1);
+        return this.requestParties(documentId, retryCount + 1);
       } else {
         console.error("requestParties [error]");
         runInAction(() => {

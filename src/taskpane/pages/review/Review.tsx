@@ -38,7 +38,8 @@ const T = {
 const Review = () => {
   const { menuStore, documentStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
-  const { isPartiesProcessing } = suggestionsStore;
+  const { parties, partiesError, isPartiesProcessing } = suggestionsStore;
+  const isError = Boolean(partiesError);
   const navigate = useNavigate();
   const styles = useReviewStyles();
 
@@ -46,24 +47,18 @@ const Review = () => {
     console.log("navigate to [page review]");
 
     const loadParties = async () => {
-      if (!documentStore.legalCaseId) {
+      if (!documentStore.documentId) {
         navigate("/");
         return;
       }
 
-      if (!suggestionsStore.parties && !suggestionsStore.isPartiesProcessing) {
-        await suggestionsStore.requestParties(documentStore.legalCaseId);
+      if (!parties && !isPartiesProcessing) {
+        await suggestionsStore.requestParties(documentStore.documentId);
       }
     };
 
     loadParties();
   }, []);
-
-  useEffect(() => {
-    if (suggestionsStore.partiesError && !suggestionsStore.isPartiesProcessing) {
-      navigate("/");
-    }
-  }, [suggestionsStore.partiesError, suggestionsStore.isPartiesProcessing]);
 
   const isDisplayAnonymizer = APP_SET_ANONYMIZER === "true";
 

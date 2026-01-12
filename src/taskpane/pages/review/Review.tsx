@@ -33,6 +33,10 @@ const T = {
     ru: "Добавить",
     en: "Add",
   },
+  errorDescription: {
+    ru: "Ошибка определения сторон договора.\n Попробуйте ещё раз.",
+    en: "Error getting contract parties.\n Please try again.",
+  },
 };
 
 const Review = () => {
@@ -61,6 +65,15 @@ const Review = () => {
   }, []);
 
   const isDisplayAnonymizer = APP_SET_ANONYMIZER === "true";
+
+  if (isError || (!parties && !isPartiesProcessing)) {
+    console.log("error parties review", isError, partiesError);
+    return (
+      <Text block className={styles.error}>
+        {T.errorDescription[locale]}
+      </Text>
+    );
+  }
 
   return (
     <div className={styles.container}>

@@ -42,9 +42,14 @@ const contract = {
     });
   },
 
+  /** @description Извлечение сторон юридического кейса */
+  // parties: (legal_case_id: string) => {
+  //   return axios.get<ResponseContractPartiesDto>(CONTRACT_ROUTES.parties(legal_case_id));
+  // },
+
   /** @description Извлечение сторон договора */
-  parties: (legal_case_id: string) => {
-    return axios.get<ResponseContractPartiesDto>(CONTRACT_ROUTES.parties(legal_case_id));
+  parties: (document_id: string) => {
+    return axios.get<ResponseContractPartiesDto>(CONTRACT_ROUTES.parties(document_id));
   },
 
   /** @description Получение JSON-рекомендаций по id */

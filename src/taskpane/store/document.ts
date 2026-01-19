@@ -150,20 +150,34 @@ class DocumentStore {
   };
 
   /**
-   * @description Получает имя документа из Word
+   * @description Получает имя из первой строки текста документа
    */
   private getDocumentName = async (): Promise<string> => {
     try {
       return await Word.run(async (context) => {
-        const properties = context.document.properties;
-        context.load(properties, "title");
+        const body = context.document.body;
+
+        const paragraphs = body.paragraphs;
+        paragraphs.load("items");
         await context.sync();
 
-        const title = properties.title;
-        if (title && title.trim()) {
-          // Убираем недопустимые символы и добавляем расширение
-          const sanitized = title.replace(/[<>:"/\\|?*]/g, "_");
-          return sanitized.endsWith(".docx") ? sanitized : `${sanitized}.docx`;
+        paragraphs.items.forEach((p) => p.load("text"));
+        await context.sync();
+
+        for (const p of paragraphs.items) {
+          const text = p.text.trim();
+          if (text) {
+            const rawTitle = text.split("№")[0].trim();
+            const lowTitle = rawTitle.toLocaleLowerCase();
+            const normalizedTitle = lowTitle.charAt(0).toLocaleUpperCase() + lowTitle.slice(1);
+            const cleanTitle = normalizedTitle
+              .replace(/[\r\n\t]/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+            const dbTitle = cleanTitle.replace(/[<>:"/\\|?*]/g, "_");
+
+            return dbTitle.endsWith(".docx") ? dbTitle : `${dbTitle}.docx`;
+          }
         }
 
         return `Contract_${Date.now()}.docx`;
@@ -228,7 +242,8 @@ class DocumentStore {
       const response = await api.contract.archive(this.documentId, true, true, true);
       const blob = response.data;
 
-      const filename = "Результат проверки _ " + this.documentName || "Результат проверки.zip";
+      const baseName = this.documentName ? this.documentName.replace(/\.docx$/i, "") : "";
+      const filename = `Результат проверки _ ${baseName}.zip`;
 
       // Создаем URL для скачивания
       const url = window.URL.createObjectURL(blob);

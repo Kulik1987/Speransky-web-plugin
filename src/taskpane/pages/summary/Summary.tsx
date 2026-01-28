@@ -18,8 +18,8 @@ const T = {
     en: "Apply All",
   },
   buttonDownloadArchive: {
-    ru: "Скачать архив результатов",
-    en: "Download archive",
+    ru: "Скачать результат",
+    en: "Download result",
   },
   errorDescription: {
     ru: "Ошибка получения рекомендаций.\n Попробуйте ещё раз.",

@@ -150,13 +150,12 @@ class DocumentStore {
   };
 
   /**
-   * @description Получает имя из первой строки текста документа
+   * @description Поиск имени из текста документа
    */
   private getDocumentName = async (): Promise<string> => {
     try {
       return await Word.run(async (context) => {
         const body = context.document.body;
-
         const paragraphs = body.paragraphs;
         paragraphs.load("items");
         await context.sync();
@@ -164,23 +163,67 @@ class DocumentStore {
         paragraphs.items.forEach((p) => p.load("text"));
         await context.sync();
 
+        // Ключевые слова для поиска названия документа
+        const documentKeywords = [
+          "договор",
+          "соглашение",
+          "контракт",
+          "акт",
+          "протокол",
+          "приложение",
+          "дополнительное соглашение",
+          "доп соглашение",
+          "доп. соглашение",
+          "спецификация",
+          "дополнение",
+        ];
+
+        let foundTitle = "";
+
         for (const p of paragraphs.items) {
           const text = p.text.trim();
-          if (text) {
-            const rawTitle = text.split("№")[0].trim();
-            const lowTitle = rawTitle.toLocaleLowerCase();
-            const normalizedTitle = lowTitle.charAt(0).toLocaleUpperCase() + lowTitle.slice(1);
-            const cleanTitle = normalizedTitle
-              .replace(/[\r\n\t]/g, " ")
-              .replace(/\s+/g, " ")
-              .trim();
-            const dbTitle = cleanTitle.replace(/[<>:"/\\|?*]/g, "_");
 
-            return dbTitle.endsWith(".docx") ? dbTitle : `${dbTitle}.docx`;
+          if (!text) continue;
+
+          // Пропускаем строки, которые явно не являются названием
+          if (text.length < 5) continue;
+          if (/^[\s_.гГ]{1,50}$/i.test(text)) continue;
+
+          const lowerText = text.toLowerCase();
+
+          // Проверяем наличие ключевых слов
+          const hasKeyword = documentKeywords.some((keyword) => lowerText.includes(keyword));
+          if (hasKeyword) {
+            foundTitle = text;
+            break;
           }
         }
 
-        return `Contract_${Date.now()}.docx`;
+        if (!foundTitle) {
+          for (const p of paragraphs.items) {
+            const text = p.text.trim();
+            if (text && text.length >= 5 && !/^[Гг]\.\s*[_\s]+/.test(text)) {
+              foundTitle = text;
+              break;
+            }
+          }
+        }
+
+        if (!foundTitle) {
+          return `Contract_${Date.now()}.docx`;
+        }
+
+        // Обработка найденного названия
+        const rawTitle = foundTitle.split("№")[0].trim();
+        const lowTitle = rawTitle.toLowerCase();
+        const normalizedTitle = lowTitle.charAt(0).toUpperCase() + lowTitle.slice(1);
+        const cleanTitle = normalizedTitle
+          .replace(/[\r\n\t]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        const dbTitle = cleanTitle.replace(/[<>:"/\\|?*]/g, "_");
+
+        return dbTitle.endsWith(".docx") ? dbTitle : `${dbTitle}.docx`;
       });
     } catch (error) {
       console.error("getDocumentName [error]:", error);

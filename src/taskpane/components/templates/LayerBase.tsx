@@ -7,7 +7,8 @@ const LayerBase = () => {
   const commonStyles = useCommonStyles();
 
   return (
-    <>
+    <div>
+      <HeaderMenu />
       <div className={commonStyles.pageContainer}>
         <HeaderMenu />
         <div className={commonStyles.outletContainer}>
@@ -15,7 +16,7 @@ const LayerBase = () => {
         </div>
         <SelectionLang />
       </div>
-    </>
+    </div>
   );
 };
 

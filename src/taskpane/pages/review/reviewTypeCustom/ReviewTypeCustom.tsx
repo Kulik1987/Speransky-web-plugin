@@ -5,7 +5,6 @@ import { useStores } from "../../../store";
 import { Settings24Regular } from "@fluentui/react-icons";
 import { Button, Field, Select, Textarea } from "@fluentui/react-components";
 import { ReviewTypeItem } from "../../../components/organisms";
-import { ReviewTypesEnums } from "../../../enums";
 
 const ReviewTypeCustom = () => {
   const { suggestionsStore, menuStore } = useStores();
@@ -15,10 +14,7 @@ const ReviewTypeCustom = () => {
 
   const isPartiesExist = Array.isArray(parties) && parties?.length > 0;
 
-  const handleStartReviewCustom = async () => {
-    await suggestionsStore.startReview(ReviewTypesEnums.CUSTOM);
-    navigate("/summary");
-  };
+  const handleStartAnalysis = async () => navigate("/summary");
 
   const handleChangeParty = (_event: React.SyntheticEvent, item: any) => {
     suggestionsStore.setFormPartySelected(item.value);
@@ -86,7 +82,7 @@ const ReviewTypeCustom = () => {
         <Select id="selectParty" disabled={!isPartiesExist} onChange={handleChangeParty}>
           {isPartiesExist &&
             parties.map((part, index) => {
-              return <option key={index}>{part}</option>;
+              return <option key={index}>{part.role}</option>;
             })}
         </Select>
       </div>
@@ -101,7 +97,7 @@ const ReviewTypeCustom = () => {
       <Button
         appearance="primary"
         size="medium"
-        onClick={handleStartReviewCustom}
+        onClick={handleStartAnalysis}
         style={{ borderColor: "#0f6cbd", borderWidth: "2px", whiteSpace: "nowrap" }}
         disabled={!isPartiesExist}
       >

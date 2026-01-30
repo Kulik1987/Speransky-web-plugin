@@ -1,5 +1,5 @@
 import * as React from "react";
-import { LevelOfCriticalEnum } from "../../../enums/suggestion";
+import { LevelOfCriticalEnum } from "../../../enums";
 
 const PriorityFlag = ({ flag }: { flag: LevelOfCriticalEnum }) => {
   const state = {
@@ -8,14 +8,17 @@ const PriorityFlag = ({ flag }: { flag: LevelOfCriticalEnum }) => {
     //   backgroundColor: "rgba(233, 20, 116, 0.25)",
     // },
     [LevelOfCriticalEnum.HIGH]: {
+      label: "high",
       color: "rgba(234, 151, 21, 1)",
       backgroundColor: "rgba(234, 151, 21, 0.25)",
     },
     [LevelOfCriticalEnum.MEDIUM]: {
+      label: "middle",
       color: "rgba(172, 192, 53, 0.8)",
       backgroundColor: "rgba(234, 237, 91, .251)",
     },
     [LevelOfCriticalEnum.LOW]: {
+      label: "low",
       color: "rgba(53, 191, 85, 1)",
       backgroundColor: "rgba(53, 191, 85, .251)",
     },
@@ -33,11 +36,9 @@ const PriorityFlag = ({ flag }: { flag: LevelOfCriticalEnum }) => {
         color: color,
         backgroundColor: backgroundColor,
         userSelect: "none",
-        // backgroundColor: "#fff",
-        // background: `rgba(${color}, 0.5)`,
       }}
     >
-      {flag}
+      {stateStyle.label}
     </div>
   );
 };

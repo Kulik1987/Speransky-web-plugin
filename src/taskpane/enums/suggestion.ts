@@ -1,7 +1,7 @@
 export enum LevelOfCriticalEnum {
-  "HIGH" = "high",
-  "MEDIUM" = "middle",
-  "LOW" = "low",
+  "HIGH" = "высокая",
+  "MEDIUM" = "средняя",
+  "LOW" = "низкая",
 }
 
 export enum RecommendationTypeEnum {
@@ -25,6 +25,11 @@ export enum ProviderLLMEnums {
   "OPEN_AI" = "openai",
   "GIGA_CHAT" = "gigachat",
   "MISTRAL" = "mistral",
+}
+
+export enum SourceTypeEnums {
+  "WEB" = "web",
+  "PLUGIN" = "plugin",
 }
 
 export enum WebUrlEnums {

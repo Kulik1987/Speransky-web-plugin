@@ -29,7 +29,7 @@ export const useCommonStyles = makeStyles({
     minWidth: "100%",
   },
   button: {
-    minWidth: "100%",
+    width: "100%",
     paddingTop: "8px",
     paddingBottom: "10px",
     fontSize: "16px",

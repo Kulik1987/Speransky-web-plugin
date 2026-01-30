@@ -1,8 +1,10 @@
 import React from "react";
-import { Divider, Text, ToggleButton } from "@fluentui/react-components";
+import { ToggleButton } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
 import { LocaleEnums } from "../../../store/menu";
+import { useSelectionLangStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 const T = {
   dividerLang: {
@@ -14,30 +16,32 @@ const T = {
 const SelectionLang = () => {
   const { menuStore } = useStores();
   const { locale, setLocale } = menuStore;
+  const commonStyles = useCommonStyles();
+  const styles = useSelectionLangStyles();
+
+  const isRU = locale === LocaleEnums.RU;
+  const isEN = locale === LocaleEnums.EN;
 
   return (
-    <div
-      style={{
-        //border: "1px solid red"
-        display: "flex",
-        gap: "16px",
-        flexDirection: "column",
-      }}
-    >
-      <Divider alignContent="center" inset>
-        <Text size={300} weight="medium">
-          {T.dividerLang[locale]}
-        </Text>
-      </Divider>
-
-      <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
-        <ToggleButton checked={locale === LocaleEnums.RU} onClick={() => setLocale(LocaleEnums.RU)}>
-          RU
-        </ToggleButton>
-        <ToggleButton checked={locale === LocaleEnums.EN} onClick={() => setLocale(LocaleEnums.EN)}>
-          EN
-        </ToggleButton>
-      </div>
+    <div className={styles.btnSection}>
+      <ToggleButton
+        className={commonStyles.button}
+        appearance={isRU ? "primary" : undefined}
+        size="medium"
+        checked={isRU}
+        onClick={() => setLocale(LocaleEnums.RU)}
+      >
+        RU
+      </ToggleButton>
+      <ToggleButton
+        className={commonStyles.button}
+        appearance={isEN ? "primary" : "secondary"}
+        size="medium"
+        checked={isEN}
+        onClick={() => setLocale(LocaleEnums.EN)}
+      >
+        EN
+      </ToggleButton>
     </div>
   );
 };

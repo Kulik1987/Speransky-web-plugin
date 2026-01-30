@@ -1,23 +1,11 @@
-import { tokens } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 
-const styles = {
-  instructions: {
-    fontWeight: tokens.fontWeightSemibold,
-    marginTop: "20px",
-    marginBottom: "10px",
-  },
-  textPromptAndInsertion: {
+export const useSelectionLangStyles = makeStyles({
+  btnSection: {
     display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
+    ...shorthands.gap(tokens.spacingHorizontalM),
+    marginBottom: "44px",
+    marginLeft: "16px",
+    marginRight: "16px",
   },
-  textAreaField: {
-    marginLeft: "20px",
-    marginTop: "30px",
-    marginBottom: "20px",
-    marginRight: "20px",
-    maxWidth: "50%",
-  },
-};
-
-export default styles;
+});

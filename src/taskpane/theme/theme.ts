@@ -1,6 +1,14 @@
 import { createDarkTheme, createLightTheme } from "@fluentui/react-components";
 import type { BrandVariants, Theme } from "@fluentui/react-components";
 
+export const customColors = {
+  text: {
+    primary: "#001232E5",
+    secondary: "#898989",
+  },
+  border: "#5E5E5E",
+} as const;
+
 const themeColors: BrandVariants = {
   10: "#010404",
   20: "#0F1B1C",

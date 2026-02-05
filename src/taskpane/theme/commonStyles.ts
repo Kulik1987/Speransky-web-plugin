@@ -33,11 +33,13 @@ export const useCommonStyles = makeStyles({
   },
   button: {
     width: "100%",
-    paddingTop: "8px",
-    paddingBottom: "10px",
-    fontSize: "16px",
+    paddingTop: tokens.spacingVerticalS,
+    paddingBottom: tokens.spacingVerticalMNudge,
+    fontSize: tokens.fontSizeBase400,
   },
   error: {
     color: tokens.colorPaletteRedForeground1,
+    whiteSpace: "pre-line",
+    lineHeight: tokens.lineHeightBase400,
   },
 });

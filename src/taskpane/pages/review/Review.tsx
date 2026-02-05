@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { RoutePathEnum } from "../../enums";
 import { DocumentBulletList24Regular, Settings24Regular } from "@fluentui/react-icons";
 import { useCommonStyles } from "../../theme/commonStyles";
+import { ErrorText } from "../../components/atoms";
 
 const T = {
   title: {
@@ -73,11 +74,7 @@ const Review = () => {
 
   if (isError || (!parties && !isPartiesProcessing)) {
     console.log("error parties review", isError, partiesError);
-    return (
-      <Text block className={mergeClasses(commonStyles.error, styles.error)}>
-        {T.errorDescription[locale]}
-      </Text>
-    );
+    return <ErrorText error={T.errorDescription[locale]} />;
   }
 
   return (

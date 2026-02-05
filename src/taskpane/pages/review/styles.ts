@@ -17,9 +17,4 @@ export const useReviewStyles = makeStyles({
     color: customColors.text.primary[90],
     lineHeight: tokens.lineHeightBase400,
   },
-  error: {
-    lineHeight: tokens.lineHeightBase400,
-    whiteSpace: "pre-line",
-    textAlign: "center",
-  },
 });

@@ -192,8 +192,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
               appearance="outline"
               size="medium"
               onClick={handleShowInDocument}
-              icon={<LocationRippleRegular color="#0f6cbd" />}
-              style={{ borderColor: "#0f6cbd", borderWidth: "2px" }}
+              icon={<LocationRippleRegular />}
             />
           </Tooltip>
         </div>
@@ -207,12 +206,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
           }}
         >
           {isChangeExist && (
-            <Button
-              appearance="primary"
-              size="medium"
-              onClick={handleApplyChange}
-              style={{ borderColor: "#0f6cbd", borderWidth: "2px", whiteSpace: "nowrap" }}
-            >
+            <Button appearance="primary" size="medium" onClick={handleApplyChange}>
               {T.buttonChange[locale]}
             </Button>
           )}
@@ -222,11 +216,6 @@ const SuggestionCard = (props: SuggestionPropT) => {
               size="medium"
               onClick={handleAddComment}
               disabled={isAccessToRangeInsertComment === false}
-              style={{
-                borderColor: isAccessToRangeInsertComment ? "#0f6cbd" : "transparent",
-                borderWidth: "2px",
-                whiteSpace: "nowrap",
-              }}
             >
               {T.buttonComment[locale]}
             </Button>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
-import { Input, makeStyles, shorthands } from "@fluentui/react-components";
+import { Input, mergeClasses } from "@fluentui/react-components";
 import { usePinCodeStyles } from "./styles";
 
 export type PinCodeRef = {
@@ -15,6 +15,7 @@ const PIN_LENGTH = 4;
 const PinCode = forwardRef<PinCodeRef, PinCodeProps>(({ onSuccess }, ref) => {
   const styles = usePinCodeStyles();
   const [values, setValues] = useState<string[]>(Array(PIN_LENGTH).fill(""));
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   const clearPinCode = () => {
@@ -70,21 +71,35 @@ const PinCode = forwardRef<PinCodeRef, PinCodeProps>(({ onSuccess }, ref) => {
     }
   }, [values]);
 
+  const getWrapperClass = (index: number) => {
+    const isFocused = focusedIndex === index;
+    const isFilled = !!values[index];
+    return mergeClasses(
+      styles.codeWrapper,
+      isFocused && styles.codeWrapperActive,
+      isFilled && styles.codeWrapperActive
+    );
+  };
+
   return (
     <div className={styles.codeRow}>
       {Array.from({ length: PIN_LENGTH }).map((_, i) => (
-        <Input
-          key={i}
-          appearance="outline"
-          className={styles.input}
-          value={values[i]}
-          onChange={handleChange(i)}
-          onKeyDown={handleKeyDown(i)}
-          onPaste={handlePaste}
-          input={{ ref: (el) => (inputsRef.current[i] = el) }}
-          maxLength={1}
-          type="tel"
-        />
+        <div key={i} className={getWrapperClass(i)}>
+          <Input
+            appearance="underline"
+            className={styles.codeInput}
+            value={values[i]}
+            onChange={handleChange(i)}
+            onKeyDown={handleKeyDown(i)}
+            onPaste={handlePaste}
+            onFocus={() => setFocusedIndex(i)}
+            onBlur={() => setFocusedIndex(null)}
+            input={{ ref: (el) => (inputsRef.current[i] = el) }}
+            maxLength={1}
+            type="tel"
+            size="large"
+          />
+        </div>
       ))}
     </div>
   );

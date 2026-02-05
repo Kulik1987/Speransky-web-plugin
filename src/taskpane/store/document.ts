@@ -17,6 +17,7 @@ const APP_SET_ANONYMIZER = process.env.APP_SET_ANONYMIZER === "true";
 
 class DocumentStore {
   rootStore: RootStore;
+  isFetchingDetectDocumentType: boolean = false;
   textContractSource: string | null = null;
   textContractAnonymized: string | null = null;
   docxFile: Blob | null = null;
@@ -50,6 +51,10 @@ class DocumentStore {
 
   setDocumentName = (value: string | null) => {
     this.documentName = value;
+  };
+
+  setIsFetchingDetectDocumentType = (value: boolean) => {
+    this.isFetchingDetectDocumentType = value;
   };
 
   /**
@@ -236,6 +241,7 @@ class DocumentStore {
    */
   detectDocumentType = async () => {
     try {
+      this.isFetchingDetectDocumentType = true;
       // Получаем документ и его имя
       const [blob, fileName] = await Promise.all([this.getDocumentAsBlob(), this.getDocumentName()]);
       if (!blob) {
@@ -272,6 +278,8 @@ class DocumentStore {
     } catch (error) {
       console.error("detectDocumentType [error]:", error);
       throw error;
+    } finally {
+      this.isFetchingDetectDocumentType = false;
     }
   };
 

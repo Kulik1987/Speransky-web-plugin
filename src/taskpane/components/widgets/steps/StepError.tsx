@@ -1,18 +1,23 @@
 import React from "react";
-import { Text, Button } from "@fluentui/react-components";
+import { Text, Button, mergeClasses } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { observer } from "mobx-react";
 import { AuthStepperEnum } from "../../../store/auth";
 import { useStepStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 const T = {
   title: {
     ru: "К сожалению, произошла ошибка...",
     en: "Unfortunately, an error occurred...",
   },
-  errorDescription: {
-    ru: "Ошибка авторизации.\n Попробуйте ещё раз.",
-    en: "Authorization error.\n Please try again.",
+  error: {
+    ru: "Ошибка авторизации.",
+    en: "Authorization error.",
+  },
+  description: {
+    ru: "Попробуйте ещё раз.",
+    en: "Please try again.",
   },
   btnLogin: {
     ru: "Вход",
@@ -24,6 +29,7 @@ const StepError = () => {
   const styles = useStepStyles();
   const { authStore, menuStore } = useStores();
   const { locale } = menuStore;
+  const commonStyles = useCommonStyles();
 
   const handleTryAgain = () => {
     authStore.setAuthStatus(AuthStepperEnum.EMAIL);
@@ -37,12 +43,21 @@ const StepError = () => {
           {T.title[locale]}
         </Text>
 
-        <Text block className={styles.error}>
-          {T.errorDescription[locale]}
-        </Text>
+        <div>
+          <Text block className={mergeClasses(styles.description, commonStyles.error)}>
+            {T.error[locale]}
+          </Text>
+          <Text block className={styles.description}>
+            {T.description[locale]}
+          </Text>
+        </div>
       </div>
 
-      <Button appearance="primary" onClick={handleTryAgain} className={styles.button}>
+      <Button
+        appearance="primary"
+        onClick={handleTryAgain}
+        className={mergeClasses(styles.button, commonStyles.button)}
+      >
         {T.btnLogin[locale]}
       </Button>
     </div>

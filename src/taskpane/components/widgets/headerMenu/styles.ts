@@ -1,14 +1,13 @@
-import { makeStyles, shorthands } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 
 export const useHeaderMenuStyles = makeStyles({
   container: {
+    boxSizing: "border-box",
     display: "flex",
-    ...shorthands.gap("8px"),
-  },
-  block: {
-    display: "flex",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
-    width: "100%",
+    backgroundColor: tokens.colorBrandBackground,
+    height: "60px",
+    ...shorthands.padding(tokens.spacingHorizontalL),
   },
 });

@@ -98,7 +98,6 @@ const ReviewTypeCustom = () => {
         appearance="primary"
         size="medium"
         onClick={handleStartAnalysis}
-        style={{ borderColor: "#0f6cbd", borderWidth: "2px", whiteSpace: "nowrap" }}
         disabled={!isPartiesExist}
       >
         {T.buttonStart[locale]}

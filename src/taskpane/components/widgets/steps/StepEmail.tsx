@@ -120,11 +120,12 @@ const StepEmail = () => {
         <Text as="h1" className={styles.title}>
           {T.title[locale]}
         </Text>
-
         <Text block className={styles.description}>
           {T.description[locale]}
         </Text>
+      </div>
 
+      <div className={styles.block}>
         <Input
           className={commonStyles.input}
           value={email}
@@ -138,7 +139,6 @@ const StepEmail = () => {
           appearance="outline"
           size="medium"
         />
-
         {isDisplayErrorMessage && <ErrorText error={error} />}
       </div>
 

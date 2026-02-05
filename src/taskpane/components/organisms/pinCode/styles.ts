@@ -1,4 +1,5 @@
 import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../../theme/theme";
 
 export const usePinCodeStyles = makeStyles({
   codeRow: {
@@ -11,10 +12,10 @@ export const usePinCodeStyles = makeStyles({
   codeWrapper: {
     borderBottomWidth: "4px",
     borderBottomStyle: "solid",
-    borderBottomColor: "#5E5E5E",
+    borderBottomColor: customColors.border,
   },
   codeWrapperActive: {
-    borderBottomColor: "#08656E",
+    borderBottomColor: tokens.colorBrandForeground2,
   },
   codeInput: {
     width: "70px",

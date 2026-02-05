@@ -25,7 +25,7 @@ export const useDrawerModalStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalXL),
-    color: customColors.text.primary,
+    color: customColors.text.primary[90],
   },
   sectionHeader: {
     fontSize: tokens.fontSizeBase400,
@@ -49,7 +49,7 @@ export const useDrawerModalStyles = makeStyles({
   },
   sectionButton: {
     fontWeight: tokens.fontWeightRegular,
-    color: customColors.text.primary,
+    color: customColors.text.primary[90],
     "&:disabled": {
       color: customColors.text.secondary,
     },

@@ -29,7 +29,7 @@ export const useStepStyles = makeStyles({
     textAlign: "center",
     fontSize: tokens.fontSizeBase400,
     lineHeight: tokens.lineHeightBase400,
-    "&:not(:first-child)": {
+    "&:not(:first-of-type)": {
       marginTop: "4px",
     },
   },

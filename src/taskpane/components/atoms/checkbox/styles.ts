@@ -27,8 +27,8 @@ export const useCheckBoxStyles = makeStyles({
     "@media(max-width: 428px)": {
       marginTop: "-4px",
     },
-  },
-  labelDisabled: {
-    cursor: "default",
+    "&:disabled": {
+      cursor: "not-allowed",
+    },
   },
 });

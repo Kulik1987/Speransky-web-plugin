@@ -6,7 +6,7 @@ export const useHeaderMenuStyles = makeStyles({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#19737D",
+    backgroundColor: tokens.colorBrandBackground,
     height: "60px",
     ...shorthands.padding(tokens.spacingHorizontalL),
   },

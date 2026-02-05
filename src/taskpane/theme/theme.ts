@@ -3,7 +3,11 @@ import type { BrandVariants, Theme } from "@fluentui/react-components";
 
 export const customColors = {
   text: {
-    primary: "#001232E5",
+    primary: {
+      100: "#001232",
+      90: "#001232E5",
+      65: "#001232A6",
+    },
     secondary: "#898989",
   },
   border: "#5E5E5E",

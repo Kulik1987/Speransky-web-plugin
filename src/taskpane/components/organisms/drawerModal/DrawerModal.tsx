@@ -54,7 +54,7 @@ const T = {
   },
   language: {
     ru: "Русский",
-    en: "Английский",
+    en: "English",
   },
   settingsChat: {
     ru: "Открыть AI чат",

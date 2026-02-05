@@ -29,7 +29,7 @@ const CheckBox = (props: CheckBoxProps) => {
         }}
       />
       {label && (
-        <Label disabled={disabled} className={disabled ? styles.labelDisabled : styles.label}>
+        <Label disabled={disabled} className={styles.label}>
           {label}
         </Label>
       )}

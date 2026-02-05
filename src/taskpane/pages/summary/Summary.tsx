@@ -1,12 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useStores } from "../../store";
 import { SuggestionCard } from "../../components/widgets";
 import { Button, Divider, Text } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { ApplyService } from "../../services/applyService";
-import { ItemSkeleton } from "../../components/molecules";
+import { ItemSkeleton, PopoverWarning } from "../../components/molecules";
 import { useSummaryStyles } from "./styles";
-import { RecommendationTypeEnum } from "../../enums";
+import { RecommendationTypeEnum, RoutePathEnum } from "../../enums";
+import { ErrorText } from "../../components/atoms";
+import { ArrowLeft20Regular } from "@fluentui/react-icons";
+import { useNavigate } from "react-router-dom";
 
 const T = {
   waitingNotification: {
@@ -25,6 +28,10 @@ const T = {
     ru: "Ошибка получения рекомендаций.\n Попробуйте ещё раз.",
     en: "Error getting recommendations.\n Please try again.",
   },
+  popoverMessage: {
+    ru: "Рекомендации будут потеряны.\n Уйти со страницы?",
+    en: "Recommendations will be lost.\n Leave the page?",
+  },
 };
 
 const Summary = () => {
@@ -33,9 +40,12 @@ const Summary = () => {
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
   const styles = useSummaryStyles();
+  const navigate = useNavigate();
 
   const { isSuggestionExist, suggestionsNew, suggestionsError, isAnalysisProcessing } = suggestionsStore;
   const isError = Boolean(suggestionsError);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
     console.log("navigate to [page summary]");
@@ -48,6 +58,11 @@ const Summary = () => {
 
     loadSuggestions();
   }, []);
+
+  const handleConfirmLeave = () => {
+    setIsPopoverOpen(false);
+    navigate(RoutePathEnum.ROOT);
+  };
 
   const handleApplyAll = async () => {
     suggestionsNew.forEach(async (itemSuggestion, indexSuggestion) => {
@@ -92,16 +107,12 @@ const Summary = () => {
   };
 
   if (isError || (!isAnalysisProcessing && !isSuggestionExist)) {
-    return (
-      <Text block className={styles.error}>
-        {T.errorDescription[locale]}
-      </Text>
-    );
+    return <ErrorText error={T.errorDescription[locale]} />;
   }
 
   return (
     <div className={styles.container}>
-      {isAnalysisProcessing && (
+      {isAnalysisProcessing ? (
         <div className={styles.block}>
           <Divider alignContent="center" inset>
             <Text size={300} weight="medium">
@@ -110,25 +121,31 @@ const Summary = () => {
           </Divider>
           <ItemSkeleton />
         </div>
-      )}
-      {!isAnalysisProcessing &&
-        suggestionsNew?.map((data, index) => {
-          return <SuggestionCard data={data} key={index} index={index} />;
-        })}
-      {
-        // computedIsExistUntouchedSuggestions &&
-        !isAnalysisProcessing && (
+      ) : (
+        <>
+          <PopoverWarning
+            message={T.popoverMessage[locale]}
+            trigger={<Button appearance="transparent" icon={<ArrowLeft20Regular />} />}
+            isOpen={isPopoverOpen}
+            setIsOpen={setIsPopoverOpen}
+            onConfirm={handleConfirmLeave}
+          />
+
+          {suggestionsNew?.map((data, index) => {
+            return <SuggestionCard data={data} key={index} index={index} />;
+          })}
+
           <div className={styles.block}>
-            <Button appearance="primary" size="medium" onClick={handleApplyAll} className={styles.button}>
+            <Button appearance="primary" size="medium" onClick={handleApplyAll}>
               {T.buttonApplyAll[locale]}
             </Button>
             <Divider />
-            <Button appearance="primary" size="medium" onClick={handleDownloadArchive} className={styles.button}>
+            <Button appearance="primary" size="medium" onClick={handleDownloadArchive}>
               {T.buttonDownloadArchive[locale]}
             </Button>
           </div>
-        )
-      }
+        </>
+      )}
     </div>
   );
 };

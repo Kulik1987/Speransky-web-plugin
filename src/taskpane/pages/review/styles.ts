@@ -1,21 +1,20 @@
 import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../theme/theme";
 
 export const useReviewStyles = makeStyles({
   container: {
     display: "flex",
     flexDirection: "column",
-    ...shorthands.gap("32px"),
+    ...shorthands.gap(tokens.spacingVerticalM),
   },
   block: {
     display: "flex",
     flexDirection: "column",
-    ...shorthands.gap("16px"),
+    ...shorthands.gap("28px"),
   },
-  error: {
-    color: tokens.colorPaletteRedForeground1,
-    fontSize: "16px",
-    lineHeight: "130%",
-    whiteSpace: "pre-line",
-    textAlign: "center",
+  title: {
+    ...shorthands.margin(0),
+    color: customColors.text.primary[90],
+    lineHeight: tokens.lineHeightBase400,
   },
 });

@@ -23,4 +23,9 @@ export const useCardStyles = makeStyles({
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalM),
   },
+  disabled: {
+    opacity: 0.5,
+    cursor: "not-allowed",
+    pointerEvents: "none",
+  },
 });

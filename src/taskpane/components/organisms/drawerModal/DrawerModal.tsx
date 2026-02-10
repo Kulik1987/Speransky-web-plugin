@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react";
 import {
   Button,
@@ -21,6 +22,7 @@ import {
 import { useStores } from "../../../store";
 import { AuthStepperEnum } from "../../../store/auth";
 import { useDrawerModalStyles } from "./styles";
+import { RoutePathEnum } from "../../../enums";
 
 type DrawerModalT = {
   isOpen: boolean;
@@ -73,12 +75,14 @@ const DrawerModal = (props: DrawerModalT) => {
   const { menuStore, authStore } = useStores();
   const { locale } = menuStore;
   const styles = useDrawerModalStyles();
+  const navigate = useNavigate();
 
   const handleClose = () => {
     onClose();
   };
   const handleLogout = () => {
     authStore.logout();
+    navigate(RoutePathEnum.ROOT);
     onClose();
   };
 

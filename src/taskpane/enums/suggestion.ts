@@ -17,8 +17,8 @@ export enum InsertPlaceEnum {
 }
 
 export enum ReviewTypesEnums {
-  "GENERAL" = "GENERAL",
-  "CUSTOM" = "CUSTOM",
+  "GENERAL" = "general",
+  "CUSTOM" = "custom",
 }
 
 export enum ProviderLLMEnums {

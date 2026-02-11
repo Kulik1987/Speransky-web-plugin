@@ -1,108 +1,110 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
-import { Settings24Regular } from "@fluentui/react-icons";
-import { Button, Field, Select, Textarea } from "@fluentui/react-components";
-import { ReviewTypeItem } from "../../../components/organisms";
+import { Button, Dropdown, Field, Option, Textarea } from "@fluentui/react-components";
+import { useReviewTypeCustomStyles } from "./styles";
+import { PartyDropdown } from "../../../components/molecules";
+
+const T = {
+  contractTypeLabel: {
+    ru: "Тип договора",
+    en: "Contract type",
+  },
+  contractTypeOptions: {
+    ru: [
+      "Договор оказания услуг",
+      "Договор подряда",
+      "Договор поставок",
+      "Договор купли-продажи недвижимости",
+      "Договор аренды недвижимости",
+      "Договор купли-продажи доли в ООО",
+      "Лицензионный договор",
+      "Соглашение о конфиденциальности (NDA)",
+    ],
+    en: [
+      "Services Agreement",
+      "Works Contract",
+      "Supply Agreement",
+      "Real Estate Purchase and Sale Agreement",
+      "Real Estate Lease Agreement",
+      "Agreement for the Sale and Purchase of a Share in an LLC",
+      "License Agreement",
+      "Non-Disclosure Agreement (NDA)",
+    ],
+  },
+  selectPartyLabel: {
+    ru: "Сторона договора",
+    en: "Party to the contract",
+  },
+  fieldCustomInstructionsLabel: {
+    ru: "Пользовательские инструкции",
+    en: "Custom instructions",
+  },
+  fieldCustomInstructionsPlaceholder: {
+    ru: "Напишите конкретные требования или общие задачи проверки",
+    en: "Enter a description of the condition",
+  },
+  buttonStart: {
+    ru: "Начать проверку",
+    en: "Start review",
+  },
+};
 
 const ReviewTypeCustom = () => {
   const { suggestionsStore, menuStore } = useStores();
   const { locale } = menuStore;
   const navigate = useNavigate();
   const { parties, formCustomInstructions } = suggestionsStore;
+  const styles = useReviewTypeCustomStyles();
 
   const isPartiesExist = Array.isArray(parties) && parties?.length > 0;
+  const [isPartySelected, setIsPartySelected] = useState(false);
 
   const handleStartAnalysis = async () => navigate("/summary");
 
-  const handleChangeParty = (_event: React.SyntheticEvent, item: any) => {
-    suggestionsStore.setFormPartySelected(item.value);
-  };
-
+  const handleChangeContractType = () => {};
   const handleChangeCustomInstructions = (_event: React.SyntheticEvent, item: any) => {
     suggestionsStore.setFormCustomInstructions(item.value);
   };
 
-  const T = {
-    title: {
-      ru: "Индивидуальная",
-      en: "Custom",
-    },
-    subtitle: {
-      ru: "Добавьте любые свои правила",
-      en: "Focus the review on any topic",
-    },
-    selectVerifyLabel: {
-      ru: "Выберите, что отображать",
-      en: "Select the type verification",
-    },
-    selectVerifyItem1: {
-      ru: "Примечания и правки",
-      en: "Comments and Readlines",
-    },
-    selectVerifyItem2: {
-      ru: "Примечания",
-      en: "Comments Only",
-    },
-    selectVerifyItem3: {
-      ru: "Правки",
-      en: "Redlines Only",
-    },
-    selectPartyLabel: {
-      ru: "Выберите сторону договора",
-      en: "Select a party",
-    },
-    fieldCustomInstructionsLabel: {
-      ru: "Пользовательские инструкции",
-      en: "Custom instructions",
-    },
-    fieldCustomInstructionsPlaceholder: {
-      ru: "Напишите конкретные требования или общие задачи проверки",
-      en: "Enter a description of the condition",
-    },
-    buttonStart: {
-      ru: "Начать проверку",
-      en: "Start review",
-    },
-  };
-
   return (
-    <ReviewTypeItem title={T.title[locale]} icon={<Settings24Regular color="grey" />} subtitle={T.subtitle[locale]}>
-      <div>
-        <label htmlFor="selectVerification">{T.selectVerifyLabel[locale]}</label>
-        <Select id="selectVerification" disabled>
-          <option>{T.selectVerifyItem1[locale]}</option>
-          <option>{T.selectVerifyItem2[locale]}</option>
-          <option>{T.selectVerifyItem3[locale]}</option>
-        </Select>
-      </div>
-      <div>
-        <label htmlFor="selectParty">{T.selectPartyLabel[locale]}</label>
-        <Select id="selectParty" disabled={!isPartiesExist} onChange={handleChangeParty}>
-          {isPartiesExist &&
-            parties.map((part, index) => {
-              return <option key={index}>{part.role}</option>;
-            })}
-        </Select>
-      </div>
+    <div className={styles.container}>
+      <Dropdown
+        id="selectContractType"
+        placeholder={T.contractTypeLabel[locale]}
+        disabled={!isPartiesExist}
+        onOptionSelect={handleChangeContractType}
+        size="large"
+      >
+        {T.contractTypeOptions[locale].map((option) => (
+          <Option key={option} value={option}>
+            {option}
+          </Option>
+        ))}
+      </Dropdown>
+
+      <PartyDropdown placeholder={T.selectPartyLabel[locale]} onSelect={setIsPartySelected} />
+
       <Field label={T.fieldCustomInstructionsLabel[locale]}>
         <Textarea
           placeholder={T.fieldCustomInstructionsPlaceholder[locale]}
           rows={5}
           onChange={handleChangeCustomInstructions}
           defaultValue={formCustomInstructions ?? ""}
+          className={styles.textarea}
         />
       </Field>
+
       <Button
         appearance="primary"
-        size="medium"
+        size="large"
         onClick={handleStartAnalysis}
-        disabled={!isPartiesExist}
+        disabled={!isPartiesExist || !isPartySelected}
       >
         {T.buttonStart[locale]}
       </Button>
-    </ReviewTypeItem>
+    </div>
   );
 };
 

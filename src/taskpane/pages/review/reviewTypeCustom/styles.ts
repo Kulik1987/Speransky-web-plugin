@@ -1,23 +1,17 @@
-import { tokens } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../../theme/theme";
 
-const styles = {
-  instructions: {
-    fontWeight: tokens.fontWeightSemibold,
-    marginTop: "20px",
-    marginBottom: "10px",
-  },
-  textPromptAndInsertion: {
+export const useReviewTypeCustomStyles = makeStyles({
+  container: {
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    ...shorthands.gap(tokens.spacingVerticalXXL),
   },
-  textAreaField: {
-    marginLeft: "20px",
-    marginTop: "30px",
-    marginBottom: "20px",
-    marginRight: "20px",
-    maxWidth: "50%",
+  textarea: {
+    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalSNudge),
+    "&:placeholder": {
+      color: customColors.text.primary[65],
+      fontSize: tokens.fontSizeBase300,
+    },
   },
-};
-
-export default styles;
+});

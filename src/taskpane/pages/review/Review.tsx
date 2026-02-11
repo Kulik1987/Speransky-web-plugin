@@ -5,7 +5,7 @@ import { useStores } from "../../store";
 import { Card, ItemSkeleton } from "../../components/molecules";
 import { useReviewStyles } from "./styles";
 import { useNavigate } from "react-router-dom";
-import { RoutePathEnum } from "../../enums";
+import { ReviewTypesEnums, RoutePathEnum } from "../../enums";
 import { DocumentBulletList24Regular, Settings24Regular } from "@fluentui/react-icons";
 import { ErrorText } from "../../components/atoms";
 
@@ -60,8 +60,8 @@ const Review = () => {
     loadParties();
   }, []);
 
-  const handleNavigateToReviewType = () => {
-    navigate(RoutePathEnum.REVIEW_TYPE);
+  const handleNavigateToReviewType = (tab: ReviewTypesEnums) => {
+    navigate(RoutePathEnum.REVIEW_TYPE, { state: { tab } });
   };
 
   if (isError || (!parties && !isPartiesProcessing)) {
@@ -88,13 +88,13 @@ const Review = () => {
               title={T.generalTitle[locale]}
               text={T.generalText[locale]}
               icon={<DocumentBulletList24Regular />}
-              onClick={handleNavigateToReviewType}
+              onClick={() => handleNavigateToReviewType(ReviewTypesEnums.GENERAL)}
             />
             <Card
               title={T.customTitle[locale]}
               text={T.customText[locale]}
               icon={<Settings24Regular />}
-              onClick={handleNavigateToReviewType}
+              onClick={() => handleNavigateToReviewType(ReviewTypesEnums.CUSTOM)}
             />
           </div>
         </>

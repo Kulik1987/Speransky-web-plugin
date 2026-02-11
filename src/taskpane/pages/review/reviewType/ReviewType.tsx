@@ -7,6 +7,7 @@ import { ReviewTypesEnums } from "../../../enums";
 import { ReviewTypeGeneral } from "../reviewTypeGeneral";
 import { ReviewTypeCustom } from "../reviewTypeCustom";
 import { useReviewTypeStyles } from "./styles";
+import { useLocation } from "react-router-dom";
 
 const T = {
   titleGeneral: {
@@ -23,8 +24,11 @@ const ReviewType = () => {
   const { menuStore } = useStores();
   const { locale } = menuStore;
   const styles = useReviewTypeStyles();
+  const location = useLocation();
 
-  const [selectedValue, setSelectedValue] = useState<string>(ReviewTypesEnums.GENERAL);
+  const state = location.state as { tab?: ReviewTypesEnums } | null;
+  const initialTab = state?.tab || ReviewTypesEnums.GENERAL;
+  const [selectedValue, setSelectedValue] = useState<string>(initialTab);
 
   const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
     setSelectedValue(data.value as string);

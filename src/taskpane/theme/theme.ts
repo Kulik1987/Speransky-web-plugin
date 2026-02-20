@@ -10,7 +10,10 @@ export const customColors = {
     },
     secondary: "#898989",
   },
-  border: "#5E5E5E",
+  border: {
+    10: "#5E5E5E",
+    20: "#CCD0D6",
+  },
 } as const;
 
 const themeColors: BrandVariants = {

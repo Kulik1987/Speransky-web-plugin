@@ -1,46 +1,42 @@
 import React from "react";
-import { ToggleButton } from "@fluentui/react-components";
+import { useLocation } from "react-router-dom";
+import { mergeClasses, ToggleButton } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
+import { AuthStepperEnum } from "../../../store/auth";
 import { LocaleEnums } from "../../../store/menu";
 import { useSelectionLangStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
-
-const T = {
-  dividerLang: {
-    ru: "Язык интерфейса",
-    en: "Interface language",
-  },
-};
+import { RoutePathEnum } from "../../../enums";
 
 const SelectionLang = () => {
-  const { menuStore } = useStores();
+  const { menuStore, authStore } = useStores();
   const { locale, setLocale } = menuStore;
+  const { pathname } = useLocation();
   const commonStyles = useCommonStyles();
   const styles = useSelectionLangStyles();
 
+  const isVisible =
+    authStore.authStatus === AuthStepperEnum.EMAIL ||
+    (pathname === RoutePathEnum.ROOT && authStore.authStatus === AuthStepperEnum.ACCESSED);
+
+  if (!isVisible) return null;
+
   const isRU = locale === LocaleEnums.RU;
-  const isEN = locale === LocaleEnums.EN;
+
+  const toggleLocale = () => {
+    setLocale(isRU ? LocaleEnums.EN : LocaleEnums.RU);
+  };
 
   return (
     <div className={styles.btnSection}>
       <ToggleButton
-        className={commonStyles.button}
-        appearance={isRU ? "primary" : undefined}
+        className={mergeClasses(commonStyles.button, styles.btn)}
+        appearance="primary"
         size="medium"
-        checked={isRU}
-        onClick={() => setLocale(LocaleEnums.RU)}
+        onClick={toggleLocale}
       >
-        RU
-      </ToggleButton>
-      <ToggleButton
-        className={commonStyles.button}
-        appearance={isEN ? "primary" : "secondary"}
-        size="medium"
-        checked={isEN}
-        onClick={() => setLocale(LocaleEnums.EN)}
-      >
-        EN
+        {isRU ? "Ru" : "En"}
       </ToggleButton>
     </div>
   );

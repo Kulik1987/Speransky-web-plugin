@@ -12,7 +12,7 @@ export const usePinCodeStyles = makeStyles({
   codeWrapper: {
     borderBottomWidth: "4px",
     borderBottomStyle: "solid",
-    borderBottomColor: customColors.border,
+    borderBottomColor: customColors.border[10],
   },
   codeWrapperActive: {
     borderBottomColor: tokens.colorBrandForeground2,

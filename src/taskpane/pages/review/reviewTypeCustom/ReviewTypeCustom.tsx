@@ -73,7 +73,7 @@ const ReviewTypeCustom = () => {
       <Dropdown
         id="selectContractType"
         placeholder={T.contractTypeLabel[locale]}
-        disabled={!isPartiesExist}
+        disabled={true}
         onOptionSelect={handleChangeContractType}
         size="large"
       >

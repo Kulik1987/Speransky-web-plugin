@@ -165,15 +165,11 @@ class SuggestionsStore {
         throw new Error("Document not uploaded");
       }
 
-      if (!party) {
-        throw new Error("Party not selected");
-      }
-
       const payload = {
         document_id: documentId,
         llm_provider: this.rootStore.menuStore.providerLLM,
         source: SourceTypeEnums.PLUGIN,
-        selected_party: party,
+        selected_party: party || undefined,
         user_comment: userComment || undefined,
       };
 
@@ -233,7 +229,7 @@ class SuggestionsStore {
    * @description Запрашивает стороны договора по document_id
    */
   requestParties = async (documentId: string, retryCount = 0) => {
-    const MAX_RETRIES = 10; // Количество повторных запросов при ожидании ответа
+    const MAX_RETRIES = 15; // Количество повторных запросов при ожидании ответа
     const RETRY_DELAY = 5000; // Интервал запроса 5 секунд
 
     if (retryCount === 0) {
@@ -255,7 +251,7 @@ class SuggestionsStore {
 
       runInAction(() => {
         this.parties = parties && parties.length > 0 ? parties : null;
-        this.formPartySelected = parties?.[0].role ?? null;
+        this.formPartySelected = null;
         this.isPartiesProcessing = false;
         this.partiesError = null;
       });

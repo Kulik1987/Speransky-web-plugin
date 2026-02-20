@@ -1,13 +1,12 @@
 import React, { useEffect } from "react";
 import { observer } from "mobx-react";
-import { mergeClasses, Text } from "@fluentui/react-components";
+import { Text } from "@fluentui/react-components";
 import { useStores } from "../../store";
 import { Card, ItemSkeleton } from "../../components/molecules";
 import { useReviewStyles } from "./styles";
 import { useNavigate } from "react-router-dom";
-import { RoutePathEnum } from "../../enums";
+import { ReviewTypesEnums, RoutePathEnum } from "../../enums";
 import { DocumentBulletList24Regular, Settings24Regular } from "@fluentui/react-icons";
-import { useCommonStyles } from "../../theme/commonStyles";
 import { ErrorText } from "../../components/atoms";
 
 const T = {
@@ -47,7 +46,6 @@ const Review = () => {
   const { parties, partiesError, isPartiesProcessing } = suggestionsStore;
   const isError = Boolean(partiesError);
   const navigate = useNavigate();
-  const commonStyles = useCommonStyles();
   const styles = useReviewStyles();
 
   useEffect(() => {
@@ -62,14 +60,8 @@ const Review = () => {
     loadParties();
   }, []);
 
-  const handleNavigateToReviewType = () => {
-    navigate(RoutePathEnum.REVIEW_TYPE);
-  };
-  const handleNavigateToReviewGeneral = () => {
-    navigate(RoutePathEnum.REVIEW_GENERAL);
-  };
-  const handleNavigateToReviewCustom = () => {
-    navigate(RoutePathEnum.REVIEW_CUSTOM);
+  const handleNavigateToReviewType = (tab: ReviewTypesEnums) => {
+    navigate(RoutePathEnum.REVIEW_TYPE, { state: { tab } });
   };
 
   if (isError || (!parties && !isPartiesProcessing)) {
@@ -96,13 +88,13 @@ const Review = () => {
               title={T.generalTitle[locale]}
               text={T.generalText[locale]}
               icon={<DocumentBulletList24Regular />}
-              onClick={handleNavigateToReviewGeneral}
+              onClick={() => handleNavigateToReviewType(ReviewTypesEnums.GENERAL)}
             />
             <Card
               title={T.customTitle[locale]}
               text={T.customText[locale]}
               icon={<Settings24Regular />}
-              onClick={handleNavigateToReviewCustom}
+              onClick={() => handleNavigateToReviewType(ReviewTypesEnums.CUSTOM)}
             />
           </div>
         </>

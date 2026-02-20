@@ -1,11 +1,15 @@
-import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { makeStyles } from "@fluentui/react-components";
 
 export const useSelectionLangStyles = makeStyles({
   btnSection: {
     display: "flex",
-    ...shorthands.gap(tokens.spacingHorizontalM),
+    justifyContent: "flex-end",
     marginBottom: "44px",
     marginLeft: "16px",
     marginRight: "16px",
+  },
+  btn: {
+    minWidth: "50px",
+    maxWidth: "50px",
   },
 });

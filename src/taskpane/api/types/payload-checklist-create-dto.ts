@@ -5,5 +5,5 @@ export interface PayloadChecklistCreateDto {
   description?: string;
   doc_type?: string;
   party?: string;
-  rules: PayloadChecklistAddRuleDto[];
+  rules?: PayloadChecklistAddRuleDto[];
 }

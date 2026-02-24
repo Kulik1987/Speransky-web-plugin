@@ -1,8 +1,7 @@
 export const CONTRACT_ROUTES = {
   detectType: "/v1/legal-case/detect-type",
   analyze: "/v1/legal-case/analyze",
-  // parties: (legal_case_id: string) => `/v1/legal-case/legal-case/${legal_case_id}/parties`,
-  parties: (document_id: string) => `/v1/legal-case/document/${document_id}/parties`,
+  meta: (document_id: string) => `/v1/legal-case/document/${document_id}/meta`,
   recommendation: (document_id: string) => `/v1/legal-case/document/${document_id}/recommendation`,
   archive: (document_id: string) => `/v1/legal-case/document/${document_id}/archive`,
 } as const;

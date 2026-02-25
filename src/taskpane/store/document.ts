@@ -6,7 +6,7 @@ import api from "../api/v1";
 import {
   replaceCompanyNames,
   removeAddressesByPart,
-  removeAmountByPart,
+  // removeAmountByPart,
   removeContract,
   removePayment,
   removePersonData,
@@ -67,7 +67,7 @@ class DocumentStore {
       this.textContractAnonymized = (() => {
         let modText = "";
         modText = removeAddressesByPart(docText);
-        modText = removeAmountByPart(modText);
+        // modText = removeAmountByPart(modText);
         modText = removePersonData(modText);
         modText = removeContract(modText);
         modText = removePayment(modText);

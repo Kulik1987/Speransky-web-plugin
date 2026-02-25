@@ -1,6 +1,8 @@
-import { ResponseContractPartiesDto } from "../../api/types";
+import { ContractPartieData } from "../../api/types";
 
-const mockParties: ResponseContractPartiesDto = [
+export const mockContractType: string = "Договор подряда";
+
+export const mockParties: ContractPartieData[] = [
   {
     name: "НазваниеКонтр",
     role: "Заказчик",
@@ -10,5 +12,3 @@ const mockParties: ResponseContractPartiesDto = [
     role: "Подрядчик",
   },
 ];
-
-export default mockParties;

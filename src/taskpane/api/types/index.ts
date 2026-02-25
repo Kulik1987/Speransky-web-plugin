@@ -3,7 +3,7 @@ export * from "./payload-contract-detect-type-dto";
 
 export * from "./response-contract-analyze-dto";
 export * from "./response-contract-detect-type-dto";
-export * from "./response-contract-parties-dto";
+export * from "./response-contract-meta-dto";
 export * from "./response-contract-recommendation-dto";
 
 export * from "./response-client-check-dto";

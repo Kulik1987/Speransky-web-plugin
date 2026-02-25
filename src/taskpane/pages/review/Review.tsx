@@ -43,8 +43,8 @@ const T = {
 const Review = () => {
   const { menuStore, documentStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
-  const { parties, partiesError, isPartiesProcessing } = suggestionsStore;
-  const isError = Boolean(partiesError);
+  const { parties, metaDataError, isMetaDataProcessing } = suggestionsStore;
+  const isError = Boolean(metaDataError);
   const navigate = useNavigate();
   const styles = useReviewStyles();
 
@@ -52,8 +52,8 @@ const Review = () => {
     console.log("navigate to [page review]");
 
     const loadParties = async () => {
-      if (!parties && !isPartiesProcessing) {
-        await suggestionsStore.requestParties(documentStore.documentId);
+      if (!parties && !isMetaDataProcessing) {
+        await suggestionsStore.requestMetaData(documentStore.documentId);
       }
     };
 
@@ -64,8 +64,8 @@ const Review = () => {
     navigate(RoutePathEnum.REVIEW_TYPE, { state: { tab } });
   };
 
-  if (isError || (!parties && !isPartiesProcessing)) {
-    console.log("error parties review", isError, partiesError);
+  if (isError || (!parties && !isMetaDataProcessing)) {
+    console.log("error parties review", isError, metaDataError);
     return <ErrorText error={T.errorDescription[locale]} />;
   }
 

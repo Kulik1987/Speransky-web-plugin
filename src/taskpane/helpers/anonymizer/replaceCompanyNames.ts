@@ -6,27 +6,24 @@ function findAndReplaceParties(
 ): string {
   const pattern = new RegExp(regex, "g");
   let matcher: RegExpExecArray | null;
-  let counter: number = Object.keys(companyMap).length + 1;
 
   while ((matcher = pattern.exec(text)) !== null) {
     const originalName: string = matcher[0];
     const normalizedName: string = normalizeCompanyName(originalName);
     const abbreviation: string = getAbbreviation(normalizedName);
-    // let replacement: string = "Сторона " + counter;
     let replacement: string = "*******";
 
-    if (normilizedMap[normalizedName]) {
-      replacement = normilizedMap[normalizedName];
-    } else if (normilizedMap[abbreviation]) {
-      replacement = normilizedMap[abbreviation];
+    if (normilizedMap.get(normalizedName)) {
+      replacement = normilizedMap.get(normalizedName);
+    } else if (normilizedMap.get(abbreviation)) {
+      replacement = normilizedMap.get(abbreviation);
     } else {
-      normilizedMap[normalizedName] = replacement;
-      normilizedMap[abbreviation] = replacement;
+      normilizedMap.set(normalizedName, replacement);
+      normilizedMap.set(abbreviation, replacement);
     }
 
-    companyMap[replacement] = originalName;
-    text = text.replace(originalName, replacement);
-    counter++;
+    companyMap.set(replacement, originalName);
+    text = text.replaceAll(originalName, replacement);
   }
 
   return text;
@@ -36,7 +33,10 @@ function normalizeCompanyName(name: string) {
   let normalized = name
     .toLowerCase()
     .replace(/«|»/g, "")
-    .replace(/\b(ооо|зао|пао|оао|ип|акционерное общество|общество с ограниченной ответственностью|ао)\b/g, "")
+    .replace(
+      /(?:^|\s)(?:ооо|зао|пао|оао|ип|акционерное общество|общество с ограниченной ответственностью|ао)(?=\s|$)/g,
+      ""
+    )
     .replace(/[^a-zа-яё0-9]/g, " ")
     .replace(/\s+/g, " ")
     .trim();

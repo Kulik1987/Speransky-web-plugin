@@ -2,7 +2,7 @@ const removeAddressesByPart = (inputString: string): string => {
   let text = inputString;
 
   // city
-  text = text.replace(/(?<=(?:г\.\s?|город\s?))(?:[А-ЯЁ][а-яё]+(?:[ -][А-ЯЁ][а-яё]+)*)/g, "******");
+  text = text.replace(/(?<=(?:(?<![а-яёА-ЯЁ])г\.\s?|город\s?))(?:[А-ЯЁ][а-яё]+(?:[ -][А-ЯЁ][а-яё]+)*)/g, "******");
 
   // other city
   text = text.replace(/(?<=(?:н\.п\.?\s?|населенный\s*пункт\s?))(?:[А-ЯЁ][а-яё]+(?:[ -][А-ЯЁ][а-яё]+)*)/g, "*********");
@@ -51,7 +51,10 @@ const removeAddressesByPart = (inputString: string): string => {
   );
 
   // House
-  text = text.replace(/(?<=(?:д\.\s?|д\.|дом\s?))(?:\d+[а-я]?)|(?:\d+[а-я]?\s?(?:д\.\s?|д\.|дом))/g, "**********");
+  text = text.replace(
+    /(?<=(?:(?<![а-яёА-ЯЁ])д\.\s?|дом\s?))(?:\d+[а-я]?)|(?:\d+[а-я]?\s?(?:д\.\s?|д\.|дом))/g,
+    "**********"
+  );
 
   // korp
   text = text.replace(
@@ -61,7 +64,7 @@ const removeAddressesByPart = (inputString: string): string => {
 
   // build
   text = text.replace(
-    /(?<=(?:стр\.\s?|стр\.|строение\s?))(?:\d+[а-я]?)|(?:\d+[а-я]?\s?(?:стр\.\s?|стр\.|строение))/g,
+    /(?<=(?:(?<![а-яёА-ЯЁ])стр\.\s?|строение\s?))(?:\d+[а-я]?)|(?:\d+[а-я]?\s?(?:стр\.\s?|стр\.|строение))/g,
     "**********"
   );
 

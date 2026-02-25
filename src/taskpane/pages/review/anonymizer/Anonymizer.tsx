@@ -2,21 +2,26 @@ import React from "react";
 import { observer } from "mobx-react";
 import { Button, Text } from "@fluentui/react-components";
 import { useStores } from "../../../store";
-import { AddCircleRegular } from "@fluentui/react-icons";
+import { DocumentLockRegular } from "@fluentui/react-icons";
+import { useAnonymizerStyles } from "./styles";
 
 const T = {
-  buttonAnonymizer: {
-    ru: "Добавить",
-    en: "Add",
+  description: {
+    ru: "Добавить в конец документа текст договора с удаленными персональными данными",
+    en: "Appends a copy of the contract with personal data replaced to the end of the document",
+  },
+  button: {
+    ru: "Добавить анонимную копию",
+    en: "Add anonymous copy",
   },
 };
 
 const Anonymizer = () => {
   const { menuStore, documentStore } = useStores();
   const { locale } = menuStore;
+  const styles = useAnonymizerStyles();
 
   const handleAddAnonymizedText = async () => {
-    // documentStore.buildAnonymizedText();
     const { textContractAnonymized } = documentStore;
     if (typeof textContractAnonymized !== "string") return null;
     await Word.run(async (context) => {
@@ -24,9 +29,9 @@ const Anonymizer = () => {
       // Создаем новый Range в конце документа для прокрутки к концу
       const range = body.getRange("End");
       range.select();
-      // Добавляем текст в конец документа
-      body.insertText(textContractAnonymized, Word.InsertLocation.end);
 
+      const sanitizedText = textContractAnonymized.replace(/\v/g, "\r");
+      body.insertText(sanitizedText, Word.InsertLocation.end);
       await context.sync();
     }).catch((error) => {
       console.log("Error [handleAddAnonymizedText]: " + error);
@@ -34,20 +39,18 @@ const Anonymizer = () => {
   };
 
   return (
-    <>
-      <Text size={300}>Опция добавляет в конец документа текст договора с удаленными персональными данными</Text>
-      <div>
-        <Button
-          appearance="primary"
-          size="medium"
-          style={{ whiteSpace: "nowrap" }}
-          icon={<AddCircleRegular />}
-          onClick={handleAddAnonymizedText}
-        >
-          {T.buttonAnonymizer[locale]}
-        </Button>
-      </div>
-    </>
+    <div className={styles.container}>
+      <Text size={300}>{T.description[locale]}</Text>
+      <Button
+        appearance="primary"
+        size="medium"
+        className={styles.button}
+        icon={<DocumentLockRegular />}
+        onClick={handleAddAnonymizedText}
+      >
+        {T.button[locale]}
+      </Button>
+    </div>
   );
 };
 

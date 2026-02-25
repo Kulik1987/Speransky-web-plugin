@@ -6,6 +6,7 @@ import { useStores } from "../../store";
 import { useMainStyles } from "./styles";
 import { Card } from "../../components/molecules";
 import { RoutePathEnum } from "../../enums";
+import { Anonymizer } from "../review/anonymizer";
 
 const T = {
   reviewTitle: {
@@ -73,6 +74,7 @@ const Main = () => {
         onClick={handleNavigateToDraft}
         disabled
       />
+      <Anonymizer />
     </div>
   );
 };

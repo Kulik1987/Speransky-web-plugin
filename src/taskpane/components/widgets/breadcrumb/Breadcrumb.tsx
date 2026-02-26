@@ -35,21 +35,23 @@ const T = {
     ru: "Создать договор",
     en: "Create contract",
   },
+  checklistPage: {
+    ru: "Настроить чек-листы",
+    en: "Configure checklists",
+  },
 };
 
 const MAIN_STEP: BreadcrumbStep = { label: T.mainPage, path: RoutePathEnum.ROOT };
 const DRAFT_STEP: BreadcrumbStep = { label: T.draftPage, path: RoutePathEnum.DRAFT };
 const REVIEW_STEP: BreadcrumbStep = { label: T.reviewPage, path: RoutePathEnum.REVIEW };
 const REVIEW_TYPE_STEP: BreadcrumbStep = { label: T.reviewTypePage, path: RoutePathEnum.REVIEW_TYPE };
-const REVIEW_GENERAL_STEP: BreadcrumbStep = { label: T.reviewTypePage, path: RoutePathEnum.REVIEW_GENERAL };
-const REVIEW_CUSTOM_STEP: BreadcrumbStep = { label: T.reviewTypePage, path: RoutePathEnum.REVIEW_CUSTOM };
+const CHECKLIST_STEP: BreadcrumbStep = { label: T.checklistPage, path: RoutePathEnum.CHECKLIST };
 
 const BREADCRUMB_CONFIG: Partial<Record<RoutePathEnum, BreadcrumbStep[]>> = {
   [RoutePathEnum.DRAFT]: [MAIN_STEP, DRAFT_STEP],
   [RoutePathEnum.REVIEW]: [MAIN_STEP, REVIEW_STEP],
   [RoutePathEnum.REVIEW_TYPE]: [MAIN_STEP, REVIEW_STEP, REVIEW_TYPE_STEP],
-  [RoutePathEnum.REVIEW_GENERAL]: [MAIN_STEP, REVIEW_STEP, REVIEW_GENERAL_STEP],
-  [RoutePathEnum.REVIEW_CUSTOM]: [MAIN_STEP, REVIEW_STEP, REVIEW_CUSTOM_STEP],
+  [RoutePathEnum.CHECKLIST]: [MAIN_STEP, CHECKLIST_STEP],
 };
 
 const Breadcrumb = () => {

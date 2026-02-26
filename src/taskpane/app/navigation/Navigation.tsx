@@ -1,5 +1,5 @@
 import React from "react";
-import { Main, Draft, Review, Summary } from "../../pages";
+import { Main, Draft, Review, Summary, Checklist } from "../../pages";
 import { LayerBase } from "../../components/templates";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "../AuthProvider";
@@ -18,6 +18,7 @@ const Navigation: React.FC = () => {
               <Route index element={<Review />} />
               <Route path={RoutePathEnum.REVIEW_TYPE} element={<ReviewType />} />
             </Route>
+            <Route path={RoutePathEnum.CHECKLIST} element={<Checklist />} />
             <Route path={RoutePathEnum.SUMMARY} element={<Summary />} />
           </Route>
         </Route>

@@ -3,6 +3,7 @@ import { Field, Textarea } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { useChecklistRuleStyles } from "./styles";
 import { ADVANCED_RULE_FIELDS } from "../../../constants";
+import { autoResize, getMaxLengthError, sanitizeFieldValue } from "../../../helpers";
 
 const FIELDS = [
   "checkCondition",
@@ -27,16 +28,22 @@ const RuleAdvancedFields = ({ onChange, ...values }: RuleAdvancedFieldsProps) =>
   return (
     <div className={styles.fields}>
       {FIELDS.map((field) => {
+        const error = getMaxLengthError(values[field], locale);
         return (
           <Field
             key={field}
             label={ADVANCED_RULE_FIELDS[field].label[locale]}
             required={field === "checkCondition"}
+            validationState={error ? "error" : "none"}
+            validationMessage={error}
           >
             <Textarea
               resize="none"
               value={values[field]}
-              onChange={(_, data) => onChange(field, data.value)}
+              onChange={(event, data) => {
+                onChange(field, sanitizeFieldValue(data.value));
+                autoResize(event);
+              }}
               placeholder={ADVANCED_RULE_FIELDS[field].placeholder[locale]}
             />
           </Field>

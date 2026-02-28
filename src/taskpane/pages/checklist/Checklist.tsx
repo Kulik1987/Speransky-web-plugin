@@ -24,6 +24,7 @@ import { ChecklistCard } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
 import { Modal } from "../../components/atoms";
+import { getMaxLengthError, sanitizeFieldValue } from "../../helpers";
 
 const T = {
   pageCreateTitle: {
@@ -179,6 +180,8 @@ const Checklist = () => {
     setTargetId(null);
   };
 
+  const validationName = getMaxLengthError(checklistName, locale, 255);
+
   if (checkList.isDraftLoading) return <div>Loading...</div>;
 
   return (
@@ -267,13 +270,15 @@ const Checklist = () => {
                 ))}
               </Dropdown>
 
-              <Input
-                size="large"
-                placeholder={T.checklistNamePlaceholder[locale]}
-                value={checklistName}
-                onChange={(_, data) => setChecklistName(data.value)}
-                required
-              />
+              <Field validationState={validationName ? "error" : "none"} validationMessage={validationName}>
+                <Input
+                  size="large"
+                  placeholder={T.checklistNamePlaceholder[locale]}
+                  value={checklistName}
+                  onChange={(_, data) => setChecklistName(sanitizeFieldValue(data.value))}
+                  required
+                />
+              </Field>
 
               <ChecklistForm
                 key={checkList.editingChecklistId ?? "new"}

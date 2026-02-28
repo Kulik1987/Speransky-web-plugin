@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Accordion,
   AccordionHeader,
@@ -18,6 +18,7 @@ import { useChecklistRuleStyles } from "./styles";
 import { SIMPLE_RULE_FIELD } from "../../../constants";
 import { Modal } from "../../atoms";
 import { customColors } from "../../../theme/theme";
+import { autoResize, resizeTextarea, sanitizeFieldValue } from "../../../helpers";
 
 const T = {
   ruleTitle: {
@@ -96,6 +97,12 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
 
   const [isOpen, setIsOpen] = useState(true);
   const [targetId, setTargetId] = useState<string | number | null>(null);
+  const fieldsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!initialValue) return;
+    fieldsRef.current?.querySelectorAll("textarea").forEach((el) => resizeTextarea(el));
+  }, []);
 
   const simpleIv = initialValue && "simple_rule" in initialValue ? initialValue : null;
   const advancedIv = initialValue && "check_condition" in initialValue ? initialValue : null;
@@ -157,14 +164,15 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
           </AccordionHeader>
 
           <AccordionPanel className={styles.accordionPanel}>
-            <div className={styles.fields}>
+            <div ref={fieldsRef} className={styles.fields}>
               {ruleType === "simple" ? (
                 <Field label={SIMPLE_RULE_FIELD.label[locale]} required>
                   <Textarea
                     resize="none"
                     value={ruleState.simple}
-                    onChange={(_, data) => {
-                      handleSimpleChange(data.value);
+                    onChange={(event, data) => {
+                      handleSimpleChange(sanitizeFieldValue(data.value));
+                      autoResize(event);
                     }}
                     placeholder={SIMPLE_RULE_FIELD.placeholder[locale]}
                   />
@@ -197,7 +205,10 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                     <Textarea
                       resize="none"
                       value={ruleState.riskTrigger}
-                      onChange={(_, data) => update({ riskTrigger: data.value })}
+                      onChange={(event, data) => {
+                        update({ riskTrigger: data.value });
+                        autoResize(event);
+                      }}
                       placeholder={T.riskTriggerPlaceholder[locale]}
                     />
                   )}

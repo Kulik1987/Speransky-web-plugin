@@ -15,3 +15,10 @@ export const AUTH_OTP_VERIFY = "/v1/auth/verify";
 export const AUTH_JWT_REFRESH = "/v1/auth/jwt/refresh";
 export const AUTH_JWT_LOGOUT = "/v1/auth/jwt/logout";
 export const AUTH_JWT_CLIENT_DATA = "/v1/auth/jwt/me";
+
+export const CHECKLIST_ROUTES = {
+  checklists: "/v1/checklists/",
+  checklistById: (checklist_id: string) => `/v1/checklists/${checklist_id}`,
+  rules: (checklist_id: string) => `/v1/checklists/${checklist_id}/rules`,
+  ruleById: (rule_id: string) => `/v1/checklists/rules/${rule_id}`,
+};

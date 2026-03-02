@@ -3,7 +3,6 @@ export enum RoutePathEnum {
   DRAFT = "/draft",
   REVIEW = "/review",
   REVIEW_TYPE = "/review/type",
-  REVIEW_GENERAL = "/review/general",
-  REVIEW_CUSTOM = "/review/custom",
+  CHECKLIST = "/checklist",
   SUMMARY = "/summary",
 }

@@ -9,29 +9,6 @@ import { SourceTypeEnums } from "../enums";
 
 const APP_SET_MOCK = process.env.APP_SET_MOCK === "true";
 
-export const CONTRACT_TYPES = {
-  ru: [
-    "Договор оказания услуг",
-    "Договор подряда",
-    "Договор поставок",
-    "Договор купли-продажи недвижимости",
-    "Договор аренды недвижимости",
-    "Договор купли-продажи доли в ООО",
-    "Лицензионный договор",
-    "Соглашение о конфиденциальности (NDA)",
-  ],
-  en: [
-    "Services Agreement",
-    "Works Contract",
-    "Supply Agreement",
-    "Real Estate Purchase and Sale Agreement",
-    "Real Estate Lease Agreement",
-    "Agreement for the Sale and Purchase of a Share in an LLC",
-    "License Agreement",
-    "Non-Disclosure Agreement (NDA)",
-  ],
-};
-
 type SuggestionPropertyT = {
   isDismiss?: boolean;
   isApplyChange?: boolean;

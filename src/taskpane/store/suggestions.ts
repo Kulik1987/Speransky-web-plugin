@@ -161,6 +161,7 @@ class SuggestionsStore {
       const documentId = this.rootStore.documentStore.documentId;
       const party = this.formPartySelected;
       const userComment = this.formCustomInstructions;
+      const checklistId = this.rootStore.checkList.editingChecklistId;
 
       if (!documentId) {
         throw new Error("Document not uploaded");
@@ -172,6 +173,7 @@ class SuggestionsStore {
         source: SourceTypeEnums.PLUGIN,
         selected_party: party || undefined,
         user_comment: userComment || undefined,
+        checklist_id: checklistId || undefined,
       };
 
       const response = await api.contract.analyze(payload);

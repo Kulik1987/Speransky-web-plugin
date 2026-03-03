@@ -7,7 +7,6 @@ export enum RiskLevel {
 interface SimpleRule {
   simple_rule: string;
   risk_level: RiskLevel;
-  risk_trigger?: string;
 }
 
 interface AdvancedRule {

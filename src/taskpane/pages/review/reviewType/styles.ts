@@ -9,6 +9,7 @@ export const useReviewTypeStyles = makeStyles({
   },
   tablist: {
     width: "100%",
+    height: "40px",
     display: "flex",
   },
   tab: {
@@ -20,6 +21,7 @@ export const useReviewTypeStyles = makeStyles({
     "& span": {
       fontSize: tokens.fontSizeBase400,
       lineHeight: tokens.lineHeightBase400,
+      fontWeight: tokens.fontWeightRegular,
     },
     "&[aria-selected='true']::after, &:hover::before": {
       left: "-1px",
@@ -28,9 +30,22 @@ export const useReviewTypeStyles = makeStyles({
       width: "101%",
       borderTopLeftRadius: tokens.borderRadiusMedium,
       borderTopRightRadius: tokens.borderRadiusMedium,
+      ...shorthands.borderColor(tokens.colorBrandForeground2),
     },
     "&:hover::before": {
       backgroundColor: customColors.border[20],
+    },
+    "&[aria-selected='true']": {
+      backgroundColor: tokens.colorBrandForeground2,
+      "& span": {
+        color: "#FFFFFF",
+      },
+    },
+    "&[aria-selected='true']:hover": {
+      backgroundColor: tokens.colorBrandForeground1,
+      "& span": {
+        color: "#FFFFFF",
+      },
     },
   },
   tabFirst: {
@@ -41,5 +56,32 @@ export const useReviewTypeStyles = makeStyles({
   tabLast: {
     borderTopRightRadius: tokens.borderRadiusMedium,
     borderBottomRightRadius: tokens.borderRadiusMedium,
+  },
+  radioGroup: {
+    display: "flex",
+    flexDirection: "column",
+    ...shorthands.gap(tokens.spacingVerticalL),
+    position: "relative",
+  },
+  radioItem: {
+    width: "95%",
+    ...shorthands.border("1px", "solid", customColors.border[20]),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.padding(tokens.spacingHorizontalS),
+    "&:hover": {
+      ...shorthands.borderColor(tokens.colorBrandForeground2),
+    },
+    "&:has(input:checked)": {
+      ...shorthands.borderColor(tokens.colorBrandForeground2),
+    },
+    "& input:enabled:not(:checked) ~ .fui-Radio__label": {
+      color: tokens.colorNeutralForeground1,
+    },
+  },
+  radioItemLabel: {
+    fontSize: tokens.fontSizeBase400,
+    lineHeight: tokens.lineHeightBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    cursor: "pointer",
   },
 });

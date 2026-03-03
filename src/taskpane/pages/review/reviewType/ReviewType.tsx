@@ -1,13 +1,15 @@
-import { Tab, TabList, mergeClasses } from "@fluentui/react-components";
+import { Radio, RadioGroup, Tab, TabList, mergeClasses } from "@fluentui/react-components";
 import type { SelectTabData, SelectTabEvent } from "@fluentui/react-components";
 import { observer } from "mobx-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useStores } from "../../../store";
-import { ReviewTypesEnums } from "../../../enums";
-import { ReviewTypeGeneral } from "../reviewTypeGeneral";
-import { ReviewTypeCustom } from "../reviewTypeCustom";
+import { ReviewTypesEnums, RoutePathEnum } from "../../../enums";
 import { useReviewTypeStyles } from "./styles";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ReviewTypeBase } from "../reviewTypeBase";
+import { ChecklistCard } from "../../../components/molecules";
+import { Modal } from "../../../components/atoms";
+import { SUPPORTED_CONTRACT_TYPES } from "../../../constants";
 
 const T = {
   titleGeneral: {
@@ -18,25 +20,94 @@ const T = {
     ru: "Индивидуальная",
     en: "Custom",
   },
+  deleteTitle: {
+    ru: "Удалить чек-лист",
+    en: "Delete checklist",
+  },
+  deleteConfirm: {
+    ru: "Удалить",
+    en: "Delete",
+  },
 };
 
 const ReviewType = () => {
-  const { menuStore } = useStores();
+  const { menuStore, checkList } = useStores();
   const { locale } = menuStore;
   const styles = useReviewTypeStyles();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const state = location.state as { tab?: ReviewTypesEnums } | null;
   const initialTab = state?.tab || ReviewTypesEnums.GENERAL;
-  const [selectedValue, setSelectedValue] = useState<string>(initialTab);
+  const [selectedTab, setSelectedTab] = useState<string>(initialTab);
+
+  const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
+  const [targetId, setTargetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    checkList.getChecklists();
+  }, []);
 
   const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
-    setSelectedValue(data.value as string);
+    setSelectedTab(data.value as string);
   };
+
+  const handleStartAnalysis = async () => navigate("/summary");
+
+  const navigateToChecklistPage = () => {
+    navigate(RoutePathEnum.CHECKLIST);
+  };
+
+  const handleEdit = () => {};
+  const handleDuplicate = () => {};
+
+  const handleDelete = (id: string) => setTargetId(id);
+  const handleDeleteConfirm = async () => {
+    await checkList.deleteChecklist(targetId);
+    setTargetId(null);
+  };
+
+  const reviewGeneralChecklists = (
+    <RadioGroup className={styles.radioGroup}>
+      {SUPPORTED_CONTRACT_TYPES[locale].map((item: string) => (
+        <Radio
+          key={item}
+          root={{ className: styles.radioItem }}
+          label={{ className: styles.radioItemLabel, children: item }}
+          value={item}
+        />
+      ))}
+    </RadioGroup>
+  );
+
+  const reviewCustomChecklists = checkList.hasChecklists
+    ? checkList.checklists.map((item) => (
+        <ChecklistCard
+          key={item.id}
+          id={item.id}
+          name={item.name}
+          createdAt={item.created_at}
+          isRadio
+          selected={selectedChecklist === item.id}
+          onSelect={setSelectedChecklist}
+          onEdit={handleEdit}
+          onDuplicate={handleDuplicate}
+          onDelete={handleDelete}
+        />
+      ))
+    : null;
 
   return (
     <div className={styles.container}>
-      <TabList selectedValue={selectedValue} onTabSelect={onTabSelect} appearance="subtle" className={styles.tablist}>
+      <Modal
+        open={targetId !== null}
+        onClose={() => setTargetId(null)}
+        title={T.deleteTitle[locale]}
+        actionButtonTitle={T.deleteConfirm[locale]}
+        onAction={handleDeleteConfirm}
+      />
+
+      <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} appearance="subtle" className={styles.tablist}>
         <Tab value={ReviewTypesEnums.GENERAL} className={mergeClasses(styles.tab, styles.tabFirst)}>
           {T.titleGeneral[locale]}
         </Tab>
@@ -45,7 +116,15 @@ const ReviewType = () => {
         </Tab>
       </TabList>
 
-      {selectedValue === ReviewTypesEnums.GENERAL ? <ReviewTypeGeneral /> : <ReviewTypeCustom />}
+      {selectedTab === ReviewTypesEnums.GENERAL ? (
+        <ReviewTypeBase listContent={reviewGeneralChecklists} onStartReview={handleStartAnalysis} />
+      ) : (
+        <ReviewTypeBase
+          listContent={reviewCustomChecklists}
+          onStartReview={handleStartAnalysis}
+          actionHandleClick={navigateToChecklistPage}
+        />
+      )}
     </div>
   );
 };

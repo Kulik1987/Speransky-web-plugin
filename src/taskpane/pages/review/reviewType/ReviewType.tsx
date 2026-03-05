@@ -52,7 +52,10 @@ const ReviewType = () => {
     setSelectedTab(data.value as string);
   };
 
-  const handleStartAnalysis = async () => navigate("/summary");
+  const handleStartAnalysis = () => {
+    suggestionsStore.setChecklistId(selectedTab === ReviewTypesEnums.CUSTOM ? selectedChecklist : null);
+    navigate("/summary");
+  };
 
   const navigateToChecklistPage = () => {
     navigate(RoutePathEnum.CHECKLIST);

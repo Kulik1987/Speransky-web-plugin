@@ -35,6 +35,9 @@ class SuggestionsStore {
   // Кастомная инструкция пользователя
   formCustomInstructions: string | null = null;
 
+  // Чек-лист, выбранный для анализа
+  checklistId: string | null = null;
+
   constructor(rootStore: RootStore) {
     makeAutoObservable(this);
     this.rootStore = rootStore;
@@ -55,6 +58,10 @@ class SuggestionsStore {
 
   setFormCustomInstructions = (value: string | null) => {
     this.formCustomInstructions = value;
+  };
+
+  setChecklistId = (value: string | null) => {
+    this.checklistId = value;
   };
 
   setSuggestionProperty = (indexSuggestion: number, values: SuggestionPropertyT) => {
@@ -161,7 +168,7 @@ class SuggestionsStore {
       const documentId = this.rootStore.documentStore.documentId;
       const party = this.formPartySelected;
       const userComment = this.formCustomInstructions;
-      const checklistId = this.rootStore.checkList.editingChecklistId;
+      const checklistId = this.checklistId;
 
       if (!documentId) {
         throw new Error("Document not uploaded");
@@ -314,6 +321,7 @@ class SuggestionsStore {
       this.suggestionsError = null;
       this.isAnalysisProcessing = false;
       this.formCustomInstructions = "";
+      this.checklistId = null;
     });
   };
 }

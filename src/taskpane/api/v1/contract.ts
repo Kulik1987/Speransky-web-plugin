@@ -35,6 +35,10 @@ const contract = {
       body.append("user_comment", data.user_comment);
     }
 
+    if (data.checklist_id) {
+      body.append("checklist_id", data.checklist_id);
+    }
+
     return axios.post<ResponseContractAnalyzeDto>(CONTRACT_ROUTES.analyze, body, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

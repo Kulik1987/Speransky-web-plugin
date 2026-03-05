@@ -1,7 +1,11 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react";
-import { DocumentSignature24Regular, TextBulletListSquareSearch20Regular } from "@fluentui/react-icons";
+import {
+  DocumentSignature24Regular,
+  Settings24Regular,
+  TextBulletListSquareSearch20Regular,
+} from "@fluentui/react-icons";
 import { useStores } from "../../store";
 import { useMainStyles } from "./styles";
 import { Card } from "../../components/molecules";
@@ -33,6 +37,18 @@ const T = {
     ru: "Создайте новый документ, который хотите проверить",
     en: "Create a new document that you want to check",
   },
+  checklistTitle: {
+    ru: "Настроить чек-листы",
+    en: "Configure checklists",
+  },
+  checklistSubtitle: {
+    ru: "Написать свои правила",
+    en: "Write your own rules",
+  },
+  checklistText: {
+    ru: "Создавайте свои правила для проверки",
+    en: "Create your own rules for review",
+  },
 };
 
 const Main = () => {
@@ -43,6 +59,7 @@ const Main = () => {
 
   const handleNavigateToDraft = () => navigate(RoutePathEnum.DRAFT);
   const handleNavigateToReview = async () => navigate(RoutePathEnum.REVIEW);
+  const handleNavigateToChecklist = async () => navigate(RoutePathEnum.CHECKLIST);
 
   useEffect(() => {
     if (documentStore.textContractSource === null) {
@@ -73,6 +90,13 @@ const Main = () => {
         icon={<DocumentSignature24Regular />}
         onClick={handleNavigateToDraft}
         disabled
+      />
+      <Card
+        title={T.checklistTitle[locale]}
+        subtitle={T.checklistSubtitle[locale]}
+        text={T.checklistText[locale]}
+        icon={<Settings24Regular />}
+        onClick={handleNavigateToChecklist}
       />
       <Anonymizer />
     </div>

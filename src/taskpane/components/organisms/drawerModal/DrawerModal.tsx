@@ -94,6 +94,11 @@ const DrawerModal = (props: DrawerModalT) => {
     onClose();
   };
 
+  const handleGoToChecklists = () => {
+    navigate(RoutePathEnum.CHECKLIST);
+    onClose();
+  };
+
   const handleSelectLang = (lang: LocaleEnums) => {
     setLocale(lang);
   };
@@ -140,7 +145,7 @@ const DrawerModal = (props: DrawerModalT) => {
                     appearance="transparent"
                     className={mergeClasses(styles.button, styles.sectionButton)}
                     icon={<DocumentTableCheckmark20Regular />}
-                    disabled
+                    onClick={handleGoToChecklists}
                   >
                     {T.checklists[locale]}
                   </Button>

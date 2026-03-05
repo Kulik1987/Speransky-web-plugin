@@ -1,9 +1,22 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type RootStore from ".";
 import api from "../api/v1";
-import { ChecklistShortInfo, ResponseChecklistDto, PayloadChecklistAddRuleDto } from "../api/types";
+import {
+  ChecklistShortInfo,
+  ResponseChecklistDto,
+  PayloadChecklistAddRuleDto,
+  PayloadChecklistUpdateDto,
+} from "../api/types";
 
 export type DraftRule = PayloadChecklistAddRuleDto & { id?: string };
+
+interface OriginalDraft {
+  checklistName: string;
+  checklistDescription: string;
+  checklistDocType: string;
+  checklistParty: string;
+  checklistRules: DraftRule[];
+}
 
 const initialDraft = {
   editingChecklistId: null as string | null,
@@ -43,6 +56,9 @@ class CheckList {
   checklistRules: DraftRule[] = initialDraft.checklistRules;
   ruleType: "simple" | "advanced" = initialDraft.ruleType;
 
+  // Состояние чек-листа на момент загрузки с сервера
+  private originalDraft: OriginalDraft | null = null;
+
   setEditingChecklistId = (id: string | null) => {
     this.editingChecklistId = id;
   };
@@ -50,25 +66,16 @@ class CheckList {
     this.checklistName = value;
   };
   setChecklistDocType = (value: string) => {
-    this.checklistName = value;
+    this.checklistDocType = value;
   };
   setChecklistParty = (value: string) => {
-    this.checklistName = value;
+    this.checklistParty = value;
   };
-
-  /**
-   * @description Возвращает true, если черновик готов к сохранению:
-   * заполнено название и все правила прошли валидацию обязательных полей.
-   */
-  get canSave(): boolean {
-    if (!this.checklistName) return false;
-    return this.checklistRules.every((rule) => ("simple_rule" in rule ? !!rule.simple_rule : !!rule.check_condition));
-  }
 
   /**
    * @description Инициализирует черновик.
-   * Без аргументов — сбрасывает в начальное состояние (режим создания).
-   * С аргументом — заполняет данными существующего чек-листа (режим редактирования).
+   * Без аргументов: сбрасывает в начальное состояние (режим создания).
+   * С аргументом: заполняет данными существующего чек-листа (режим редактирования).
    */
   initDraft = (checklist?: ResponseChecklistDto) => {
     if (checklist) {
@@ -83,7 +90,15 @@ class CheckList {
             Object.entries(rule).filter(([key, value]) => key !== "created_at" && value !== null)
           ) as DraftRule
       );
+      this.originalDraft = {
+        checklistName: this.checklistName,
+        checklistDescription: this.checklistDescription,
+        checklistDocType: this.checklistDocType,
+        checklistParty: this.checklistParty,
+        checklistRules: this.checklistRules.map((rule) => ({ ...rule })),
+      };
     } else {
+      this.originalDraft = null;
       this.editingChecklistId = initialDraft.editingChecklistId;
       this.checklistName = initialDraft.checklistName;
       this.checklistDescription = initialDraft.checklistDescription;
@@ -94,13 +109,18 @@ class CheckList {
     }
   };
 
+  /** @description Сбрасывает состояние черновика */
   clearDraft = () => this.initDraft();
 
+  /**
+   * @description Обновляет поля черновика и сохраняет чек-лист на сервере.
+   * Параметры, не переданные явно, остаются без изменений.
+   */
   submitDraft = async (name?: string, docType?: string, party?: string, rules?: DraftRule[]): Promise<boolean> => {
-    this.checklistName = name;
-    this.checklistDocType = docType;
-    this.checklistParty = party;
-    this.checklistRules = rules;
+    this.checklistName = name ?? this.checklistName;
+    this.checklistDocType = docType ?? this.checklistDocType;
+    this.checklistParty = party ?? this.checklistParty;
+    this.checklistRules = rules ?? this.checklistRules;
     return this.saveChecklist();
   };
 
@@ -120,8 +140,8 @@ class CheckList {
 
   /**
    * @description Сохраняет чек-лист.
-   * Создание: один запрос — чек-лист с правилами в теле.
-   * Редактирование: обновляет метаданные + параллельно удаляет/обновляет/добавляет правила по id.
+   * Создание: создает чек-лист с правилами.
+   * Редактирование: обновляет метаданные + параллельно обновляет/добавляет правила по id.
    */
   saveChecklist = async (): Promise<boolean> => {
     runInAction(() => {
@@ -131,20 +151,40 @@ class CheckList {
     try {
       if (this.editingChecklistId) {
         const checklistId = this.editingChecklistId;
+        const original = this.originalDraft;
+        const metadataPatch: PayloadChecklistUpdateDto = {};
 
-        await this.checklistApi.update(checklistId, {
-          name: this.checklistName,
-          description: this.checklistDescription || undefined,
-          doc_type: this.checklistDocType || undefined,
-          party: this.checklistParty || undefined,
-        });
+        if (!original || this.checklistName !== original.checklistName) metadataPatch.name = this.checklistName;
+        if (!original || this.checklistDescription !== original.checklistDescription)
+          metadataPatch.description = this.checklistDescription || undefined;
+        if (!original || this.checklistDocType !== original.checklistDocType)
+          metadataPatch.doc_type = this.checklistDocType || undefined;
+        if (!original || this.checklistParty !== original.checklistParty)
+          metadataPatch.party = this.checklistParty || undefined;
+
+        if (Object.keys(metadataPatch).length > 0) {
+          await this.checklistApi.update(checklistId, metadataPatch);
+        }
+
+        const originalRuleById = new Map<string, DraftRule>();
+        if (original) {
+          for (const rule of original.checklistRules) {
+            if (rule.id) originalRuleById.set(rule.id, rule);
+          }
+        }
 
         await Promise.all(
-          this.checklistRules.map(({ id, ...rule }) =>
-            id && !id.startsWith("_local_")
-              ? this.checklistApi.updateRule(id, rule)
-              : this.checklistApi.addRule(checklistId, rule)
-          )
+          this.checklistRules.map(({ id, ...ruleContent }) => {
+            if (!id || id.startsWith("_local_"))
+              return this.checklistApi.addRule(checklistId, ruleContent as PayloadChecklistAddRuleDto);
+
+            const orig = originalRuleById.get(id);
+            if (orig) {
+              const origWithoutId = JSON.stringify(orig, (k, v) => (k === "id" ? undefined : v));
+              if (JSON.stringify(ruleContent) === origWithoutId) return Promise.resolve();
+            }
+            return this.checklistApi.updateRule(id, ruleContent as PayloadChecklistAddRuleDto);
+          })
         );
       } else {
         await this.checklistApi.create({
@@ -246,7 +286,7 @@ class CheckList {
     });
 
     try {
-      const response = await api.checklist.get(checklistId);
+      const response = await this.checklistApi.get(checklistId);
 
       runInAction(() => {
         this.isDraftLoading = false;
@@ -268,7 +308,7 @@ class CheckList {
   /** @description Удаляет чек-лист */
   deleteChecklist = async (checklistId: string) => {
     try {
-      await api.checklist.delete(checklistId);
+      await this.checklistApi.delete(checklistId);
 
       if (this.editingChecklistId === checklistId) {
         this.clearDraft();

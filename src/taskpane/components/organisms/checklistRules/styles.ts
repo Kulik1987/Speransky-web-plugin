@@ -37,7 +37,11 @@ export const useChecklistRuleStyles = makeStyles({
     },
     "& textarea": {
       ...shorthands.overflow("hidden"),
-      minHeight: "76px",
+      minHeight: "56px",
+      paddingTop: tokens.spacingVerticalXS,
+      paddingBottom: tokens.spacingVerticalXXXL,
+      paddingLeft: tokens.spacingHorizontalSNudge,
+      paddingRight: tokens.spacingHorizontalSNudge,
       backgroundColor: customColors.bg.textarea,
     },
   },

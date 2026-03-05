@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, Tab, TabList, mergeClasses } from "@fluentui/react-components";
+import { Radio, RadioGroup, Spinner, Tab, TabList, mergeClasses } from "@fluentui/react-components";
 import type { SelectTabData, SelectTabEvent } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
@@ -28,10 +28,14 @@ const T = {
     ru: "Удалить",
     en: "Delete",
   },
+  loadingTitle: {
+    ru: "Определяем тип и стороны договора",
+    en: "Determine contract type and parties",
+  },
 };
 
 const ReviewType = () => {
-  const { menuStore, checkList } = useStores();
+  const { menuStore, suggestionsStore, checkList } = useStores();
   const { locale } = menuStore;
   const styles = useReviewTypeStyles();
   const location = useLocation();
@@ -61,8 +65,14 @@ const ReviewType = () => {
     navigate(RoutePathEnum.CHECKLIST);
   };
 
-  const handleEdit = () => {};
-  const handleDuplicate = () => {};
+  const handleEdit = (id: string) => {
+    checkList.setEditingChecklistId(id);
+    navigate(RoutePathEnum.CHECKLIST);
+  };
+
+  const handleDuplicate = async (id: string) => {
+    await checkList.duplicateChecklist(id);
+  };
 
   const handleDelete = (id: string) => setTargetId(id);
   const handleDeleteConfirm = async () => {
@@ -72,7 +82,7 @@ const ReviewType = () => {
 
   const reviewGeneralChecklists = (
     <RadioGroup className={styles.radioGroup}>
-      {SUPPORTED_CONTRACT_TYPES[locale].map((item: string) => (
+      {SUPPORTED_CONTRACT_TYPES.map((item: string) => (
         <Radio
           key={item}
           root={{ className: styles.radioItem }}
@@ -99,6 +109,8 @@ const ReviewType = () => {
         />
       ))
     : null;
+
+  if (suggestionsStore.isMetaDataProcessing) return <Spinner size="tiny" label={T.loadingTitle[locale]} />;
 
   return (
     <div className={styles.container}>

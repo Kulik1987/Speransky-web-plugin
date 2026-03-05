@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  mergeClasses,
 } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { useModalStyles } from "./styles";
@@ -35,7 +36,7 @@ const Modal = (props: ModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={(_, data) => !data.open && onClose()}>
-      <DialogSurface className={styles.container}>
+      <DialogSurface className={mergeClasses(styles.container, children && styles.withContent)}>
         <DialogBody>
           <DialogTitle className={styles.title}>{title}</DialogTitle>
           {children && <DialogContent>{children}</DialogContent>}

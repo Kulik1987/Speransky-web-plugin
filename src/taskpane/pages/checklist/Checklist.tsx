@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react";
 import { useStores } from "../../store";
 import { useChecklistStyles } from "./styles";
@@ -9,12 +10,15 @@ import {
   AccordionPanel,
   Button,
   Dropdown,
+  Field,
   Input,
   Option,
+  Spinner,
 } from "@fluentui/react-components";
+import type { AccordionToggleData, AccordionToggleEvent } from "@fluentui/react-components";
 import {
   Add16Filled,
-  ArrowLeftRegular,
+  ArrowLeft16Regular,
   Save16Regular,
   TriangleDownFilled,
   TriangleRightFilled,
@@ -40,8 +44,8 @@ const T = {
     en: "New checklist",
   },
   pageEditTitle: {
-    ru: "Редактирование  чек-листа",
-    en: "",
+    ru: "Редактирование чек-листа",
+    en: "Edit checklist",
   },
   docTypePlaceholder: {
     ru: "Тип договора",
@@ -94,6 +98,7 @@ const iconStyle = { width: "9px", height: "9px", padding: "8px" };
 const Checklist = () => {
   const { menuStore, checkList } = useStores();
   const { locale } = menuStore;
+  const navigate = useNavigate();
   const styles = useChecklistStyles();
 
   const isEditing = !!checkList.editingChecklistId;
@@ -107,13 +112,15 @@ const Checklist = () => {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
   const [openItem, setOpenItems] = useState<number[]>([]);
-  const handleToggle = useCallback((_, data) => {
-    const value = data.value as number;
+
+  const handleToggle = useCallback((_: AccordionToggleEvent, data: AccordionToggleData<number>) => {
+    const value = data.value;
     setOpenItems((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
   }, []);
 
   const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
   const [targetId, setTargetId] = useState<string | null>(null);
+  const [isChecklistPage, setIsChecklistPage] = useState(false);
 
   useEffect(() => {
     checkList.getChecklists();
@@ -135,7 +142,7 @@ const Checklist = () => {
     checkList.getChecklistById(id).then((data) => {
       if (!data) return;
       setDocType(data.doc_type ?? "");
-      setParty(data.party ?? "");
+      setParty(data.party || T.allPartiesValue[locale]);
       setChecklistName(data.name);
       setChecklistRules([...checkList.checklistRules]);
       setIsFormOpen(true);
@@ -167,6 +174,7 @@ const Checklist = () => {
   };
 
   const handleEdit = (id: string) => {
+    setIsChecklistPage(true);
     checkList.setEditingChecklistId(id);
   };
 
@@ -180,9 +188,42 @@ const Checklist = () => {
     setTargetId(null);
   };
 
+  const handleGoBack = () => {
+    if (isEditing && isChecklistPage) {
+      checkList.setEditingChecklistId(null);
+      setIsChecklistPage(false);
+      setIsFormOpen(false);
+    } else {
+      checkList.setEditingChecklistId(null);
+      navigate(-1);
+    }
+  };
+
   const validationName = getMaxLengthError(checklistName, locale, 255);
 
-  if (checkList.isDraftLoading) return <div>Loading...</div>;
+  // Возвращает true, если чек-лист готов к сохранению:
+  // заполнено название и все правила прошли валидацию обязательных полей
+  const canSave =
+    !!checklistName &&
+    !validationName &&
+    checklistRules.every((rule) => {
+      const r = rule as { simple_rule?: string; check_condition?: string };
+      return !!(r.simple_rule || r.check_condition);
+    });
+
+  const checklistNameField = (
+    <Field validationState={validationName ? "error" : "none"} validationMessage={validationName}>
+      <Input
+        size="large"
+        placeholder={T.checklistNamePlaceholder[locale]}
+        value={checklistName}
+        onChange={(_, data) => setChecklistName(sanitizeFieldValue(data.value))}
+        required
+      />
+    </Field>
+  );
+
+  if (checkList.isDraftLoading) return <Spinner />;
 
   return (
     <div className={styles.container}>
@@ -200,14 +241,15 @@ const Checklist = () => {
         title={isEditing ? T.modalEditTitle[locale] : T.modalSaveTitle[locale]}
         actionButtonTitle={T.modalSaveConfirm[locale]}
         onAction={handleSubmitChecklist}
+        children={checklistNameField}
       />
 
       <Button
         size="small"
         appearance="transparent"
         className={styles.btnTitle}
-        icon={<ArrowLeftRegular />}
-        // onClick={handleGoBack}
+        icon={<ArrowLeft16Regular />}
+        onClick={handleGoBack}
       >
         {isEditing ? T.pageEditTitle[locale] : T.pageCreateTitle[locale]}
       </Button>
@@ -270,15 +312,7 @@ const Checklist = () => {
                 ))}
               </Dropdown>
 
-              <Field validationState={validationName ? "error" : "none"} validationMessage={validationName}>
-                <Input
-                  size="large"
-                  placeholder={T.checklistNamePlaceholder[locale]}
-                  value={checklistName}
-                  onChange={(_, data) => setChecklistName(sanitizeFieldValue(data.value))}
-                  required
-                />
-              </Field>
+              {checklistNameField}
 
               <ChecklistForm
                 key={checkList.editingChecklistId ?? "new"}
@@ -293,7 +327,7 @@ const Checklist = () => {
               size="small"
               onClick={() => setIsSaveModalOpen(true)}
               className={styles.btnSaveChecklist}
-              // disabled={!checkList.canSave}
+              disabled={!canSave}
             />
           </AccordionItem>
         )}

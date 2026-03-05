@@ -64,7 +64,8 @@ export const useReviewTypeStyles = makeStyles({
     position: "relative",
   },
   radioItem: {
-    width: "95%",
+    width: "100%",
+    boxSizing: "border-box",
     ...shorthands.border("1px", "solid", customColors.border[20]),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.padding(tokens.spacingHorizontalS),

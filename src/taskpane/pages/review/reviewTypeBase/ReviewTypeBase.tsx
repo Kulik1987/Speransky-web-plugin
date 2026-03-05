@@ -68,6 +68,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         size="large"
         placeholder={T.docTypePlaceholder[locale]}
         onOptionSelect={(_, data) => setDocType(data.optionValue ?? "")}
+        disabled={!suggestionsStore.documentType}
       >
         <Option key={suggestionsStore.documentType} value={suggestionsStore.documentType}>
           {suggestionsStore.documentType}

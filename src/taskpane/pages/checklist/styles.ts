@@ -1,4 +1,5 @@
 import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../theme/theme";
 
 export const useChecklistStyles = makeStyles({
   container: {
@@ -11,6 +12,7 @@ export const useChecklistStyles = makeStyles({
     alignSelf: "flex-start",
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
+    color: customColors.text.primary[90],
     ...shorthands.padding(0),
   },
   btnAdd: {
@@ -30,21 +32,26 @@ export const useChecklistStyles = makeStyles({
   },
   accordionHeader: {
     "& > button": {
-      backgroundColor: `color-mix(in srgb, ${tokens.colorBrandBackground2} 75%, transparent)`,
+      backgroundColor: customColors.bg.accordion[75],
       borderBottomWidth: "1px",
       borderBottomStyle: "solid",
       borderBottomColor: tokens.colorNeutralStroke1,
-      ...shorthands.padding(tokens.spacingHorizontalM, tokens.spacingVerticalS),
+      paddingTop: tokens.spacingVerticalM,
+      paddingBottom: tokens.spacingVerticalM,
+      paddingLeft: tokens.spacingHorizontalS,
+      paddingRight: tokens.spacingHorizontalXL,
       minHeight: "48px",
       fontSize: tokens.fontSizeBase400,
       lineHeight: tokens.lineHeightBase400,
       fontWeight: tokens.fontWeightSemibold,
+      color: customColors.text.primary[90],
     },
   },
   accordionPanel: {
     display: "flex",
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalM),
+    ...shorthands.margin(tokens.spacingHorizontalM, tokens.spacingVerticalS),
   },
   btnSaveChecklist: {
     position: "absolute",

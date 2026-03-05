@@ -9,6 +9,12 @@ export const useModalStyles = makeStyles({
       maxWidth: "300px",
     },
   },
+  withContent: {
+    maxWidth: "388px",
+    "@media screen and (max-width: 480px)": {
+      maxWidth: "388px",
+    },
+  },
   title: {
     fontSize: tokens.fontSizeBase400,
     lineHeight: tokens.lineHeightBase400,

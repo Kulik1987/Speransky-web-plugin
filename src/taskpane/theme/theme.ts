@@ -14,6 +14,21 @@ export const customColors = {
     10: "#5E5E5E",
     20: "#CCD0D6",
   },
+  bg: {
+    accordion: {
+      35: "#CFDFE159",
+      75: "#CFDFE1BF",
+    },
+    textarea: "#F0F0F059",
+  },
+  accent: {
+    delete: "#C50F1F",
+    risk: {
+      low: "#44A900",
+      medium: "#F1C928",
+      high: "#FF383C",
+    },
+  },
 } as const;
 
 const themeColors: BrandVariants = {

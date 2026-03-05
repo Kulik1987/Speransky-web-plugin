@@ -4,4 +4,5 @@ export interface PayloadContractAnalyzeDto {
   source: "web" | "plugin";
   selected_party?: string | null;
   user_comment?: string | null;
+  checklist_id?: string | null;
 }

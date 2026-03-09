@@ -2,6 +2,9 @@ import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 import { customColors } from "../../../theme/theme";
 
 export const useBreadcrumbStyles = makeStyles({
+  breadcrumb: {
+    paddingBottom: tokens.spacingVerticalL,
+  },
   divider: {
     color: customColors.text.primary[65],
     ...shorthands.padding(tokens.spacingVerticalXS),

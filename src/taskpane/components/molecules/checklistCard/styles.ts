@@ -11,11 +11,12 @@ export const useChecklistCardStyles = makeStyles({
     paddingBottom: tokens.spacingVerticalXL,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.border("1px", "solid", tokens.colorNeutralStroke1),
-    boxShadow: tokens.shadow4,
+    boxShadow: "0px 0px 3px 0px #415B5D40, 0px 1px 2px 0px #415B5D26",
     cursor: "pointer",
     userSelect: "none",
     "&:hover": {
       ...shorthands.borderColor(tokens.colorBrandForeground2),
+      boxShadow: "0px 0px 3px 0px #415B5D40, 0px 1px 2px 0px #415B5D26",
     },
   },
   cardSelected: {

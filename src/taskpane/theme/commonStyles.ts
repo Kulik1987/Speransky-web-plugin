@@ -2,19 +2,14 @@ import { makeStyles, tokens, shorthands } from "@fluentui/react-components";
 import { customColors } from "./theme";
 
 export const useCommonStyles = makeStyles({
-  card: {
-    ...shorthands.padding(tokens.spacingVerticalL),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    boxShadow: tokens.shadow4,
-  },
   pageContainer: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
     ...shorthands.padding(tokens.spacingVerticalL),
+    paddingBottom: "40px",
     position: "absolute",
-    top: "60px",
+    top: "48px",
     bottom: 0,
     left: 0,
     right: 0,
@@ -27,7 +22,6 @@ export const useCommonStyles = makeStyles({
     flexDirection: "column",
     justifyContent: "space-between",
     ...shorthands.gap(tokens.spacingVerticalXXXL),
-    paddingTop: tokens.spacingVerticalL,
   },
   input: {
     minWidth: "100%",

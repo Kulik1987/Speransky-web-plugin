@@ -15,6 +15,7 @@ import { useStores } from "../../../store";
 import { PayloadChecklistAddRuleDto, RiskLevel } from "../../../api/types";
 import RuleAdvancedFields, { AdvancedField, AdvancedFieldsState } from "./RuleAdvancedFields";
 import { useChecklistRuleStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
 import { SIMPLE_RULE_FIELD } from "../../../constants";
 import { Modal } from "../../atoms";
 import { customColors } from "../../../theme/theme";
@@ -28,6 +29,10 @@ const T = {
   riskLevel: {
     ru: "Степень риска",
     en: "Risk level",
+  },
+  optional: {
+    ru: "(опционально)",
+    en: "(optional)",
   },
   low: {
     ru: "Низкая",
@@ -93,6 +98,7 @@ const iconStyle = { width: "9px", height: "9px", padding: "8px" };
 const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: ChecklistRuleProps) => {
   const { menuStore } = useStores();
   const { locale } = menuStore;
+  const commonStyles = useCommonStyles();
   const styles = useChecklistRuleStyles();
 
   const [isOpen, setIsOpen] = useState(true);
@@ -154,7 +160,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
         openItems={isOpen ? ["rule"] : []}
         onToggle={(_, data) => setIsOpen(data.openItems.includes("rule"))}
       >
-        <AccordionItem value="rule" className={styles.accordionItem}>
+        <AccordionItem value="rule" className={commonStyles.accordionItem}>
           <AccordionHeader
             className={styles.accordionHeader}
             expandIcon={isOpen ? <TriangleDownFilled style={iconStyle} /> : <TriangleRightFilled style={iconStyle} />}
@@ -166,7 +172,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
           <AccordionPanel className={styles.accordionPanel}>
             <div ref={fieldsRef} className={styles.fields}>
               {ruleType === "simple" ? (
-                <Field label={SIMPLE_RULE_FIELD.label[locale]} required>
+                <Field label={SIMPLE_RULE_FIELD.label[locale]}>
                   <Textarea
                     resize="none"
                     value={ruleState.simple}
@@ -182,7 +188,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
               )}
 
               <div className={styles.riskSection}>
-                <Field label={T.riskLevel[locale]} required>
+                <Field label={`${T.riskLevel[locale]} ${ruleType === "simple" ? T.optional[locale] : ""}`}>
                   <div className={styles.riskBtnBlock}>
                     {Object.values(RiskLevel).map((risk) => (
                       <Button

@@ -11,6 +11,7 @@ import {
 } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { useModalStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 interface ModalProps {
   open: boolean;
@@ -32,16 +33,17 @@ const Modal = (props: ModalProps) => {
   const { open, onClose, title, actionButtonTitle, onAction, children } = props;
   const { menuStore } = useStores();
   const { locale } = menuStore;
+  const commonStyles = useCommonStyles();
   const styles = useModalStyles();
 
   return (
     <Dialog open={open} onOpenChange={(_, data) => !data.open && onClose()}>
       <DialogSurface className={mergeClasses(styles.container, children && styles.withContent)}>
-        <DialogBody>
-          <DialogTitle className={styles.title}>{title}</DialogTitle>
+        <DialogBody className={mergeClasses(styles.body, children ? styles.bodyGapSmall : styles.bodyGapLarge)}>
+          <DialogTitle className={commonStyles.pageTitle}>{title}</DialogTitle>
           {children && <DialogContent>{children}</DialogContent>}
           <DialogActions className={styles.actionsBlock}>
-            <Button appearance="subtle" onClick={onClose}>
+            <Button appearance="subtle" onClick={onClose} className={styles.btnCancel}>
               {T.cancel[locale]}
             </Button>
             <Button appearance="primary" onClick={onAction}>

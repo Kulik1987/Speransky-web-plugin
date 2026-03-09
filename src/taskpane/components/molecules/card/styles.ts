@@ -7,6 +7,10 @@ export const useCardStyles = makeStyles({
     ...shorthands.gap(tokens.spacingVerticalM),
     cursor: "pointer",
     userSelect: "none",
+    boxShadow: "0px 0px 3px 0px #415B5D40, 0px 1px 2px 0px #415B5D26",
+    "&:hover": {
+      boxShadow: "0px 0px 3px 0px #415B5D40, 0px 1px 2px 0px #415B5D26",
+    },
   },
   title: {
     color: customColors.text.primary[100],

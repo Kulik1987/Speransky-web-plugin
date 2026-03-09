@@ -7,7 +7,8 @@ export const useHeaderMenuStyles = makeStyles({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: tokens.colorBrandBackground,
-    height: "60px",
+    height: "48px",
     ...shorthands.padding(tokens.spacingHorizontalL),
+    backgroundImage: "linear-gradient(90deg, #19737D 0%, #08656E 50%, #0F565E 100%)",
   },
 });

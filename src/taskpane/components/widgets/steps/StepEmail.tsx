@@ -137,7 +137,7 @@ const StepEmail = () => {
           disabled={isLoading}
           autoFocus
           appearance="outline"
-          size="medium"
+          size="large"
         />
         {isDisplayErrorMessage && <ErrorText error={error} />}
       </div>

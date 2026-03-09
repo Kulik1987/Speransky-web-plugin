@@ -66,7 +66,7 @@ const Breadcrumb = () => {
   if (!steps || !authStore.isClientVerify) return null;
 
   return (
-    <BreadcrumbUI aria-label="breadcrumb navigation" size="small">
+    <BreadcrumbUI aria-label="breadcrumb navigation" size="small" className={styles.breadcrumb}>
       {steps.map((step, index) => {
         const isLast = index === steps.length - 1;
 

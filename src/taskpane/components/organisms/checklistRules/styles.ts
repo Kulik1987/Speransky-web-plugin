@@ -30,6 +30,18 @@ export const useChecklistRuleStyles = makeStyles({
       marginBottom: tokens.spacingVerticalS,
       color: customColors.text.primary[90],
     },
+    "& span": {
+      borderBottomColor: tokens.colorNeutralStroke1,
+      "&::after": {
+        display: "none",
+      },
+      "&:hover, &:focus-within, &:active": {
+        borderBottomColor: tokens.colorNeutralStroke1,
+        "&::after": {
+          display: "none",
+        },
+      },
+    },
     "& textarea": {
       ...shorthands.overflow("hidden"),
       minHeight: "56px",
@@ -57,6 +69,7 @@ export const useChecklistRuleStyles = makeStyles({
   btnRisk: {
     maxHeight: "24px",
     ...shorthands.flex(1),
+    minWidth: 0,
     fontSize: tokens.fontSizeBase200,
     fontWeight: tokens.fontWeightRegular,
   },

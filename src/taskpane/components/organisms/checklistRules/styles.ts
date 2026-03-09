@@ -5,11 +5,6 @@ export const useChecklistRuleStyles = makeStyles({
   container: {
     position: "relative",
   },
-  accordionItem: {
-    position: "relative",
-    ...shorthands.border("1px", "solid", tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-  },
   accordionHeader: {
     "& > button": {
       backgroundColor: customColors.bg.accordion[35],

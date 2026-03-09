@@ -8,11 +8,13 @@ import {
   AccordionPanel,
   Button,
   Dropdown,
+  mergeClasses,
   Option,
 } from "@fluentui/react-components";
 import { Add16Filled, TriangleDownFilled, TriangleRightFilled } from "@fluentui/react-icons";
 import { PartyDropdown } from "../../../components/molecules";
 import { useReviewTypeBaseStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 const T = {
   docTypePlaceholder: {
@@ -54,6 +56,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
   const { listContent, actionIcon, actionHandleClick, onStartReview } = props;
   const { menuStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
+  const commonStyles = useCommonStyles();
   const styles = useReviewTypeBaseStyles();
 
   const [isPartySelected, setIsPartySelected] = useState(false);
@@ -77,22 +80,24 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
 
       <PartyDropdown placeholder={T.partyPlaceholder[locale]} onSelect={setIsPartySelected} />
 
-      <Accordion collapsible className={styles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
-        <AccordionItem className={styles.accordionItem} value={1}>
+      <Accordion collapsible className={commonStyles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
+        <AccordionItem className={commonStyles.accordionItem} value={1}>
           <AccordionHeader
-            className={styles.accordionHeader}
+            className={mergeClasses(commonStyles.pageTitle, commonStyles.accordionHeader, styles.accordionHeader)}
             expandIcon={isOpen ? <TriangleDownFilled style={iconStyle} /> : <TriangleRightFilled style={iconStyle} />}
           >
             {T.listTitle[locale]}
           </AccordionHeader>
-          <AccordionPanel className={styles.accordionPanel}>{listContent}</AccordionPanel>
+          <AccordionPanel className={mergeClasses(commonStyles.accordionPanel, styles.accordionPanel)}>
+            {listContent}
+          </AccordionPanel>
           {(actionIcon || actionHandleClick) && isOpen && (
             <Button
               icon={actionIcon || <Add16Filled />}
               appearance="primary"
               size="small"
               onClick={actionHandleClick}
-              className={styles.accordionActions}
+              className={commonStyles.accordionActions}
             />
           )}
         </AccordionItem>

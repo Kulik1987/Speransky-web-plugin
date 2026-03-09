@@ -28,6 +28,7 @@ import { AuthStepperEnum } from "../../../store/auth";
 import { LocaleEnums } from "../../../store/menu";
 import { useDrawerModalStyles } from "./styles";
 import { RoutePathEnum } from "../../../enums";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 type DrawerModalT = {
   isOpen: boolean;
@@ -79,6 +80,7 @@ const DrawerModal = (props: DrawerModalT) => {
   const { isOpen, onClose } = props;
   const { menuStore, authStore } = useStores();
   const { locale, setLocale } = menuStore;
+  const commonStyles = useCommonStyles();
   const styles = useDrawerModalStyles();
   const navigate = useNavigate();
   const [level, setLevel] = useState<1 | 2>(1);
@@ -176,7 +178,7 @@ const DrawerModal = (props: DrawerModalT) => {
 
           {level === 2 && (
             <>
-              <div className={styles.langHeader}>
+              <div className={mergeClasses(commonStyles.pageTitle, styles.langHeader)}>
                 <Button
                   appearance="transparent"
                   aria-label="Back"

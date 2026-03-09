@@ -67,10 +67,6 @@ export const useDrawerModalStyles = makeStyles({
   langHeader: {
     display: "flex",
     alignItems: "center",
-    fontSize: tokens.fontSizeBase400,
-    lineHeight: tokens.lineHeightBase400,
-    fontWeight: tokens.fontWeightSemibold,
-    color: customColors.text.primary[90],
   },
   langList: {
     display: "flex",

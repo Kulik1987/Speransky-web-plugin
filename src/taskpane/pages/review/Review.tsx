@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { observer } from "mobx-react";
-import { Text } from "@fluentui/react-components";
+import { mergeClasses, Text } from "@fluentui/react-components";
 import { useStores } from "../../store";
 import { Card, ItemSkeleton } from "../../components/molecules";
 import { useReviewStyles } from "./styles";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { ReviewTypesEnums, RoutePathEnum } from "../../enums";
 import { DocumentBulletList24Regular, Settings24Regular } from "@fluentui/react-icons";
 import { ErrorText } from "../../components/atoms";
+import { useCommonStyles } from "../../theme/commonStyles";
 
 const T = {
   title: {
@@ -46,6 +47,7 @@ const Review = () => {
   const { parties, metaDataError, isMetaDataProcessing } = suggestionsStore;
   const isError = Boolean(metaDataError);
   const navigate = useNavigate();
+  const commonStyles = useCommonStyles();
   const styles = useReviewStyles();
 
   useEffect(() => {
@@ -80,7 +82,7 @@ const Review = () => {
         </>
       ) : (
         <>
-          <Text as="h1" weight="semibold" className={styles.title}>
+          <Text as="h1" weight="semibold" className={mergeClasses(commonStyles.pageTitle, styles.title)}>
             {T.title[locale]}
           </Text>
           <div className={styles.block}>

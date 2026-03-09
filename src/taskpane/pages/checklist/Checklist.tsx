@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react";
 import { useStores } from "../../store";
 import { useChecklistStyles } from "./styles";
+import { useCommonStyles } from "../../theme/commonStyles";
 import {
   Accordion,
   AccordionHeader,
@@ -99,6 +100,7 @@ const Checklist = () => {
   const { menuStore, checkList } = useStores();
   const { locale } = menuStore;
   const navigate = useNavigate();
+  const commonStyles = useCommonStyles();
   const styles = useChecklistStyles();
 
   const isEditing = !!checkList.editingChecklistId;
@@ -246,7 +248,7 @@ const Checklist = () => {
 
       <Button
         size="small"
-        appearance="transparent"
+        appearance="subtle"
         className={styles.btnTitle}
         icon={<ArrowLeft16Regular />}
         onClick={handleGoBack}
@@ -266,11 +268,11 @@ const Checklist = () => {
         </Button>
       )}
 
-      <Accordion collapsible multiple className={styles.accordion} onToggle={handleToggle} openItems={openItem}>
+      <Accordion collapsible multiple className={commonStyles.accordion} onToggle={handleToggle} openItems={openItem}>
         {isFormOpen && (
-          <AccordionItem className={styles.accordionItem} value={1}>
+          <AccordionItem className={commonStyles.accordionItem} value={1}>
             <AccordionHeader
-              className={styles.accordionHeader}
+              className={commonStyles.accordionHeader}
               expandIcon={
                 openItem.includes(1) ? (
                   <TriangleDownFilled style={iconStyle} />
@@ -281,7 +283,7 @@ const Checklist = () => {
             >
               {isEditing ? checklistName : T.formCreatingTitle[locale]}
             </AccordionHeader>
-            <AccordionPanel className={styles.accordionPanel}>
+            <AccordionPanel className={commonStyles.accordionPanel}>
               <Dropdown
                 size="large"
                 placeholder={T.docTypePlaceholder[locale]}
@@ -326,16 +328,16 @@ const Checklist = () => {
               appearance="primary"
               size="small"
               onClick={() => setIsSaveModalOpen(true)}
-              className={styles.btnSaveChecklist}
+              className={commonStyles.accordionActions}
               disabled={!canSave}
             />
           </AccordionItem>
         )}
 
         {checkList.hasChecklists && (
-          <AccordionItem className={styles.accordionItem} value={2}>
+          <AccordionItem className={commonStyles.accordionItem} value={2}>
             <AccordionHeader
-              className={styles.accordionHeader}
+              className={commonStyles.accordionHeader}
               expandIcon={
                 openItem.includes(2) ? (
                   <TriangleDownFilled style={iconStyle} />
@@ -346,7 +348,7 @@ const Checklist = () => {
             >
               {T.listTitle[locale]}
             </AccordionHeader>
-            <AccordionPanel className={styles.accordionPanel}>
+            <AccordionPanel className={commonStyles.accordionPanel}>
               {checkList.checklists.map((item) => (
                 <ChecklistCard
                   key={item.id}

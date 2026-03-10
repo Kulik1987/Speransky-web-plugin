@@ -1,8 +1,7 @@
 import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
-import { LevelOfCriticalEnum } from "../../../enums";
 import { customColors } from "../../../theme/theme";
 
-export const usePriorityFlagStyles = makeStyles({
+export const usePartyFlagStyles = makeStyles({
   container: {
     ...shorthands.borderRadius("10px"),
     ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalS),
@@ -10,13 +9,13 @@ export const usePriorityFlagStyles = makeStyles({
     color: "#FFFFFF",
     fontSize: tokens.fontSizeBase200,
   },
-  [LevelOfCriticalEnum.HIGH]: {
-    backgroundColor: customColors.accent.risk.high,
+  partyAll: {
+    backgroundColor: customColors.text.primary[100],
   },
-  [LevelOfCriticalEnum.MEDIUM]: {
-    backgroundColor: customColors.accent.risk.medium,
+  party0: {
+    backgroundColor: customColors.text.primary[90],
   },
-  [LevelOfCriticalEnum.LOW]: {
-    backgroundColor: customColors.accent.risk.low,
+  party1: {
+    backgroundColor: customColors.text.primary[65],
   },
 });

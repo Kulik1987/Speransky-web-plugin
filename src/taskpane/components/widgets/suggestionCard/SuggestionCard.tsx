@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { useStores } from "../../../store";
 import { Button, Text, Tooltip } from "@fluentui/react-components";
 import { DismissFilled, LocationRippleRegular } from "@fluentui/react-icons";
-import { PriorityFlag } from "../../atoms";
+import { PartyFlag, PriorityFlag } from "../../atoms";
 import { ApplyService } from "../../../services/applyService";
 import { SearchService } from "../../../services/searchService";
 import { SuggestionT } from "../../../store/suggestions";
@@ -56,6 +56,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
     risk_level,
     new_clause_wording: changeText,
     target_snippet_full: sourceText,
+    relevant_party,
     is_new_clause,
     is_removed_clause,
     isDismiss,
@@ -138,7 +139,10 @@ const SuggestionCard = (props: SuggestionPropT) => {
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <PriorityFlag flag={risk_level} />
+        <div style={{ display: "flex", gap: "6px" }}>
+          <PriorityFlag flag={risk_level} />
+          <PartyFlag flag={relevant_party} parties={suggestionsStore.parties} />
+        </div>
         <Button
           appearance="subtle"
           size="small"

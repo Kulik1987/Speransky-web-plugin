@@ -29,7 +29,7 @@ import { ChecklistCard } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
 import { Modal } from "../../components/atoms";
-import { getMaxLengthError, sanitizeFieldValue } from "../../helpers";
+import { getMaxLengthError, normalizeFieldValue, sanitizeFieldValue } from "../../helpers";
 
 const T = {
   pageCreateTitle: {
@@ -92,6 +92,10 @@ const T = {
     ru: "Сохранить",
     en: "Save",
   },
+  requiredField: {
+    ru: "Обязательное поле",
+    en: "Required field",
+  },
 };
 
 const iconStyle = { width: "9px", height: "9px", padding: "8px" };
@@ -110,6 +114,7 @@ const Checklist = () => {
   const [checklistName, setChecklistName] = useState("");
   const [checklistRules, setChecklistRules] = useState<DraftRule[]>([]);
 
+  const [checklistNameTouched, setChecklistNameTouched] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
@@ -169,6 +174,7 @@ const Checklist = () => {
       setIsFormOpen(false);
       setChecklistRules([]);
       setChecklistName("");
+      setChecklistNameTouched(false);
       setDocType("");
       setParty("");
       setOpenItems([2]);
@@ -201,13 +207,15 @@ const Checklist = () => {
     }
   };
 
-  const validationName = getMaxLengthError(checklistName, locale, 255);
+  const validationName =
+    checklistNameTouched && !checklistName ? T.requiredField[locale] : getMaxLengthError(checklistName, locale, 255);
 
   // Возвращает true, если чек-лист готов к сохранению:
   // заполнено название и все правила прошли валидацию обязательных полей
   const canSave =
     !!checklistName &&
-    !validationName &&
+    !getMaxLengthError(checklistName, locale, 255) &&
+    checklistRules.length !== 0 &&
     checklistRules.every((rule) => {
       const r = rule as { simple_rule?: string; check_condition?: string };
       return !!(r.simple_rule || r.check_condition);
@@ -220,6 +228,10 @@ const Checklist = () => {
         placeholder={T.checklistNamePlaceholder[locale]}
         value={checklistName}
         onChange={(_, data) => setChecklistName(sanitizeFieldValue(data.value))}
+        onBlur={(e) => {
+          setChecklistNameTouched(true);
+          setChecklistName(normalizeFieldValue(e.target.value));
+        }}
         required
       />
     </Field>

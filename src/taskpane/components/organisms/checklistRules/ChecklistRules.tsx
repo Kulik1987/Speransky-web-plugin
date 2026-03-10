@@ -19,7 +19,13 @@ import { useCommonStyles } from "../../../theme/commonStyles";
 import { SIMPLE_RULE_FIELD } from "../../../constants";
 import { Modal } from "../../atoms";
 import { customColors } from "../../../theme/theme";
-import { autoResize, resizeTextarea, sanitizeFieldValue } from "../../../helpers";
+import {
+  autoResize,
+  getMaxLengthError,
+  normalizeFieldValue,
+  resizeTextarea,
+  sanitizeFieldValue,
+} from "../../../helpers";
 
 const T = {
   ruleTitle: {
@@ -57,6 +63,10 @@ const T = {
   deleteConfirm: {
     ru: "Удалить",
     en: "Delete",
+  },
+  requiredField: {
+    ru: "Обязательное поле",
+    en: "Required field",
   },
 };
 
@@ -101,6 +111,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
   const commonStyles = useCommonStyles();
   const styles = useChecklistRuleStyles();
 
+  const [simpleTouched, setSimpleTouched] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [targetId, setTargetId] = useState<string | number | null>(null);
   const fieldsRef = useRef<HTMLDivElement>(null);
@@ -145,6 +156,9 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
     setTargetId(null);
   };
 
+  const validationField =
+    simpleTouched && !ruleState.simple ? T.requiredField[locale] : getMaxLengthError(ruleState.simple, locale);
+
   return (
     <div className={styles.container}>
       <Modal
@@ -172,13 +186,22 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
           <AccordionPanel className={styles.accordionPanel}>
             <div ref={fieldsRef} className={styles.fields}>
               {ruleType === "simple" ? (
-                <Field label={SIMPLE_RULE_FIELD.label[locale]}>
+                <Field
+                  label={SIMPLE_RULE_FIELD.label[locale]}
+                  required
+                  validationState={validationField ? "error" : "none"}
+                  validationMessage={validationField}
+                >
                   <Textarea
                     resize="none"
                     value={ruleState.simple}
                     onChange={(event, data) => {
                       handleSimpleChange(sanitizeFieldValue(data.value));
                       autoResize(event);
+                    }}
+                    onBlur={() => {
+                      setSimpleTouched(true);
+                      handleSimpleChange(normalizeFieldValue(ruleState.simple));
                     }}
                     placeholder={SIMPLE_RULE_FIELD.placeholder[locale]}
                   />
@@ -188,7 +211,14 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
               )}
 
               <div className={styles.riskSection}>
-                <Field label={`${T.riskLevel[locale]} ${ruleType === "simple" ? T.optional[locale] : ""}`}>
+                <Field
+                  label={
+                    <>
+                      {T.riskLevel[locale]}
+                      {ruleType === "simple" && <span className={styles.labelOptional}> {T.optional[locale]}</span>}
+                    </>
+                  }
+                >
                   <div className={styles.riskBtnBlock}>
                     {Object.values(RiskLevel).map((risk) => (
                       <Button
@@ -212,9 +242,10 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                       resize="none"
                       value={ruleState.riskTrigger}
                       onChange={(event, data) => {
-                        update({ riskTrigger: data.value });
+                        update({ riskTrigger: sanitizeFieldValue(data.value) });
                         autoResize(event);
                       }}
+                      onBlur={() => update({ riskTrigger: normalizeFieldValue(ruleState.riskTrigger) })}
                       placeholder={T.riskTriggerPlaceholder[locale]}
                     />
                   )}

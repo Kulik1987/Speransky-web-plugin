@@ -32,6 +32,7 @@ export const useChecklistRuleStyles = makeStyles({
     },
     "& span": {
       borderBottomColor: tokens.colorNeutralStroke1,
+      paddingBottom: 0,
       "&::after": {
         display: "none",
       },
@@ -43,7 +44,7 @@ export const useChecklistRuleStyles = makeStyles({
       },
     },
     "& textarea": {
-      ...shorthands.overflow("hidden"),
+      ...shorthands.overflow("auto"),
       minHeight: "56px",
       paddingTop: tokens.spacingVerticalXS,
       paddingBottom: tokens.spacingVerticalXXXL,
@@ -51,6 +52,9 @@ export const useChecklistRuleStyles = makeStyles({
       paddingRight: tokens.spacingHorizontalSNudge,
       backgroundColor: customColors.bg.textarea,
     },
+  },
+  labelOptional: {
+    color: customColors.text.secondary,
   },
   btnDelete: {
     alignSelf: "flex-end",

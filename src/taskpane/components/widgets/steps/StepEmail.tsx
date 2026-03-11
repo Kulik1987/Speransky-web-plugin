@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
-import { Button, Input, InputProps, Link, Text } from "@fluentui/react-components";
+import { Button, Input, InputProps, Link, mergeClasses, Text } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { useStepStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
@@ -127,7 +127,7 @@ const StepEmail = () => {
 
       <div className={styles.block}>
         <Input
-          className={commonStyles.input}
+          className={mergeClasses(commonStyles.input, email && commonStyles.inputFill)}
           value={email}
           onChange={handleEmailChange}
           onBlur={handleBlur}

@@ -13,6 +13,7 @@ import {
   Dropdown,
   Field,
   Input,
+  mergeClasses,
   Option,
   Spinner,
 } from "@fluentui/react-components";
@@ -233,6 +234,7 @@ const Checklist = () => {
           setChecklistName(normalizeFieldValue(e.target.value));
         }}
         required
+        className={mergeClasses(commonStyles.input, checklistName && commonStyles.inputFill)}
       />
     </Field>
   );
@@ -303,6 +305,7 @@ const Checklist = () => {
                 value={docType}
                 onOptionSelect={(_, data) => setDocType(data.optionValue ?? "")}
                 listbox={{ className: styles.dropdownList }}
+                className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
               >
                 {ALL_CONTRACT_TYPES.map((type) => (
                   <Option key={type} value={type}>
@@ -318,6 +321,7 @@ const Checklist = () => {
                 value={party}
                 onOptionSelect={(_, data) => setParty(data.optionValue ?? "")}
                 listbox={{ className: styles.dropdownList }}
+                className={mergeClasses(commonStyles.dropdown, party && commonStyles.inputFill)}
               >
                 {ALL_PARTIES.map((type) => (
                   <Option key={type} value={type}>

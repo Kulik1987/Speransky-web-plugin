@@ -25,6 +25,7 @@ export const useDrawerModalStyles = makeStyles({
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalXL),
     color: customColors.text.primary[90],
+    width: "100%",
   },
   sectionHeader: {
     fontSize: tokens.fontSizeBase400,
@@ -32,15 +33,17 @@ export const useDrawerModalStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
   },
   sectionContent: {
-    "& > div": {
-      display: "flex",
-      alignItems: "center",
-      ...shorthands.gap(tokens.spacingHorizontalSNudge),
-      lineHeight: tokens.lineHeightHero700,
-    },
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    lineHeight: tokens.lineHeightHero700,
+  },
+  sectionRowLabel: {
+    display: "flex",
+    alignItems: "center",
+    ...shorthands.gap(tokens.spacingHorizontalSNudge),
   },
   sectionValue: {
-    marginLeft: "70px",
     fontSize: tokens.fontSizeBase300,
     lineHeight: tokens.lineHeightBase300,
     color: tokens.colorBrandForeground2,
@@ -51,7 +54,7 @@ export const useDrawerModalStyles = makeStyles({
   sectionButton: {
     fontWeight: tokens.fontWeightRegular,
     color: customColors.text.primary[90],
-    "&:disabled": {
+    "&:disabled, &:disabled:hover": {
       color: customColors.text.secondary,
     },
   },

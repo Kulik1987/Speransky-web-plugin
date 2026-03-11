@@ -14,6 +14,7 @@ export const useReviewTypeStyles = makeStyles({
   },
   tab: {
     width: "50%",
+    cursor: "pointer",
     ...shorthands.borderRadius(0),
     ...shorthands.borderStyle("solid"),
     ...shorthands.borderWidth("1px"),
@@ -23,29 +24,17 @@ export const useReviewTypeStyles = makeStyles({
       lineHeight: tokens.lineHeightBase400,
       fontWeight: tokens.fontWeightRegular,
     },
-    "&[aria-selected='true']::after, &:hover::before": {
-      left: "-1px",
-      right: 0,
-      bottom: "-1px",
-      width: "101%",
-      borderTopLeftRadius: tokens.borderRadiusMedium,
-      borderTopRightRadius: tokens.borderRadiusMedium,
-      ...shorthands.borderColor(tokens.colorBrandForeground2),
+    "&::before, &::after": {
+      display: "none",
     },
-    "&:hover::before": {
-      backgroundColor: customColors.border[20],
+    "&:hover, &:active": {
+      backgroundColor: "#FFFFFF",
     },
-    "&[aria-selected='true']": {
+    "&[aria-selected='true'], &[aria-selected='true']:hover, &[aria-selected='true']:active": {
       backgroundColor: tokens.colorBrandForeground2,
-      "& span": {
-        color: "#FFFFFF",
-      },
     },
-    "&[aria-selected='true']:hover": {
-      backgroundColor: tokens.colorBrandForeground1,
-      "& span": {
-        color: "#FFFFFF",
-      },
+    "&[aria-selected='true'] span, &[aria-selected='true']:hover span, &[aria-selected='true']:active span": {
+      color: "#FFFFFF",
     },
   },
   tabFirst: {

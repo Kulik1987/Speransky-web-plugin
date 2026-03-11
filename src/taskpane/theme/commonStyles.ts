@@ -25,6 +25,41 @@ export const useCommonStyles = makeStyles({
   },
   input: {
     minWidth: "100%",
+    borderBottomColor: tokens.colorNeutralStroke1,
+    "&::after": { display: "none" },
+    "&:focus-within": {
+      borderBottomColor: tokens.colorBrandStroke2,
+      borderBottomWidth: "2px",
+    },
+    "&:hover": {
+      borderBottomColor: tokens.colorBrandStroke2,
+    },
+    "&:has(input:hover), &:has(input:active), &:has(input:focus-within)": {
+      borderBottomColor: tokens.colorBrandStroke2,
+    },
+  },
+  inputFill: {
+    "&::after": { display: "none" },
+    borderBottomColor: tokens.colorBrandForegroundOnLightPressed,
+    borderBottomWidth: "2px",
+    "&:focus-within": {
+      borderBottomColor: tokens.colorBrandForegroundOnLightPressed,
+      borderBottomWidth: "2px",
+    },
+  },
+  dropdown: {
+    borderBottomColor: tokens.colorNeutralStroke1,
+    "&::after": { display: "none" },
+    "&:focus-within": {
+      borderBottomColor: tokens.colorBrandStroke2,
+      borderBottomWidth: "2px",
+    },
+    "&:hover": {
+      borderBottomColor: tokens.colorBrandStroke2,
+    },
+    "&:active": {
+      borderBottomColor: tokens.colorBrandStroke2,
+    },
   },
   button: {
     width: "100%",
@@ -63,7 +98,7 @@ export const useCommonStyles = makeStyles({
       paddingTop: tokens.spacingVerticalM,
       paddingBottom: tokens.spacingVerticalM,
       paddingLeft: tokens.spacingHorizontalS,
-      paddingRight: tokens.spacingHorizontalXL,
+      paddingRight: "40px",
       minHeight: "48px",
       fontSize: tokens.fontSizeBase400,
       lineHeight: tokens.lineHeightBase400,

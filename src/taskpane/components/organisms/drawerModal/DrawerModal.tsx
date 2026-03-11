@@ -14,6 +14,7 @@ import {
   mergeClasses,
 } from "@fluentui/react-components";
 import {
+  ArrowCircleRight16Regular,
   ArrowLeft16Regular,
   Chat20Regular,
   Dismiss24Regular,
@@ -124,45 +125,48 @@ const DrawerModal = (props: DrawerModalT) => {
               <div>
                 <div className={styles.sectionHeader}>{T.account[locale]}</div>
                 <div className={styles.sectionContent}>
-                  <div>
+                  <span className={styles.sectionRowLabel}>
                     <MailCopy20Regular /> {authStore.clientEmail}
-                  </div>
+                  </span>
                 </div>
               </div>
 
               <div>
                 <div className={styles.sectionHeader}>{T.tariff[locale]}</div>
                 <div className={styles.sectionContent}>
-                  <div>
+                  <span className={styles.sectionRowLabel}>
                     <FolderPeople20Regular />
                     {authStore.clientData?.active_tariffs[0].name || "Speransky Corp"}
-                  </div>
+                  </span>
                 </div>
               </div>
 
               <div>
                 <div className={styles.sectionHeader}>{T.quickAccess[locale]}</div>
                 <div className={styles.sectionContent}>
+                  <span className={styles.sectionRowLabel}>
+                    <DocumentTableCheckmark20Regular /> {T.checklists[locale]}
+                  </span>
                   <Button
                     appearance="transparent"
-                    className={mergeClasses(styles.button, styles.sectionButton)}
-                    icon={<DocumentTableCheckmark20Regular />}
+                    className={styles.sectionValue}
+                    icon={<ArrowCircleRight16Regular />}
                     onClick={handleGoToChecklists}
-                  >
-                    {T.checklists[locale]}
-                  </Button>
+                  />
                 </div>
               </div>
 
               <div>
                 <div className={styles.sectionHeader}>{T.settings[locale]}</div>
                 <div className={styles.sectionContent}>
-                  <div>
+                  <span className={styles.sectionRowLabel}>
                     <Globe20Regular /> {T.settingsLang[locale]}
-                    <Button appearance="transparent" className={styles.sectionValue} onClick={() => setLevel(2)}>
-                      {T.language[locale]}
-                    </Button>
-                  </div>
+                  </span>
+                  <Button appearance="transparent" className={styles.sectionValue} onClick={() => setLevel(2)}>
+                    {T.language[locale]}
+                  </Button>
+                </div>
+                <div className={styles.sectionContent}>
                   <Button
                     appearance="transparent"
                     className={mergeClasses(styles.button, styles.sectionButton)}

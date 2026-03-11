@@ -72,13 +72,18 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         placeholder={T.docTypePlaceholder[locale]}
         onOptionSelect={(_, data) => setDocType(data.optionValue ?? "")}
         disabled={!suggestionsStore.documentType}
+        className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
       >
         <Option key={suggestionsStore.documentType} value={suggestionsStore.documentType}>
           {suggestionsStore.documentType}
         </Option>
       </Dropdown>
 
-      <PartyDropdown placeholder={T.partyPlaceholder[locale]} onSelect={setIsPartySelected} />
+      <PartyDropdown
+        placeholder={T.partyPlaceholder[locale]}
+        onSelect={setIsPartySelected}
+        isFilled={isPartySelected}
+      />
 
       <Accordion collapsible className={commonStyles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
         <AccordionItem className={commonStyles.accordionItem} value={1}>

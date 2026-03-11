@@ -110,42 +110,33 @@ const Summary = () => {
     return <ErrorText error={T.errorDescription[locale]} />;
   }
 
+  if (isAnalysisProcessing) {
+    return <ItemSkeleton title={T.waitingNotification[locale]} />;
+  }
+
   return (
     <div className={styles.container}>
-      {isAnalysisProcessing ? (
-        <div className={styles.block}>
-          <Divider alignContent="center" inset>
-            <Text size={300} weight="medium">
-              {T.waitingNotification[locale]}
-            </Text>
-          </Divider>
-          <ItemSkeleton />
-        </div>
-      ) : (
-        <>
-          <PopoverWarning
-            message={T.popoverMessage[locale]}
-            trigger={<Button appearance="transparent" icon={<ArrowLeft20Regular />} />}
-            isOpen={isPopoverOpen}
-            setIsOpen={setIsPopoverOpen}
-            onConfirm={handleConfirmLeave}
-          />
+      <PopoverWarning
+        message={T.popoverMessage[locale]}
+        trigger={<Button appearance="transparent" icon={<ArrowLeft20Regular />} />}
+        isOpen={isPopoverOpen}
+        setIsOpen={setIsPopoverOpen}
+        onConfirm={handleConfirmLeave}
+      />
 
-          {suggestionsNew?.map((data, index) => {
-            return <SuggestionCard data={data} key={index} index={index} />;
-          })}
+      {suggestionsNew?.map((data, index) => {
+        return <SuggestionCard data={data} key={index} index={index} />;
+      })}
 
-          <div className={styles.block}>
-            <Button appearance="primary" size="medium" onClick={handleApplyAll}>
-              {T.buttonApplyAll[locale]}
-            </Button>
-            <Divider />
-            <Button appearance="primary" size="medium" onClick={handleDownloadArchive}>
-              {T.buttonDownloadArchive[locale]}
-            </Button>
-          </div>
-        </>
-      )}
+      <div className={styles.block}>
+        <Button appearance="primary" size="medium" onClick={handleApplyAll}>
+          {T.buttonApplyAll[locale]}
+        </Button>
+        <Divider />
+        <Button appearance="primary" size="medium" onClick={handleDownloadArchive}>
+          {T.buttonDownloadArchive[locale]}
+        </Button>
+      </div>
     </div>
   );
 };

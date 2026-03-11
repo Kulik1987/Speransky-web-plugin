@@ -32,8 +32,8 @@ const T = {
     en: "Create and save your own rules for review",
   },
   waitingNotification: {
-    ru: "Идёт анализ сторон",
-    en: "Please wait",
+    ru: "Определяем тип и стороны договора",
+    en: "Getting contract type and parties",
   },
   errorDescription: {
     ru: "Ошибка определения сторон договора.\n Попробуйте ещё раз.",
@@ -71,36 +71,29 @@ const Review = () => {
     return <ErrorText error={T.errorDescription[locale]} />;
   }
 
+  if (documentStore.isFetchingDetectDocumentType) {
+    return <ItemSkeleton title={T.waitingNotification[locale]} />;
+  }
+
   return (
     <div className={styles.container}>
-      {documentStore.isFetchingDetectDocumentType ? (
-        <>
-          <Text size={300} weight="medium">
-            {T.waitingNotification[locale]}
-          </Text>
-          <ItemSkeleton />
-        </>
-      ) : (
-        <>
-          <Text as="h1" weight="semibold" className={mergeClasses(commonStyles.pageTitle, styles.title)}>
-            {T.title[locale]}
-          </Text>
-          <div className={styles.block}>
-            <Card
-              title={T.generalTitle[locale]}
-              text={T.generalText[locale]}
-              icon={<DocumentBulletList24Regular />}
-              onClick={() => handleNavigateToReviewType(ReviewTypesEnums.GENERAL)}
-            />
-            <Card
-              title={T.customTitle[locale]}
-              text={T.customText[locale]}
-              icon={<Settings24Regular />}
-              onClick={() => handleNavigateToReviewType(ReviewTypesEnums.CUSTOM)}
-            />
-          </div>
-        </>
-      )}
+      <Text as="h1" weight="semibold" className={mergeClasses(commonStyles.pageTitle, styles.title)}>
+        {T.title[locale]}
+      </Text>
+      <div className={styles.block}>
+        <Card
+          title={T.generalTitle[locale]}
+          text={T.generalText[locale]}
+          icon={<DocumentBulletList24Regular />}
+          onClick={() => handleNavigateToReviewType(ReviewTypesEnums.GENERAL)}
+        />
+        <Card
+          title={T.customTitle[locale]}
+          text={T.customText[locale]}
+          icon={<Settings24Regular />}
+          onClick={() => handleNavigateToReviewType(ReviewTypesEnums.CUSTOM)}
+        />
+      </div>
     </div>
   );
 };

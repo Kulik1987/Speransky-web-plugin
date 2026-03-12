@@ -17,7 +17,7 @@ import RuleAdvancedFields, { AdvancedField, AdvancedFieldsState } from "./RuleAd
 import { useChecklistRuleStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
 import { SIMPLE_RULE_FIELD } from "../../../constants";
-import { Modal } from "../../atoms";
+import { IconButton, Modal } from "../../atoms";
 import { customColors } from "../../../theme/theme";
 import {
   autoResize,
@@ -57,8 +57,8 @@ const T = {
     en: "What deviation from the rule determines this risk level?",
   },
   deleteRuleTitle: {
-    ru: "Удалить правило?",
-    en: "Delete rule?",
+    ru: "Удалить правило",
+    en: "Delete rule",
   },
   deleteConfirm: {
     ru: "Удалить",
@@ -164,7 +164,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
       <Modal
         open={targetId !== null}
         onClose={() => setTargetId(null)}
-        title={T.deleteRuleTitle[locale]}
+        title={`${T.deleteRuleTitle[locale]}?`}
         actionButtonTitle={T.deleteConfirm[locale]}
         onAction={handleDeleteRuleConfirm}
       />
@@ -251,11 +251,12 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                   )}
                 </Field>
 
-                <Button
-                  className={styles.btnDelete}
-                  appearance="subtle"
+                <IconButton
+                  tooltip={T.deleteRuleTitle[locale]}
                   icon={<Delete24Regular color={customColors.accent.delete} />}
                   onClick={handleDeleteRule}
+                  positioning="above-end"
+                  className={styles.btnDelete}
                 />
               </div>
             </div>

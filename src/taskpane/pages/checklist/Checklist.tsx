@@ -29,7 +29,7 @@ import { ALL_PARTIES, ALL_CONTRACT_TYPES } from "../../constants";
 import { ChecklistCard } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
-import { Modal } from "../../components/atoms";
+import { IconButton, Modal } from "../../components/atoms";
 import { getMaxLengthError, normalizeFieldValue, sanitizeFieldValue } from "../../helpers";
 
 const T = {
@@ -339,11 +339,12 @@ const Checklist = () => {
               />
             </AccordionPanel>
 
-            <Button
+            <IconButton
+              tooltip={T.btnSaveChecklist[locale]}
               icon={<Save16Regular />}
-              appearance="primary"
-              size="small"
               onClick={() => setIsSaveModalOpen(true)}
+              positioning="above-end"
+              appearance="primary"
               className={commonStyles.accordionActions}
               disabled={!canSave}
             />

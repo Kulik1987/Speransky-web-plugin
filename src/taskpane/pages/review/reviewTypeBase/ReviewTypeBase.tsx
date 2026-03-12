@@ -15,6 +15,7 @@ import { Add16Filled, TriangleDownFilled, TriangleRightFilled } from "@fluentui/
 import { PartyDropdown } from "../../../components/molecules";
 import { useReviewTypeBaseStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
+import { IconButton } from "../../../components/atoms";
 
 const T = {
   docTypePlaceholder: {
@@ -97,11 +98,12 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
             {listContent}
           </AccordionPanel>
           {(actionIcon || actionHandleClick) && isOpen && (
-            <Button
+            <IconButton
+              tooltip={T.btnCreateChecklist[locale]}
               icon={actionIcon || <Add16Filled />}
-              appearance="primary"
-              size="small"
               onClick={actionHandleClick}
+              positioning="above-end"
+              appearance="primary"
               className={commonStyles.accordionActions}
             />
           )}

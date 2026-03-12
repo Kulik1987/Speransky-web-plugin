@@ -11,4 +11,10 @@ export const useHeaderMenuStyles = makeStyles({
     ...shorthands.padding(tokens.spacingHorizontalL),
     backgroundImage: "linear-gradient(90deg, #19737D 0%, #08656E 50%, #0F565E 100%)",
   },
+  logoHidden: {
+    visibility: "hidden",
+  },
+  logoVisible: {
+    visibility: "visible",
+  },
 });

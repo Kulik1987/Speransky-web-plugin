@@ -7,6 +7,7 @@ import { PayloadChecklistAddRuleDto, RiskLevel } from "../../../api/types";
 import { DraftRule } from "../../../store/checklist";
 import { ChecklistRules, RuleType } from "../checklistRules";
 import { useChecklistStyles } from "./styles";
+import { IconButton } from "../../atoms";
 
 const T = {
   modeSimpleTitle: {
@@ -28,6 +29,10 @@ const T = {
   addRulesLabel: {
     ru: "Добавить правило проверки",
     en: "Add check rule",
+  },
+  addRuleTooltip: {
+    ru: "Добавить правило",
+    en: "Add rule",
   },
 };
 
@@ -105,7 +110,13 @@ const ChecklistForm = ({ onRulesChange, initialRules }: ChecklistFormProps) => {
 
       <div className={styles.rulesHeader}>
         <span className={styles.rulesLabel}>{T.addRulesLabel[locale]}</span>
-        <Button size="small" appearance="primary" icon={<Add16Regular />} onClick={handleAddRule} />
+        <IconButton
+          tooltip={T.addRuleTooltip[locale]}
+          icon={<Add16Regular />}
+          onClick={handleAddRule}
+          positioning="above-end"
+          appearance="primary"
+        />
       </div>
 
       <div className={styles.rules}>

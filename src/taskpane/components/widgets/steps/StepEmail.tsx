@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
-import { Button, Input, InputProps, Link, mergeClasses, Text } from "@fluentui/react-components";
+import { Button, Field, Input, InputProps, Link, mergeClasses, Text } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { useStepStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
-import { CheckBox, ErrorText } from "../../atoms";
+import { CheckBox } from "../../atoms";
 
 const T = {
   title: {
@@ -125,7 +125,11 @@ const StepEmail = () => {
         </Text>
       </div>
 
-      <div className={styles.block}>
+      <Field
+        validationState={isDisplayErrorMessage ? "error" : "none"}
+        validationMessage={error}
+        style={{ minWidth: "100%" }}
+      >
         <Input
           className={mergeClasses(commonStyles.input, email && commonStyles.inputFill)}
           value={email}
@@ -139,8 +143,7 @@ const StepEmail = () => {
           appearance="outline"
           size="large"
         />
-        {isDisplayErrorMessage && <ErrorText error={error} />}
-      </div>
+      </Field>
 
       <Button
         appearance="primary"

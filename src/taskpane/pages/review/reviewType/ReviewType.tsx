@@ -47,6 +47,7 @@ const ReviewType = () => {
 
   const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
   const [targetId, setTargetId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     checkList.getChecklists();
@@ -54,11 +55,12 @@ const ReviewType = () => {
 
   const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
     setSelectedTab(data.value as string);
+    setSearchQuery("");
   };
 
   const handleStartAnalysis = () => {
     suggestionsStore.setChecklistId(selectedTab === ReviewTypesEnums.CUSTOM ? selectedChecklist : null);
-    navigate("/summary");
+    navigate(RoutePathEnum.SUMMARY, { state: { reviewType: selectedTab } });
   };
 
   const navigateToChecklistPage = () => {
@@ -80,9 +82,13 @@ const ReviewType = () => {
     setTargetId(null);
   };
 
+  const filteredContractTypes = searchQuery
+    ? SUPPORTED_CONTRACT_TYPES.filter((item: string) => item.toLowerCase().includes(searchQuery.toLowerCase()))
+    : SUPPORTED_CONTRACT_TYPES;
+
   const reviewGeneralChecklists = (
     <RadioGroup className={styles.radioGroup}>
-      {SUPPORTED_CONTRACT_TYPES.map((item: string) => (
+      {filteredContractTypes.map((item: string) => (
         <Radio
           key={item}
           root={{ className: styles.radioItem }}
@@ -93,8 +99,12 @@ const ReviewType = () => {
     </RadioGroup>
   );
 
+  const filteredChecklists = searchQuery
+    ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : checkList.checklists;
+
   const reviewCustomChecklists = checkList.hasChecklists
-    ? checkList.checklists.map((item) => (
+    ? filteredChecklists.map((item) => (
         <ChecklistCard
           key={item.id}
           id={item.id}
@@ -132,10 +142,17 @@ const ReviewType = () => {
       </TabList>
 
       {selectedTab === ReviewTypesEnums.GENERAL ? (
-        <ReviewTypeBase listContent={reviewGeneralChecklists} onStartReview={handleStartAnalysis} />
+        <ReviewTypeBase
+          listContent={reviewGeneralChecklists}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onStartReview={handleStartAnalysis}
+        />
       ) : (
         <ReviewTypeBase
           listContent={reviewCustomChecklists}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
           onStartReview={handleStartAnalysis}
           actionHandleClick={navigateToChecklistPage}
         />

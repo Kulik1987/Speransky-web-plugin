@@ -15,7 +15,7 @@ import { Add16Filled, TriangleDownFilled, TriangleRightFilled } from "@fluentui/
 import { PartyDropdown } from "../../../components/molecules";
 import { useReviewTypeBaseStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
-import { IconButton } from "../../../components/atoms";
+import { IconButton, SearchBox } from "../../../components/atoms";
 
 const T = {
   docTypePlaceholder: {
@@ -38,6 +38,10 @@ const T = {
     ru: "Сохранённые чек-листы",
     en: "Saved checklists",
   },
+  searchBoxPlaceholder: {
+    ru: "Найти по названию",
+    en: "Search by name",
+  },
   btnStartReview: {
     ru: "Начать проверку",
     en: "Start review",
@@ -46,6 +50,8 @@ const T = {
 
 type ReviewTypeBaseProps = {
   listContent: ReactNode;
+  searchQuery?: string;
+  onSearchChange?: (value: string) => void;
   actionIcon?: ReactElement;
   actionHandleClick?: () => void;
   onStartReview: () => void;
@@ -54,7 +60,7 @@ type ReviewTypeBaseProps = {
 const iconStyle = { width: "9px", height: "9px", padding: "8px" };
 
 const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
-  const { listContent, actionIcon, actionHandleClick, onStartReview } = props;
+  const { listContent, searchQuery = "", onSearchChange, actionIcon, actionHandleClick, onStartReview } = props;
   const { menuStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
   const commonStyles = useCommonStyles();
@@ -95,6 +101,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
             {T.listTitle[locale]}
           </AccordionHeader>
           <AccordionPanel className={mergeClasses(commonStyles.accordionPanel, styles.accordionPanel)}>
+            <SearchBox value={searchQuery} onChange={onSearchChange} placeholder={T.searchBoxPlaceholder[locale]} />
             {listContent}
           </AccordionPanel>
           {(actionIcon || actionHandleClick) && isOpen && (

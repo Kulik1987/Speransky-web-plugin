@@ -29,7 +29,7 @@ import { ALL_PARTIES, ALL_CONTRACT_TYPES } from "../../constants";
 import { ChecklistCard } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
-import { IconButton, Modal } from "../../components/atoms";
+import { IconButton, Modal, SearchBox } from "../../components/atoms";
 import { getMaxLengthError, normalizeFieldValue, sanitizeFieldValue } from "../../helpers";
 
 const T = {
@@ -97,6 +97,10 @@ const T = {
     ru: "Обязательное поле",
     en: "Required field",
   },
+  searchChecklistPlaceholder: {
+    ru: "Найти по названию",
+    en: "Search by name",
+  },
 };
 
 const iconStyle = { width: "9px", height: "9px", padding: "8px" };
@@ -114,6 +118,8 @@ const Checklist = () => {
   const [docType, setDocType] = useState("");
   const [checklistName, setChecklistName] = useState("");
   const [checklistRules, setChecklistRules] = useState<DraftRule[]>([]);
+
+  const [checklistSearch, setChecklistSearch] = useState("");
 
   const [checklistNameTouched, setChecklistNameTouched] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -238,6 +244,10 @@ const Checklist = () => {
       />
     </Field>
   );
+
+  const filteredChecklists = checklistSearch
+    ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(checklistSearch.toLowerCase()))
+    : checkList.checklists;
 
   if (checkList.isDraftLoading) return <Spinner />;
 
@@ -366,7 +376,13 @@ const Checklist = () => {
               {T.listTitle[locale]}
             </AccordionHeader>
             <AccordionPanel className={commonStyles.accordionPanel}>
-              {checkList.checklists.map((item) => (
+              <SearchBox
+                value={checklistSearch}
+                onChange={setChecklistSearch}
+                placeholder={T.searchChecklistPlaceholder[locale]}
+              />
+
+              {filteredChecklists.map((item) => (
                 <ChecklistCard
                   key={item.id}
                   id={item.id}

@@ -1,15 +1,22 @@
 /* global Word console */
-import React from "react";
+import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
-import { Button, Text, Tooltip } from "@fluentui/react-components";
-import { DismissFilled, LocationRippleRegular } from "@fluentui/react-icons";
-import { PartyFlag, PriorityFlag } from "../../atoms";
+import { Text, tokens } from "@fluentui/react-components";
+import {
+  CheckboxChecked24Regular,
+  CommentNote24Regular,
+  Delete24Regular,
+  LocationRipple24Regular,
+} from "@fluentui/react-icons";
+import { IconButton, Modal, PartyFlag, PriorityFlag } from "../../atoms";
 import { ApplyService } from "../../../services/applyService";
 import { SearchService } from "../../../services/searchService";
 import { SuggestionT } from "../../../store/suggestions";
 import { htmlChangesMatching } from "../../../helpers/diff";
 import { RecommendationTypeEnum } from "../../../enums";
+import { useSuggestionCardStyles } from "./styles";
+import { customColors } from "../../../theme/theme";
 
 type SuggestionPropT = {
   index: number;
@@ -22,8 +29,8 @@ const T = {
     en: "Dismiss",
   },
   buttonLocation: {
-    ru: "Найти в тексте",
-    en: "Search a location",
+    ru: "Местоположение в документе",
+    en: "Location in contract",
   },
   labelChange: {
     ru: "Правка:",
@@ -41,6 +48,14 @@ const T = {
     ru: "Добавить комментарий",
     en: "Add comment",
   },
+  deleteRecommendationTitle: {
+    ru: "Удалить рекомендацию из списка?",
+    en: "Delete recommendation from list?",
+  },
+  deleteConfirm: {
+    ru: "Удалить",
+    en: "Delete",
+  },
 };
 
 const SuggestionCard = (props: SuggestionPropT) => {
@@ -48,6 +63,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
   const { locale } = menuStore;
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
+  const styles = useSuggestionCardStyles();
 
   const { data, index: indexSuggestion } = props;
 
@@ -77,6 +93,8 @@ const SuggestionCard = (props: SuggestionPropT) => {
 
   const isChangeExist = !!changeText || isTypeDelete;
   const isCommentExist = !!commentText;
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleShowInDocument = async () => {
     await Word.run(async (context) => {
@@ -126,105 +144,84 @@ const SuggestionCard = (props: SuggestionPropT) => {
 
   if (isDismiss) return null;
 
+  const handleDeleteRecommendation = () => setIsModalOpen(true);
+  const handleDeleteConfirm = () => {
+    setIsModalOpen(false);
+    handleDismiss();
+  };
+
   return (
-    <div
-      style={{
-        border: "1px solid rgba(0, 0, 0, 0.1)",
-        borderRadius: "8px",
-        padding: "16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
-        boxShadow: "0 3px 5px rgba(0, 0, 0, 0.25)",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", gap: "6px" }}>
-          <PriorityFlag flag={risk_level} />
-          <PartyFlag flag={relevant_party} parties={suggestionsStore.parties} />
-        </div>
-        <Button
-          appearance="subtle"
-          size="small"
-          iconPosition="after"
-          onClick={handleDismiss}
-          icon={<DismissFilled fontSize={"1em"} color="grey" />}
-        >
-          {T.buttonDismiss[locale]}
-        </Button>
+    <div className={styles.container} onClick={handleShowInDocument}>
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={T.deleteRecommendationTitle[locale]}
+        actionButtonTitle={T.deleteConfirm[locale]}
+        onAction={handleDeleteConfirm}
+      />
+
+      <div className={styles.flagBlock}>
+        <PriorityFlag flag={risk_level} />
+        <PartyFlag flag={relevant_party} />
       </div>
-      {isChangeExist && (
-        <div>
-          <Text weight="bold">{T.labelChange[locale]} </Text>
-          {isTypeAdd ? (
-            <Text weight="bold" block style={{ color: "#099e1a" }}>
-              {changeText}
-            </Text>
-          ) : isTypeDelete ? (
-            <Text block style={{ textDecoration: "line-through", color: "#db690d" }}>
-              {sourceText}
-            </Text>
-          ) : (
-            <div dangerouslySetInnerHTML={{ __html: htmlChangesMatchingText || changeText }} />
-          )}
-        </div>
-      )}
-      {isCommentExist && (
-        <div>
-          <Text weight="bold">{T.labelComment[locale]} </Text>
-          <Text>{commentText}</Text>
-        </div>
-      )}
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          gap: "12px",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-          }}
-        >
-          <Tooltip content={T.buttonLocation[locale]} relationship="label">
-            <Button
-              appearance="outline"
-              size="medium"
-              onClick={handleShowInDocument}
-              icon={<LocationRippleRegular />}
-            />
-          </Tooltip>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            flex: 1,
-          }}
-        >
-          {isChangeExist && (
-            <Button appearance="primary" size="medium" onClick={handleApplyChange}>
-              {T.buttonChange[locale]}
-            </Button>
-          )}
+
+      <div className={styles.changesBlock}>
+        {isChangeExist && (
+          <div>
+            <Text weight="bold">{T.labelChange[locale]}</Text>
+            {isTypeAdd ? (
+              <Text block style={{ color: customColors.accent.risk.low.text }}>
+                {changeText}
+              </Text>
+            ) : isTypeDelete ? (
+              <Text block style={{ textDecoration: "line-through", color: customColors.accent.risk.high.text }}>
+                {sourceText}
+              </Text>
+            ) : (
+              <div dangerouslySetInnerHTML={{ __html: htmlChangesMatchingText || changeText }} />
+            )}
+          </div>
+        )}
+        {isCommentExist && (
+          <div>
+            <Text weight="bold">{T.labelComment[locale]}</Text>
+            <Text block>{commentText}</Text>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.buttonsBlock}>
+        <div className={styles.changeButtons}>
+          <IconButton
+            tooltip={T.buttonLocation[locale]}
+            icon={<LocationRipple24Regular color={tokens.colorBrandForeground2} />}
+            onClick={handleShowInDocument}
+            positioning="above-start"
+          />
           {isCommentExist && (
-            <Button
-              appearance="primary"
-              size="medium"
+            <IconButton
+              tooltip={T.buttonComment[locale]}
+              icon={<CommentNote24Regular color={tokens.colorBrandForeground2} />}
               onClick={handleAddComment}
+              positioning="above-start"
               disabled={isAccessToRangeInsertComment === false}
-            >
-              {T.buttonComment[locale]}
-            </Button>
+            />
+          )}
+          {isChangeExist && (
+            <IconButton
+              tooltip={T.buttonChange[locale]}
+              icon={<CheckboxChecked24Regular color={tokens.colorBrandForeground2} />}
+              onClick={handleApplyChange}
+              positioning="above-start"
+            />
           )}
         </div>
+        <IconButton
+          tooltip={T.buttonDismiss[locale]}
+          icon={<Delete24Regular color={customColors.accent.delete} />}
+          onClick={handleDeleteRecommendation}
+          positioning="above-end"
+        />
       </div>
     </div>
   );

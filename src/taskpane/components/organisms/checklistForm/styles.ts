@@ -5,28 +5,29 @@ export const useChecklistStyles = makeStyles({
   container: {
     display: "flex",
     flexDirection: "column",
-    ...shorthands.gap(tokens.spacingVerticalM),
+    ...shorthands.gap(tokens.spacingVerticalXL),
   },
   tabList: {
     ...shorthands.gap(tokens.spacingHorizontalM),
-    marginBottom: tokens.spacingVerticalS,
-    marginTop: tokens.spacingVerticalS,
   },
   tab: {
     height: "auto",
     width: "48%",
-    paddingTop: 0,
+    paddingTop: tokens.spacingVerticalSNudge,
     paddingBottom: tokens.spacingVerticalS,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.borderBottom("2px", "solid", tokens.colorNeutralStroke1),
+    "&[aria-selected='true'], &[aria-selected='true']:hover": {
+      backgroundColor: customColors.bg.accordion,
+      ...shorthands.borderBottom("2px", "solid", tokens.colorBrandForegroundOnLightPressed),
+    },
     "& .fui-Tab__content": {
       display: "flex",
       flexDirection: "column",
       fontWeight: tokens.fontWeightRegular,
     },
-    "&[aria-selected='true']::after, &:hover::before": {
-      left: 0,
-      right: 0,
-      bottom: 0,
-      width: "100%",
+    "&::after, &::before": {
+      display: "none",
     },
   },
   modeTitle: {
@@ -43,6 +44,7 @@ export const useChecklistStyles = makeStyles({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    marginTop: tokens.spacingVerticalS,
   },
   rulesLabel: {
     fontSize: tokens.fontSizeBase400,
@@ -54,5 +56,14 @@ export const useChecklistStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalL),
+  },
+  emptyBlock: {
+    alignItems: "center",
+  },
+  emptyTitle: {
+    color: customColors.text.primary[65],
+    fontSize: tokens.fontSizeBase300,
+    lineHeight: tokens.lineHeightBase400,
+    textAlign: "center",
   },
 });

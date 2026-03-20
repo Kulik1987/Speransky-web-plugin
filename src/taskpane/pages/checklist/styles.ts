@@ -7,9 +7,14 @@ export const useChecklistStyles = makeStyles({
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalL),
   },
+  blockTitle: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   btnTitle: {
     width: "auto",
-    alignSelf: "flex-start",
+    alignSelf: "center",
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     color: customColors.text.primary[90],
@@ -19,12 +24,16 @@ export const useChecklistStyles = makeStyles({
     },
   },
   btnAdd: {
-    alignSelf: "flex-end",
     ...shorthands.padding(tokens.spacingVerticalSNudge, tokens.spacingHorizontalM),
-    marginBottom: tokens.spacingVerticalS,
   },
   dropdownList: {
     maxHeight: "260px",
     overflowY: "auto",
+  },
+  accordionHeader: {
+    "& > button": {
+      color: customColors.text.primary[90],
+      fontWeight: tokens.fontWeightSemibold,
+    },
   },
 });

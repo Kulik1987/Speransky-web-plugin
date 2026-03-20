@@ -25,7 +25,7 @@ export const useCommonStyles = makeStyles({
   },
   input: {
     minWidth: "100%",
-    borderBottomColor: tokens.colorNeutralStroke1,
+    ...shorthands.borderColor(customColors.border[30]),
     "&::after": { display: "none" },
     "&:focus-within": {
       borderBottomColor: tokens.colorBrandStroke2,
@@ -37,6 +37,9 @@ export const useCommonStyles = makeStyles({
     "&:has(input:hover), &:has(input:active), &:has(input:focus-within)": {
       borderBottomColor: tokens.colorBrandStroke2,
     },
+    "& input::placeholder": {
+      color: customColors.text.primary[65],
+    },
   },
   inputFill: {
     "&::after": { display: "none" },
@@ -46,9 +49,12 @@ export const useCommonStyles = makeStyles({
       borderBottomColor: tokens.colorBrandForegroundOnLightPressed,
       borderBottomWidth: "2px",
     },
+    "& button": {
+      color: tokens.colorNeutralForeground1,
+    },
   },
   dropdown: {
-    borderBottomColor: tokens.colorNeutralStroke1,
+    ...shorthands.borderColor(customColors.border[30]),
     "&::after": { display: "none" },
     "&:focus-within": {
       borderBottomColor: tokens.colorBrandStroke2,
@@ -59,6 +65,12 @@ export const useCommonStyles = makeStyles({
     },
     "&:active": {
       borderBottomColor: tokens.colorBrandStroke2,
+    },
+    "& button": {
+      color: customColors.text.primary[65],
+    },
+    "& input::placeholder": {
+      color: customColors.text.primary[65],
     },
   },
   button: {
@@ -86,24 +98,20 @@ export const useCommonStyles = makeStyles({
   },
   accordionItem: {
     position: "relative",
-    ...shorthands.border("1px", "solid", tokens.colorNeutralStroke1),
+    ...shorthands.border("1px", "solid", customColors.border[30]),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
   },
   accordionHeader: {
     "& > button": {
-      backgroundColor: customColors.bg.accordion[75],
+      backgroundColor: customColors.bg.accordion,
       borderBottomWidth: "1px",
       borderBottomStyle: "solid",
-      borderBottomColor: tokens.colorNeutralStroke1,
-      paddingTop: tokens.spacingVerticalM,
-      paddingBottom: tokens.spacingVerticalM,
-      paddingLeft: tokens.spacingHorizontalS,
+      borderBottomColor: customColors.border[30],
+      ...shorthands.padding(tokens.spacingHorizontalS),
       paddingRight: "40px",
-      minHeight: "48px",
+      minHeight: "40px",
       fontSize: tokens.fontSizeBase400,
       lineHeight: tokens.lineHeightBase400,
-      fontWeight: tokens.fontWeightSemibold,
-      color: customColors.text.primary[90],
     },
   },
   accordionPanel: {
@@ -114,7 +122,7 @@ export const useCommonStyles = makeStyles({
   },
   accordionActions: {
     position: "absolute",
-    top: "12px",
+    top: "8px",
     right: "8px",
     zIndex: 1,
   },

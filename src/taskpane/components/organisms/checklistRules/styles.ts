@@ -6,15 +6,9 @@ export const useChecklistRuleStyles = makeStyles({
     position: "relative",
   },
   accordionHeader: {
+    position: "relative",
     "& > button": {
-      backgroundColor: customColors.bg.accordion[35],
-      borderBottomWidth: "1px",
-      borderBottomStyle: "solid",
-      borderBottomColor: tokens.colorNeutralStroke1,
-      ...shorthands.padding(tokens.spacingHorizontalM, tokens.spacingVerticalS),
-      minHeight: "40px",
-      fontSize: tokens.fontSizeBase400,
-      lineHeight: tokens.lineHeightBase400,
+      paddingLeft: tokens.spacingHorizontalL,
     },
   },
   accordionPanel: {
@@ -29,15 +23,18 @@ export const useChecklistRuleStyles = makeStyles({
       lineHeight: tokens.lineHeightBase400,
       marginBottom: tokens.spacingVerticalS,
       color: customColors.text.primary[90],
+      "& > span[aria-hidden]": {
+        color: tokens.colorBrandForeground2,
+      },
     },
     "& span": {
-      borderBottomColor: tokens.colorNeutralStroke1,
+      ...shorthands.borderColor(customColors.border[30]),
       paddingBottom: 0,
       "&::after": {
         display: "none",
       },
       "&:hover, &:focus-within, &:active": {
-        borderBottomColor: tokens.colorNeutralStroke1,
+        ...shorthands.borderColor(customColors.border[30]),
         "&::after": {
           display: "none",
         },
@@ -51,10 +48,14 @@ export const useChecklistRuleStyles = makeStyles({
       paddingLeft: tokens.spacingHorizontalSNudge,
       paddingRight: tokens.spacingHorizontalSNudge,
       backgroundColor: customColors.bg.textarea,
+      "&::placeholder": {
+        color: customColors.text.primary[65],
+      },
     },
   },
   labelOptional: {
     color: customColors.text.secondary,
+    fontWeight: tokens.fontWeightRegular,
   },
   btnDelete: {
     alignSelf: "flex-end",
@@ -78,19 +79,34 @@ export const useChecklistRuleStyles = makeStyles({
     fontWeight: tokens.fontWeightRegular,
   },
   btnRiskHover: {
-    ":hover": {
-      ...shorthands.borderColor("var(--risk-color)"),
+    ":hover, :active": {
+      ...shorthands.borderColor("var(--risk-color-bg)"),
       backgroundColor: "transparent",
-      color: "var(--risk-color)",
+      color: "var(--risk-color-text)",
     },
   },
   btnRiskSelected: {
-    backgroundColor: "var(--risk-color)",
-    ...shorthands.borderColor("var(--risk-color)"),
-    color: "#ffffff",
+    backgroundColor: "var(--risk-color-bg)",
+    ...shorthands.borderColor("var(--risk-color-bg)"),
+    color: "var(--risk-color-text)",
     ":hover": {
-      backgroundColor: "var(--risk-color)",
-      color: "#ffffff",
+      backgroundColor: "var(--risk-color-bg)",
+      color: "var(--risk-color-text)",
     },
+  },
+  ruleFlag: {
+    position: "absolute",
+    top: "8px",
+    right: "8px",
+    ...shorthands.borderRadius("16px"),
+    fontSize: tokens.fontSizeBase100,
+    lineHeight: tokens.lineHeightBase100,
+    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalSNudge),
+  },
+  simple: {
+    backgroundColor: customColors.accent.rule.standard,
+  },
+  advanced: {
+    backgroundColor: customColors.accent.rule.advanced,
   },
 });

@@ -10,7 +10,7 @@ import {
   AccordionItem,
   AccordionPanel,
   Button,
-  Dropdown,
+  Combobox,
   Field,
   Input,
   mergeClasses,
@@ -65,10 +65,6 @@ const T = {
     ru: "Рекомендуемое название чек-листа",
     en: "Recommended checklist name",
   },
-  btnSaveChecklist: {
-    ru: "Сохранить чек-лист",
-    en: "Save checklist",
-  },
   listTitle: {
     ru: "Сохранённые чек-листы",
     en: "Saved checklists",
@@ -101,9 +97,13 @@ const T = {
     ru: "Найти по названию",
     en: "Search by name",
   },
+  searchOrAddPlaceholder: {
+    ru: "Введите или выберите название",
+    en: "Search or add new value",
+  },
 };
 
-const iconStyle = { width: "9px", height: "9px", padding: "8px" };
+const iconStyle = { width: "12px", height: "12px", padding: "5px" };
 
 const Checklist = () => {
   const { menuStore, checkList } = useStores();
@@ -119,6 +119,8 @@ const Checklist = () => {
   const [checklistName, setChecklistName] = useState("");
   const [checklistRules, setChecklistRules] = useState<DraftRule[]>([]);
 
+  const [docTypeSearch, setDocTypeSearch] = useState("");
+  const [partySearch, setPartySearch] = useState("");
   const [checklistSearch, setChecklistSearch] = useState("");
 
   const [checklistNameTouched, setChecklistNameTouched] = useState(false);
@@ -141,7 +143,7 @@ const Checklist = () => {
   }, []);
 
   useEffect(() => {
-    if (!isEditing) {
+    if (!isEditing && !checklistName) {
       setChecklistName([docType, party].filter(Boolean).join(" - "));
     }
   }, [docType, party, checkList.editingChecklistId]);
@@ -208,6 +210,11 @@ const Checklist = () => {
       checkList.setEditingChecklistId(null);
       setIsChecklistPage(false);
       setIsFormOpen(false);
+      setChecklistName("");
+      setDocType("");
+      setParty("");
+      setChecklistRules([]);
+      setChecklistNameTouched(false);
     } else {
       checkList.setEditingChecklistId(null);
       navigate(-1);
@@ -270,33 +277,35 @@ const Checklist = () => {
         children={checklistNameField}
       />
 
-      <Button
-        size="small"
-        appearance="subtle"
-        className={styles.btnTitle}
-        icon={<ArrowLeft16Regular />}
-        onClick={handleGoBack}
-      >
-        {isEditing ? T.pageEditTitle[locale] : T.pageCreateTitle[locale]}
-      </Button>
-
-      {!isEditing && (
+      <div className={styles.blockTitle}>
         <Button
-          appearance="primary"
-          className={styles.btnAdd}
-          icon={<Add16Filled />}
-          onClick={handleOpenChecklistForm}
-          disabled={isFormOpen}
+          size="small"
+          appearance="subtle"
+          className={styles.btnTitle}
+          icon={<ArrowLeft16Regular />}
+          onClick={handleGoBack}
         >
-          {T.btnCreateChecklist[locale]}
+          {isEditing ? T.pageEditTitle[locale] : T.pageCreateTitle[locale]}
         </Button>
-      )}
+
+        {!isFormOpen && (
+          <Button
+            appearance="primary"
+            className={styles.btnAdd}
+            icon={<Add16Filled />}
+            onClick={handleOpenChecklistForm}
+            disabled={isFormOpen}
+          >
+            {T.btnCreateChecklist[locale]}
+          </Button>
+        )}
+      </div>
 
       <Accordion collapsible multiple className={commonStyles.accordion} onToggle={handleToggle} openItems={openItem}>
         {isFormOpen && (
           <AccordionItem className={commonStyles.accordionItem} value={1}>
             <AccordionHeader
-              className={commonStyles.accordionHeader}
+              className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
               expandIcon={
                 openItem.includes(1) ? (
                   <TriangleDownFilled style={iconStyle} />
@@ -308,37 +317,59 @@ const Checklist = () => {
               {isEditing ? checklistName : T.formCreatingTitle[locale]}
             </AccordionHeader>
             <AccordionPanel className={commonStyles.accordionPanel}>
-              <Dropdown
+              <Combobox
+                freeform
                 size="large"
                 placeholder={T.docTypePlaceholder[locale]}
-                selectedOptions={docType ? [docType] : []}
                 value={docType}
-                onOptionSelect={(_, data) => setDocType(data.optionValue ?? "")}
+                onOptionSelect={(_, data) => {
+                  setDocType(data.optionText ?? "");
+                  setDocTypeSearch("");
+                }}
+                onChange={(e) => {
+                  setDocType(e.target.value);
+                  setDocTypeSearch(e.target.value);
+                }}
                 listbox={{ className: styles.dropdownList }}
                 className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
+                input={{ maxLength: 255 }}
               >
-                {ALL_CONTRACT_TYPES.map((type) => (
+                {(docTypeSearch
+                  ? ALL_CONTRACT_TYPES.filter((type) => type.toLowerCase().includes(docTypeSearch.toLowerCase()))
+                  : ALL_CONTRACT_TYPES
+                ).map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
                 ))}
-              </Dropdown>
+              </Combobox>
 
-              <Dropdown
+              <Combobox
+                freeform
                 size="large"
                 placeholder={T.partyPlaceholder[locale]}
-                selectedOptions={party ? [party] : []}
                 value={party}
-                onOptionSelect={(_, data) => setParty(data.optionValue ?? "")}
+                onOptionSelect={(_, data) => {
+                  setParty(data.optionText ?? "");
+                  setPartySearch("");
+                }}
+                onChange={(e) => {
+                  setParty(e.target.value);
+                  setPartySearch(e.target.value);
+                }}
                 listbox={{ className: styles.dropdownList }}
                 className={mergeClasses(commonStyles.dropdown, party && commonStyles.inputFill)}
+                input={{ maxLength: 100 }}
               >
-                {ALL_PARTIES.map((type) => (
+                {(partySearch
+                  ? ALL_PARTIES.filter((type) => type.toLowerCase().includes(partySearch.toLowerCase()))
+                  : ALL_PARTIES
+                ).map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
                 ))}
-              </Dropdown>
+              </Combobox>
 
               {checklistNameField}
 
@@ -350,7 +381,7 @@ const Checklist = () => {
             </AccordionPanel>
 
             <IconButton
-              tooltip={T.btnSaveChecklist[locale]}
+              tooltip={T.modalSaveConfirm[locale]}
               icon={<Save16Regular />}
               onClick={() => setIsSaveModalOpen(true)}
               positioning="above-end"
@@ -364,7 +395,7 @@ const Checklist = () => {
         {checkList.hasChecklists && (
           <AccordionItem className={commonStyles.accordionItem} value={2}>
             <AccordionHeader
-              className={commonStyles.accordionHeader}
+              className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
               expandIcon={
                 openItem.includes(2) ? (
                   <TriangleDownFilled style={iconStyle} />

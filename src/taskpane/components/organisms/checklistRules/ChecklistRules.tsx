@@ -68,6 +68,14 @@ const T = {
     ru: "Обязательное поле",
     en: "Required field",
   },
+  ruleSimpleFlag: {
+    ru: "Стандартный",
+    en: "Standard",
+  },
+  ruleAdvancedFlag: {
+    ru: "Продвинутый",
+    en: "Advanced",
+  },
 };
 
 export type RuleType = "simple" | "advanced";
@@ -103,7 +111,7 @@ const buildPayload = (type: RuleType, state: RuleState): PayloadChecklistAddRule
         risk_level: state.riskLevel,
       };
 
-const iconStyle = { width: "9px", height: "9px", padding: "8px" };
+const iconStyle = { width: "12px", height: "12px", padding: "5px" };
 
 const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: ChecklistRuleProps) => {
   const { menuStore } = useStores();
@@ -176,11 +184,14 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
       >
         <AccordionItem value="rule" className={commonStyles.accordionItem}>
           <AccordionHeader
-            className={styles.accordionHeader}
+            className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
             expandIcon={isOpen ? <TriangleDownFilled style={iconStyle} /> : <TriangleRightFilled style={iconStyle} />}
           >
             {T.ruleTitle[locale]}
             {index + 1}
+            <div className={mergeClasses(styles.ruleFlag, styles[ruleType])}>
+              {ruleType === "simple" ? T.ruleSimpleFlag[locale] : T.ruleAdvancedFlag[locale]}
+            </div>
           </AccordionHeader>
 
           <AccordionPanel className={styles.accordionPanel}>
@@ -212,6 +223,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
 
               <div className={styles.riskSection}>
                 <Field
+                  required={ruleType === "advanced"}
                   label={
                     <>
                       {T.riskLevel[locale]}
@@ -228,7 +240,12 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                           styles.btnRiskHover,
                           ruleState.riskLevel === risk && styles.btnRiskSelected
                         )}
-                        style={{ "--risk-color": customColors.accent.risk[risk] } as React.CSSProperties}
+                        style={
+                          {
+                            "--risk-color-bg": customColors.accent.risk[risk].bg,
+                            "--risk-color-text": customColors.accent.risk[risk].text,
+                          } as React.CSSProperties
+                        }
                         appearance="outline"
                         onClick={() => handleRiskLevelChange(risk)}
                       >

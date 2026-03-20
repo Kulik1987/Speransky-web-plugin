@@ -42,6 +42,20 @@ type ChecklistCardProps = {
   onDelete: (id: string) => void;
 };
 
+const COPY_PREFIX = "Копия ";
+
+const renderName = (name: string, copyPrefixClass: string): React.ReactNode => {
+  if (name.startsWith(COPY_PREFIX)) {
+    return (
+      <>
+        <span className={copyPrefixClass}>{COPY_PREFIX}</span>
+        {name.slice(COPY_PREFIX.length)}
+      </>
+    );
+  }
+  return name;
+};
+
 const ChecklistCard = (props: ChecklistCardProps) => {
   const { id, name, createdAt, isRadio = false, selected, onSelect, onEdit, onDuplicate, onDelete } = props;
   const { menuStore } = useStores();
@@ -54,7 +68,7 @@ const ChecklistCard = (props: ChecklistCardProps) => {
     <div className={mergeClasses(styles.card, selected && styles.cardSelected)} onClick={() => onSelect(id)}>
       {isRadio && <Radio checked={selected} onChange={() => onSelect(id)} className={styles.radio} />}
       <div className={styles.info}>
-        <Text className={styles.name}>{name}</Text>
+        <Text className={styles.name}>{renderName(name, styles.nameCopyPrefix)}</Text>
         <Text className={styles.date}>{formattedDate}</Text>
       </div>
       <Menu>

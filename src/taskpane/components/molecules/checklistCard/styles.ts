@@ -4,19 +4,16 @@ import { customColors } from "../../../theme/theme";
 export const useChecklistCardStyles = makeStyles({
   card: {
     boxSizing: "border-box",
-    minHeight: "80px",
+    minHeight: "62px",
     display: "flex",
-    ...shorthands.gap(tokens.spacingHorizontalM),
+    ...shorthands.gap(tokens.spacingHorizontalS),
     ...shorthands.padding(tokens.spacingVerticalS),
-    paddingBottom: tokens.spacingVerticalXL,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.border("1px", "solid", tokens.colorNeutralStroke1),
-    boxShadow: "0px 0px 3px 0px #415B5D40, 0px 1px 2px 0px #415B5D26",
+    ...shorthands.border("1px", "solid", customColors.border[30]),
     cursor: "pointer",
     userSelect: "none",
     "&:hover": {
       ...shorthands.borderColor(tokens.colorBrandForeground2),
-      boxShadow: "0px 0px 3px 0px #415B5D40, 0px 1px 2px 0px #415B5D26",
     },
   },
   cardSelected: {
@@ -32,11 +29,19 @@ export const useChecklistCardStyles = makeStyles({
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalXS),
     flexGrow: 1,
+    minWidth: 0,
   },
   name: {
+    display: "block",
     lineHeight: tokens.lineHeightBase400,
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
+    whiteSpace: "nowrap",
+    ...shorthands.overflow("hidden"),
+    textOverflow: "ellipsis",
+  },
+  nameCopyPrefix: {
+    color: customColors.accent.copy,
   },
   date: {
     color: customColors.text.primary[65],
@@ -44,5 +49,6 @@ export const useChecklistCardStyles = makeStyles({
   },
   menuTrigger: {
     maxHeight: "32px",
+    color: tokens.colorBrandForeground2,
   },
 });

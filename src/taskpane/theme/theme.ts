@@ -13,20 +13,34 @@ export const customColors = {
   border: {
     10: "#5E5E5E",
     20: "#CCD0D6",
+    30: "#E4E8ED",
   },
   bg: {
-    accordion: {
-      35: "#CFDFE159",
-      75: "#CFDFE1BF",
-    },
+    accordion: "#E4E8EDB2",
     textarea: "#F0F0F059",
+    header: "#E1E4EA",
+    partyflag: "#032C4526",
   },
   accent: {
     delete: "#C50F1F",
+    copy: "#0F6CBD",
+    rule: {
+      standard: "#F6D2B5",
+      advanced: "#B9EBA5",
+    },
     risk: {
-      low: "#44A900",
-      medium: "#F1C928",
-      high: "#FF383C",
+      low: {
+        bg: "#DFF2D7",
+        text: "#3B6B3E",
+      },
+      medium: {
+        bg: "#F9B7804D",
+        text: "#FF790F",
+      },
+      high: {
+        bg: "#F8C9C6",
+        text: "#8A2A27",
+      },
     },
   },
 } as const;

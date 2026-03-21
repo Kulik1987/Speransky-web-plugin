@@ -1,23 +1,32 @@
-import { tokens } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../../theme/theme";
 
-const styles = {
-  instructions: {
-    fontWeight: tokens.fontWeightSemibold,
-    marginTop: "20px",
-    marginBottom: "10px",
-  },
-  textPromptAndInsertion: {
+export const useSuggestionCardStyles = makeStyles({
+  container: {
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    ...shorthands.gap(tokens.spacingVerticalL),
+    backgroundColor: customColors.bg.textarea,
+    ...shorthands.border("solid", "1px", customColors.border[30]),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.padding(tokens.spacingVerticalS),
+    paddingBottom: tokens.spacingVerticalXXL,
   },
-  textAreaField: {
-    marginLeft: "20px",
-    marginTop: "30px",
-    marginBottom: "20px",
-    marginRight: "20px",
-    maxWidth: "50%",
+  flagBlock: {
+    display: "flex",
+    ...shorthands.gap(tokens.spacingHorizontalMNudge),
   },
-};
-
-export default styles;
+  changesBlock: {
+    display: "flex",
+    flexDirection: "column",
+    ...shorthands.gap(tokens.spacingVerticalM),
+  },
+  buttonsBlock: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  changeButtons: {
+    display: "flex",
+    ...shorthands.gap(tokens.spacingHorizontalMNudge),
+  },
+});

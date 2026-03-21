@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Button, Tooltip } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
-import { NavigationRegular } from "@fluentui/react-icons";
+import { NavigationFilled } from "@fluentui/react-icons";
 import { DrawerModal } from "../../organisms";
+import { mergeClasses } from "@fluentui/react-components";
 import { useHeaderMenuStyles } from "./styles";
+import { IconButton } from "../../atoms";
 const logoSperansky = require("../../../assets/logo-v4.svg");
 
 const T = {
@@ -20,6 +21,7 @@ const HeaderMenu = () => {
   const styles = useHeaderMenuStyles();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
   const handleOpenModal = () => setIsOpen(true);
   const handleCloseModal = () => setIsOpen(false);
@@ -29,16 +31,21 @@ const HeaderMenu = () => {
       <DrawerModal isOpen={isOpen} onClose={handleCloseModal} />
 
       <div className={styles.container}>
-        <img alt="Speransky logo" src={logoSperansky} width="32px" height="32px" />
+        <IconButton
+          tooltip={T.tooltipMenu[locale]}
+          icon={<NavigationFilled color="#0F565E" />}
+          onClick={handleOpenModal}
+          positioning="below-end"
+        />
 
-        <Tooltip content={T.tooltipMenu[locale]} withArrow relationship="label">
-          <Button
-            appearance="transparent"
-            size="small"
-            onClick={handleOpenModal}
-            icon={<NavigationRegular color="#FFFFFF" />}
-          />
-        </Tooltip>
+        <img
+          alt="logo"
+          src={logoSperansky}
+          width="32px"
+          height="32px"
+          onLoad={() => setLogoLoaded(true)}
+          className={mergeClasses(logoLoaded ? styles.logoVisible : styles.logoHidden)}
+        />
       </div>
     </>
   );

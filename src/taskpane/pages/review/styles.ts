@@ -1,5 +1,4 @@
 import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
-import { customColors } from "../../theme/theme";
 
 export const useReviewStyles = makeStyles({
   container: {
@@ -13,8 +12,6 @@ export const useReviewStyles = makeStyles({
     ...shorthands.gap("28px"),
   },
   title: {
-    ...shorthands.margin(0),
-    color: customColors.text.primary[90],
-    lineHeight: tokens.lineHeightBase400,
+    marginTop: tokens.spacingVerticalS,
   },
 });

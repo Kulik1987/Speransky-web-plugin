@@ -6,9 +6,9 @@ export const useStepStyles = makeStyles({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    textAlign: "center",
     ...shorthands.gap(tokens.spacingVerticalXXXL),
     width: "100%",
+    paddingTop: "16px",
   },
   block: {
     width: "100%",

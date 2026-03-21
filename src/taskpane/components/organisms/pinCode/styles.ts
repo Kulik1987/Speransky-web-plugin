@@ -2,12 +2,17 @@ import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 import { customColors } from "../../../theme/theme";
 
 export const usePinCodeStyles = makeStyles({
+  codeField: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    marginTop: "68px",
+  },
   codeRow: {
     display: "flex",
     justifyContent: "center",
     textAlign: "center",
     ...shorthands.gap("8px"),
-    marginTop: "68px",
   },
   codeWrapper: {
     borderBottomWidth: "4px",
@@ -16,6 +21,12 @@ export const usePinCodeStyles = makeStyles({
   },
   codeWrapperActive: {
     borderBottomColor: tokens.colorBrandForeground2,
+  },
+  codeWrapperError: {
+    borderBottomColor: customColors.accent.delete,
+  },
+  validationMessage: {
+    marginTop: tokens.spacingVerticalM,
   },
   codeInput: {
     width: "70px",
@@ -27,6 +38,7 @@ export const usePinCodeStyles = makeStyles({
     "& input": {
       textAlign: "center",
     },
+    ...shorthands.border("none"),
     "&::after": {
       display: "none",
     },

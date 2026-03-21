@@ -1,7 +1,12 @@
 /**
- * @description функция очищает значение от недопустимых символов < >
+ * @description функция очищает значение от недопустимых символов < >, схлопывает несколько пробелов в один
  */
-export const sanitizeFieldValue = (value: string): string => value.replace(/[<>]/g, "");
+export const sanitizeFieldValue = (value: string): string => value.replace(/[<>]/g, "").replace(/  +/g, " ");
+
+/**
+ * @description функция удаляет пробелы по краям
+ */
+export const normalizeFieldValue = (value: string): string => sanitizeFieldValue(value).trim();
 
 /**
  * @description функция возвращает сообщение об ошибке при превышении количества допустимых символов

@@ -2,6 +2,9 @@ import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 import { customColors } from "../../../theme/theme";
 
 export const useBreadcrumbStyles = makeStyles({
+  breadcrumb: {
+    paddingBottom: tokens.spacingVerticalL,
+  },
   divider: {
     color: customColors.text.primary[65],
     ...shorthands.padding(tokens.spacingVerticalXS),
@@ -11,6 +14,10 @@ export const useBreadcrumbStyles = makeStyles({
     ...shorthands.padding(0),
     "&:hover": {
       color: customColors.text.primary[90],
+      backgroundColor: "transparent",
+      "&:active": {
+        backgroundColor: "transparent",
+      },
     },
   },
   default: {
@@ -18,5 +25,13 @@ export const useBreadcrumbStyles = makeStyles({
   },
   active: {
     color: customColors.text.primary[90],
+  },
+  ellipsisPopover: {
+    minWidth: "unset",
+    ...shorthands.padding(tokens.spacingVerticalXXS),
+  },
+  ellipsisMenuItem: {
+    fontSize: tokens.fontSizeBase200,
+    minHeight: "24px",
   },
 });

@@ -3,28 +3,44 @@ import { customColors } from "../../../theme/theme";
 
 export const useModalStyles = makeStyles({
   container: {
-    maxWidth: "300px",
-    ...shorthands.padding(tokens.spacingVerticalXXXL),
+    maxWidth: "388px",
+    ...shorthands.padding(tokens.spacingVerticalXXL),
     "@media screen and (max-width: 480px)": {
-      maxWidth: "300px",
+      maxWidth: "260px",
     },
+  },
+  body: {
+    display: "flex",
+    flexDirection: "column",
+    color: customColors.text.primary[90],
+  },
+  bodyGapSmall: {
+    ...shorthands.gap("10px"),
+  },
+  bodyGapLarge: {
+    ...shorthands.gap(tokens.spacingVerticalXXL),
   },
   withContent: {
     maxWidth: "388px",
     "@media screen and (max-width: 480px)": {
-      maxWidth: "388px",
+      maxWidth: "340px",
     },
   },
-  title: {
-    fontSize: tokens.fontSizeBase400,
-    lineHeight: tokens.lineHeightBase400,
-    fontWeight: tokens.fontWeightSemibold,
-    color: customColors.text.primary[90],
-  },
   actionsBlock: {
+    display: "flex",
+    justifyContent: "flex-end",
     "@media screen and (max-width: 480px)": {
       flexDirection: "row",
       justifyContent: "flex-end",
+    },
+    "& button": {
+      minWidth: "auto",
+    },
+  },
+  btnCancel: {
+    color: tokens.colorBrandForeground2,
+    "&:hover": {
+      color: tokens.colorBrandForeground2,
     },
   },
 });

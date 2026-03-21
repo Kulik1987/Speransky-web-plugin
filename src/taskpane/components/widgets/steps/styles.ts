@@ -8,6 +8,7 @@ export const useStepStyles = makeStyles({
     alignItems: "center",
     ...shorthands.gap(tokens.spacingVerticalXXXL),
     width: "100%",
+    paddingTop: "16px",
   },
   block: {
     width: "100%",

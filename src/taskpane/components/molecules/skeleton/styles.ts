@@ -9,6 +9,7 @@ export const useSkeletonStyles = makeStyles({
   title: {
     fontSize: tokens.fontSizeBase400,
     lineHeight: tokens.lineHeightBase400,
+    color: tokens.colorNeutralForeground1,
   },
   skeletonBlock: {
     display: "flex",

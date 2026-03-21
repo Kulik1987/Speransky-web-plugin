@@ -198,7 +198,7 @@ const DrawerModal = (props: DrawerModalT) => {
               >
                 <div className={styles.langRadioButton}>
                   <Radio
-                    className={styles.langRadio}
+                    className={mergeClasses(commonStyles.radio, styles.langRadio)}
                     value={LocaleEnums.RU}
                     label={
                       <div className={styles.langLabel}>
@@ -207,11 +207,11 @@ const DrawerModal = (props: DrawerModalT) => {
                       </div>
                     }
                   />
-                  <Divider />
+                  <Divider className={commonStyles.divider} />
                 </div>
                 <div className={styles.langRadioButton}>
                   <Radio
-                    className={styles.langRadio}
+                    className={mergeClasses(commonStyles.radio, styles.langRadio)}
                     value={LocaleEnums.EN}
                     label={
                       <div className={styles.langLabel}>
@@ -220,7 +220,7 @@ const DrawerModal = (props: DrawerModalT) => {
                       </div>
                     }
                   />
-                  <Divider />
+                  <Divider className={commonStyles.divider} />
                 </div>
               </RadioGroup>
             </>
@@ -229,14 +229,16 @@ const DrawerModal = (props: DrawerModalT) => {
       )}
 
       <DrawerFooter className={styles.footer}>
-        <Button
-          appearance="transparent"
-          className={mergeClasses(styles.button, styles.logoutButton)}
-          onClick={handleLogout}
-          icon={<DoorArrowLeft20Regular />}
-        >
-          {T.btnLogout[locale]}
-        </Button>
+        {isDisplayButtonLogout && (
+          <Button
+            appearance="transparent"
+            className={mergeClasses(styles.button, styles.logoutButton)}
+            onClick={handleLogout}
+            icon={<DoorArrowLeft20Regular />}
+          >
+            {T.btnLogout[locale]}
+          </Button>
+        )}
         <div className={styles.version}>v.{appBuildNumber}</div>
       </DrawerFooter>
     </Drawer>

@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, Spinner, Tab, TabList, mergeClasses } from "@fluentui/react-components";
+import { mergeClasses, Radio, RadioGroup, Tab, TabList } from "@fluentui/react-components";
 import type { SelectTabData, SelectTabEvent } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
@@ -10,6 +10,7 @@ import { ReviewTypeBase } from "../reviewTypeBase";
 import { ChecklistCard } from "../../../components/molecules";
 import { Modal } from "../../../components/atoms";
 import { SUPPORTED_CONTRACT_TYPES } from "../../../constants";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 const T = {
   titleGeneral: {
@@ -38,6 +39,7 @@ const ReviewType = () => {
   const { menuStore, suggestionsStore, checkList } = useStores();
   const { locale } = menuStore;
   const styles = useReviewTypeStyles();
+  const commonStyles = useCommonStyles();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -89,12 +91,13 @@ const ReviewType = () => {
   const reviewGeneralChecklists = (
     <RadioGroup className={styles.radioGroup}>
       {filteredContractTypes.map((item: string) => (
-        <Radio
+        <div
           key={item}
-          root={{ className: styles.radioItem }}
-          label={{ className: styles.radioItemLabel, children: item }}
-          value={item}
-        />
+          onClick={(e) => e.currentTarget.querySelector<HTMLInputElement>("input")?.click()}
+          className={mergeClasses(commonStyles.radio, styles.radioItem)}
+        >
+          <Radio label={{ className: styles.radioItemLabel, children: item }} value={item} />
+        </div>
       ))}
     </RadioGroup>
   );
@@ -120,8 +123,6 @@ const ReviewType = () => {
       ))
     : null;
 
-  if (suggestionsStore.isMetaDataProcessing) return <Spinner size="tiny" label={T.loadingTitle[locale]} />;
-
   return (
     <div className={styles.container}>
       <Modal
@@ -132,11 +133,11 @@ const ReviewType = () => {
         onAction={handleDeleteConfirm}
       />
 
-      <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} appearance="subtle" className={styles.tablist}>
-        <Tab value={ReviewTypesEnums.GENERAL} className={mergeClasses(styles.tab, styles.tabFirst)}>
+      <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} className={styles.tablist}>
+        <Tab value={ReviewTypesEnums.GENERAL} className={styles.tab}>
           {T.titleGeneral[locale]}
         </Tab>
-        <Tab value={ReviewTypesEnums.CUSTOM} className={mergeClasses(styles.tab, styles.tabLast)}>
+        <Tab value={ReviewTypesEnums.CUSTOM} className={styles.tab}>
           {T.titleCustom[locale]}
         </Tab>
       </TabList>

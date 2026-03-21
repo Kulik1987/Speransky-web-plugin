@@ -1,4 +1,5 @@
 import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../../theme/theme";
 
 export const useReviewTypeBaseStyles = makeStyles({
   container: {
@@ -8,8 +9,8 @@ export const useReviewTypeBaseStyles = makeStyles({
   },
   accordionHeader: {
     "& > button": {
-      backgroundColor: `color-mix(in srgb, ${tokens.colorBrandBackground2} 75%, transparent)`,
-      ...shorthands.padding(tokens.spacingHorizontalM, tokens.spacingVerticalS),
+      color: customColors.text.primary[90],
+      fontWeight: tokens.fontWeightSemibold,
     },
   },
   accordionPanel: {

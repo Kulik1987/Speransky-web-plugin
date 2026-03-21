@@ -14,6 +14,7 @@ import { MoreVertical24Regular } from "@fluentui/react-icons";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
 import { useChecklistCardStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 const T = {
   edit: {
@@ -61,12 +62,19 @@ const ChecklistCard = (props: ChecklistCardProps) => {
   const { menuStore } = useStores();
   const { locale } = menuStore;
   const styles = useChecklistCardStyles();
+  const commonStyles = useCommonStyles();
 
   const formattedDate = new Date(createdAt).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US");
 
   return (
     <div className={mergeClasses(styles.card, selected && styles.cardSelected)} onClick={() => onSelect(id)}>
-      {isRadio && <Radio checked={selected} onChange={() => onSelect(id)} className={styles.radio} />}
+      {isRadio && (
+        <Radio
+          checked={selected}
+          onChange={() => onSelect(id)}
+          className={mergeClasses(commonStyles.radio, styles.radio)}
+        />
+      )}
       <div className={styles.info}>
         <Text className={styles.name}>{renderName(name, styles.nameCopyPrefix)}</Text>
         <Text className={styles.date}>{formattedDate}</Text>

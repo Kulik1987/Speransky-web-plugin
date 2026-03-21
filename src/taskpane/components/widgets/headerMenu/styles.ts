@@ -1,4 +1,5 @@
 import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../../theme/theme";
 
 export const useHeaderMenuStyles = makeStyles({
   container: {
@@ -6,10 +7,9 @@ export const useHeaderMenuStyles = makeStyles({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: tokens.colorBrandBackground,
+    backgroundColor: customColors.bg.header,
     height: "48px",
     ...shorthands.padding(tokens.spacingHorizontalL),
-    backgroundImage: "linear-gradient(90deg, #19737D 0%, #08656E 50%, #0F565E 100%)",
   },
   logoHidden: {
     visibility: "hidden",

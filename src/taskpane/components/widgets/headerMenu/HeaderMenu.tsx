@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
-import { NavigationRegular } from "@fluentui/react-icons";
+import { NavigationFilled } from "@fluentui/react-icons";
 import { DrawerModal } from "../../organisms";
 import { mergeClasses } from "@fluentui/react-components";
 import { useHeaderMenuStyles } from "./styles";
@@ -31,6 +31,13 @@ const HeaderMenu = () => {
       <DrawerModal isOpen={isOpen} onClose={handleCloseModal} />
 
       <div className={styles.container}>
+        <IconButton
+          tooltip={T.tooltipMenu[locale]}
+          icon={<NavigationFilled color="#0F565E" />}
+          onClick={handleOpenModal}
+          positioning="below-end"
+        />
+
         <img
           alt="logo"
           src={logoSperansky}
@@ -38,13 +45,6 @@ const HeaderMenu = () => {
           height="32px"
           onLoad={() => setLogoLoaded(true)}
           className={mergeClasses(logoLoaded ? styles.logoVisible : styles.logoHidden)}
-        />
-
-        <IconButton
-          tooltip={T.tooltipMenu[locale]}
-          icon={<NavigationRegular color="#FFFFFF" />}
-          onClick={handleOpenModal}
-          positioning="below-end"
         />
       </div>
     </>

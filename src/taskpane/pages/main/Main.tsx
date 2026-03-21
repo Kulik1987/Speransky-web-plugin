@@ -10,7 +10,7 @@ import { useStores } from "../../store";
 import { useMainStyles } from "./styles";
 import { Card } from "../../components/molecules";
 import { RoutePathEnum } from "../../enums";
-import { Anonymizer } from "../review/anonymizer";
+// import { Anonymizer } from "../review/anonymizer";
 import { Text } from "@fluentui/react-components";
 import { useCommonStyles } from "../../theme/commonStyles";
 
@@ -108,7 +108,7 @@ const Main = () => {
         onClick={handleNavigateToDraft}
         disabled
       />
-      <Anonymizer />
+      {/* <Anonymizer /> */}
     </div>
   );
 };

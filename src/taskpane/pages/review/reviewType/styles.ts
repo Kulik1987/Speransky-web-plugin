@@ -11,14 +11,12 @@ export const useReviewTypeStyles = makeStyles({
     width: "100%",
     height: "40px",
     display: "flex",
+    ...shorthands.gap(tokens.spacingHorizontalS),
   },
   tab: {
     width: "50%",
     cursor: "pointer",
-    ...shorthands.borderRadius(0),
-    ...shorthands.borderStyle("solid"),
-    ...shorthands.borderWidth("1px"),
-    ...shorthands.borderColor(customColors.border[20]),
+    ...shorthands.border("1px", "solid", customColors.border[30]),
     "& span": {
       fontSize: tokens.fontSizeBase400,
       lineHeight: tokens.lineHeightBase400,
@@ -32,19 +30,11 @@ export const useReviewTypeStyles = makeStyles({
     },
     "&[aria-selected='true'], &[aria-selected='true']:hover, &[aria-selected='true']:active": {
       backgroundColor: tokens.colorBrandForeground2,
+      ...shorthands.borderColor(tokens.colorBrandForeground2),
     },
     "&[aria-selected='true'] span, &[aria-selected='true']:hover span, &[aria-selected='true']:active span": {
       color: "#FFFFFF",
     },
-  },
-  tabFirst: {
-    borderTopLeftRadius: tokens.borderRadiusMedium,
-    borderBottomLeftRadius: tokens.borderRadiusMedium,
-    borderRightWidth: 0,
-  },
-  tabLast: {
-    borderTopRightRadius: tokens.borderRadiusMedium,
-    borderBottomRightRadius: tokens.borderRadiusMedium,
   },
   radioGroup: {
     display: "flex",
@@ -53,6 +43,7 @@ export const useReviewTypeStyles = makeStyles({
     position: "relative",
   },
   radioItem: {
+    cursor: "pointer",
     width: "100%",
     boxSizing: "border-box",
     ...shorthands.border("1px", "solid", customColors.border[20]),
@@ -72,6 +63,7 @@ export const useReviewTypeStyles = makeStyles({
     fontSize: tokens.fontSizeBase400,
     lineHeight: tokens.lineHeightBase400,
     fontWeight: tokens.fontWeightSemibold,
+    ...shorthands.padding(0, tokens.spacingHorizontalXS),
     cursor: "pointer",
   },
 });

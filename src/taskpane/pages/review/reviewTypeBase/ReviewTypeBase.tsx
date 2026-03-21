@@ -57,7 +57,7 @@ type ReviewTypeBaseProps = {
   onStartReview: () => void;
 };
 
-const iconStyle = { width: "9px", height: "9px", padding: "8px" };
+const iconStyle = { width: "12px", height: "12px", padding: "5px" };
 
 const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
   const { listContent, searchQuery = "", onSearchChange, actionIcon, actionHandleClick, onStartReview } = props;
@@ -95,7 +95,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
       <Accordion collapsible className={commonStyles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
         <AccordionItem className={commonStyles.accordionItem} value={1}>
           <AccordionHeader
-            className={mergeClasses(commonStyles.pageTitle, commonStyles.accordionHeader, styles.accordionHeader)}
+            className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
             expandIcon={isOpen ? <TriangleDownFilled style={iconStyle} /> : <TriangleRightFilled style={iconStyle} />}
           >
             {T.listTitle[locale]}

@@ -71,7 +71,7 @@ const Review = () => {
     return <ErrorText error={T.errorDescription[locale]} />;
   }
 
-  if (documentStore.isFetchingDetectDocumentType) {
+  if (documentStore.isFetchingDetectDocumentType || isMetaDataProcessing) {
     return <ItemSkeleton title={T.waitingNotification[locale]} />;
   }
 

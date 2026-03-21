@@ -109,7 +109,6 @@ export const useDrawerModalStyles = makeStyles({
     fontSize: tokens.fontSizeBase400,
     color: tokens.colorBrandForeground2,
     textAlign: "left",
-    letterSpacing: "0.5px",
   },
   version: {
     alignSelf: "flex-end",

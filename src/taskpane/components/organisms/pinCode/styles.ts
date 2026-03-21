@@ -38,6 +38,7 @@ export const usePinCodeStyles = makeStyles({
     "& input": {
       textAlign: "center",
     },
+    ...shorthands.border("none"),
     "&::after": {
       display: "none",
     },

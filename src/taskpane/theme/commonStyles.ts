@@ -126,4 +126,20 @@ export const useCommonStyles = makeStyles({
     right: "8px",
     zIndex: 1,
   },
+  divider: {
+    "::before": {
+      ...shorthands.borderColor(customColors.border[30]),
+    },
+    "::after": {
+      ...shorthands.borderColor(customColors.border[30]),
+    },
+  },
+  radio: {
+    ...shorthands.margin(0),
+    ...shorthands.padding(0),
+    "& input:enabled:checked ~ .fui-Radio__indicator": {
+      ...shorthands.borderColor(tokens.colorBrandBackgroundSelected),
+      color: tokens.colorBrandBackgroundSelected,
+    },
+  },
 });

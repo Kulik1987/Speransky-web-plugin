@@ -1,8 +1,9 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { Dropdown, Option } from "@fluentui/react-components";
+import { Dropdown, mergeClasses, Option } from "@fluentui/react-components";
 import type { OptionOnSelectData, SelectionEvents } from "@fluentui/react-components";
 import { useStores } from "../../../store";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 const ALL_PARTIES_VALUE = "all";
 
@@ -15,11 +16,13 @@ interface PartyDropdownProps {
   placeholder: string;
   allPartiesLabel?: string;
   onSelect?: (hasSelection: boolean) => void;
+  isFilled?: boolean;
 }
 
-const PartyDropdown = ({ placeholder, allPartiesLabel = "Все стороны", onSelect }: PartyDropdownProps) => {
+const PartyDropdown = ({ placeholder, allPartiesLabel = "Все стороны", onSelect, isFilled }: PartyDropdownProps) => {
   const { suggestionsStore } = useStores();
   const { parties } = suggestionsStore;
+  const commonStyles = useCommonStyles();
 
   const isPartiesExist = Array.isArray(parties) && parties?.length > 0;
 
@@ -42,6 +45,7 @@ const PartyDropdown = ({ placeholder, allPartiesLabel = "Все стороны",
       disabled={!isPartiesExist}
       onOptionSelect={handleChangeParty}
       size="large"
+      className={mergeClasses(commonStyles.dropdown, isFilled && commonStyles.inputFill)}
     >
       {partyOptions.map((option) => (
         <Option key={option.value} value={option.value}>

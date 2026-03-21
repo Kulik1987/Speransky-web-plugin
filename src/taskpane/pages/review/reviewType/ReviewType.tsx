@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, Spinner, Tab, TabList, mergeClasses } from "@fluentui/react-components";
+import { mergeClasses, Radio, RadioGroup, Tab, TabList } from "@fluentui/react-components";
 import type { SelectTabData, SelectTabEvent } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
@@ -10,6 +10,7 @@ import { ReviewTypeBase } from "../reviewTypeBase";
 import { ChecklistCard } from "../../../components/molecules";
 import { Modal } from "../../../components/atoms";
 import { SUPPORTED_CONTRACT_TYPES } from "../../../constants";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 const T = {
   titleGeneral: {
@@ -38,6 +39,7 @@ const ReviewType = () => {
   const { menuStore, suggestionsStore, checkList } = useStores();
   const { locale } = menuStore;
   const styles = useReviewTypeStyles();
+  const commonStyles = useCommonStyles();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -47,6 +49,7 @@ const ReviewType = () => {
 
   const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
   const [targetId, setTargetId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     checkList.getChecklists();
@@ -54,11 +57,12 @@ const ReviewType = () => {
 
   const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
     setSelectedTab(data.value as string);
+    setSearchQuery("");
   };
 
   const handleStartAnalysis = () => {
     suggestionsStore.setChecklistId(selectedTab === ReviewTypesEnums.CUSTOM ? selectedChecklist : null);
-    navigate("/summary");
+    navigate(RoutePathEnum.SUMMARY, { state: { reviewType: selectedTab } });
   };
 
   const navigateToChecklistPage = () => {
@@ -80,21 +84,30 @@ const ReviewType = () => {
     setTargetId(null);
   };
 
+  const filteredContractTypes = searchQuery
+    ? SUPPORTED_CONTRACT_TYPES.filter((item: string) => item.toLowerCase().includes(searchQuery.toLowerCase()))
+    : SUPPORTED_CONTRACT_TYPES;
+
   const reviewGeneralChecklists = (
     <RadioGroup className={styles.radioGroup}>
-      {SUPPORTED_CONTRACT_TYPES.map((item: string) => (
-        <Radio
+      {filteredContractTypes.map((item: string) => (
+        <div
           key={item}
-          root={{ className: styles.radioItem }}
-          label={{ className: styles.radioItemLabel, children: item }}
-          value={item}
-        />
+          onClick={(e) => e.currentTarget.querySelector<HTMLInputElement>("input")?.click()}
+          className={mergeClasses(commonStyles.radio, styles.radioItem)}
+        >
+          <Radio label={{ className: styles.radioItemLabel, children: item }} value={item} />
+        </div>
       ))}
     </RadioGroup>
   );
 
+  const filteredChecklists = searchQuery
+    ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : checkList.checklists;
+
   const reviewCustomChecklists = checkList.hasChecklists
-    ? checkList.checklists.map((item) => (
+    ? filteredChecklists.map((item) => (
         <ChecklistCard
           key={item.id}
           id={item.id}
@@ -110,8 +123,6 @@ const ReviewType = () => {
       ))
     : null;
 
-  if (suggestionsStore.isMetaDataProcessing) return <Spinner size="tiny" label={T.loadingTitle[locale]} />;
-
   return (
     <div className={styles.container}>
       <Modal
@@ -122,20 +133,27 @@ const ReviewType = () => {
         onAction={handleDeleteConfirm}
       />
 
-      <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} appearance="subtle" className={styles.tablist}>
-        <Tab value={ReviewTypesEnums.GENERAL} className={mergeClasses(styles.tab, styles.tabFirst)}>
+      <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} className={styles.tablist}>
+        <Tab value={ReviewTypesEnums.GENERAL} className={styles.tab}>
           {T.titleGeneral[locale]}
         </Tab>
-        <Tab value={ReviewTypesEnums.CUSTOM} className={mergeClasses(styles.tab, styles.tabLast)}>
+        <Tab value={ReviewTypesEnums.CUSTOM} className={styles.tab}>
           {T.titleCustom[locale]}
         </Tab>
       </TabList>
 
       {selectedTab === ReviewTypesEnums.GENERAL ? (
-        <ReviewTypeBase listContent={reviewGeneralChecklists} onStartReview={handleStartAnalysis} />
+        <ReviewTypeBase
+          listContent={reviewGeneralChecklists}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onStartReview={handleStartAnalysis}
+        />
       ) : (
         <ReviewTypeBase
           listContent={reviewCustomChecklists}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
           onStartReview={handleStartAnalysis}
           actionHandleClick={navigateToChecklistPage}
         />

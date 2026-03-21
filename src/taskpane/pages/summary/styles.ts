@@ -4,12 +4,11 @@ export const useSummaryStyles = makeStyles({
   container: {
     display: "flex",
     flexDirection: "column",
-    ...shorthands.gap(tokens.spacingVerticalXXXL),
+    ...shorthands.gap(tokens.spacingVerticalXXL),
   },
   block: {
     display: "flex",
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalL),
-    marginBottom: tokens.spacingVerticalXXXL,
   },
 });

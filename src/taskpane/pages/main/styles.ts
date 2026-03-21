@@ -1,9 +1,9 @@
-import { makeStyles, shorthands } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 
 export const useMainStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
-    ...shorthands.gap("28px"),
+    ...shorthands.gap(tokens.spacingVerticalXXL),
   },
 });

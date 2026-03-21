@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
-import { Input, mergeClasses } from "@fluentui/react-components";
+import { Field, Input, mergeClasses } from "@fluentui/react-components";
 import { usePinCodeStyles } from "./styles";
 
 export type PinCodeRef = {
@@ -8,11 +8,13 @@ export type PinCodeRef = {
 
 type PinCodeProps = {
   onSuccess: (code: string) => void;
+  hasError?: boolean;
+  errorMessage?: string;
 };
 
 const PIN_LENGTH = 4;
 
-const PinCode = forwardRef<PinCodeRef, PinCodeProps>(({ onSuccess }, ref) => {
+const PinCode = forwardRef<PinCodeRef, PinCodeProps>(({ onSuccess, hasError = false, errorMessage }, ref) => {
   const styles = usePinCodeStyles();
   const [values, setValues] = useState<string[]>(Array(PIN_LENGTH).fill(""));
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
@@ -76,32 +78,38 @@ const PinCode = forwardRef<PinCodeRef, PinCodeProps>(({ onSuccess }, ref) => {
     const isFilled = !!values[index];
     return mergeClasses(
       styles.codeWrapper,
-      isFocused && styles.codeWrapperActive,
-      isFilled && styles.codeWrapperActive
+      hasError && styles.codeWrapperError,
+      (isFocused || isFilled) && styles.codeWrapperActive
     );
   };
 
   return (
-    <div className={styles.codeRow}>
-      {Array.from({ length: PIN_LENGTH }).map((_, i) => (
-        <div key={i} className={getWrapperClass(i)}>
-          <Input
-            appearance="underline"
-            className={styles.codeInput}
-            value={values[i]}
-            onChange={handleChange(i)}
-            onKeyDown={handleKeyDown(i)}
-            onPaste={handlePaste}
-            onFocus={() => setFocusedIndex(i)}
-            onBlur={() => setFocusedIndex(null)}
-            input={{ ref: (el) => (inputsRef.current[i] = el) }}
-            maxLength={1}
-            type="tel"
-            size="large"
-          />
-        </div>
-      ))}
-    </div>
+    <Field
+      className={styles.codeField}
+      validationState={hasError ? "error" : "none"}
+      validationMessage={{ className: styles.validationMessage, children: hasError ? errorMessage : "" }}
+    >
+      <div className={styles.codeRow}>
+        {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+          <div key={i} className={getWrapperClass(i)}>
+            <Input
+              appearance="underline"
+              className={styles.codeInput}
+              value={values[i]}
+              onChange={handleChange(i)}
+              onKeyDown={handleKeyDown(i)}
+              onPaste={handlePaste}
+              onFocus={() => setFocusedIndex(i)}
+              onBlur={() => setFocusedIndex(null)}
+              input={{ ref: (el) => (inputsRef.current[i] = el) }}
+              maxLength={1}
+              type="tel"
+              size="large"
+            />
+          </div>
+        ))}
+      </div>
+    </Field>
   );
 });
 

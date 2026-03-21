@@ -15,10 +15,17 @@ import { useStores } from "../../../store";
 import { PayloadChecklistAddRuleDto, RiskLevel } from "../../../api/types";
 import RuleAdvancedFields, { AdvancedField, AdvancedFieldsState } from "./RuleAdvancedFields";
 import { useChecklistRuleStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
 import { SIMPLE_RULE_FIELD } from "../../../constants";
-import { Modal } from "../../atoms";
+import { IconButton, Modal } from "../../atoms";
 import { customColors } from "../../../theme/theme";
-import { autoResize, resizeTextarea, sanitizeFieldValue } from "../../../helpers";
+import {
+  autoResize,
+  getMaxLengthError,
+  normalizeFieldValue,
+  resizeTextarea,
+  sanitizeFieldValue,
+} from "../../../helpers";
 
 const T = {
   ruleTitle: {
@@ -28,6 +35,10 @@ const T = {
   riskLevel: {
     ru: "Степень риска",
     en: "Risk level",
+  },
+  optional: {
+    ru: "(опционально)",
+    en: "(optional)",
   },
   low: {
     ru: "Низкая",
@@ -46,12 +57,24 @@ const T = {
     en: "What deviation from the rule determines this risk level?",
   },
   deleteRuleTitle: {
-    ru: "Удалить правило?",
-    en: "Delete rule?",
+    ru: "Удалить правило",
+    en: "Delete rule",
   },
   deleteConfirm: {
     ru: "Удалить",
     en: "Delete",
+  },
+  requiredField: {
+    ru: "Обязательное поле",
+    en: "Required field",
+  },
+  ruleSimpleFlag: {
+    ru: "Стандартный",
+    en: "Standard",
+  },
+  ruleAdvancedFlag: {
+    ru: "Продвинутый",
+    en: "Advanced",
   },
 };
 
@@ -88,13 +111,15 @@ const buildPayload = (type: RuleType, state: RuleState): PayloadChecklistAddRule
         risk_level: state.riskLevel,
       };
 
-const iconStyle = { width: "9px", height: "9px", padding: "8px" };
+const iconStyle = { width: "12px", height: "12px", padding: "5px" };
 
 const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: ChecklistRuleProps) => {
   const { menuStore } = useStores();
   const { locale } = menuStore;
+  const commonStyles = useCommonStyles();
   const styles = useChecklistRuleStyles();
 
+  const [simpleTouched, setSimpleTouched] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [targetId, setTargetId] = useState<string | number | null>(null);
   const fieldsRef = useRef<HTMLDivElement>(null);
@@ -139,12 +164,15 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
     setTargetId(null);
   };
 
+  const validationField =
+    simpleTouched && !ruleState.simple ? T.requiredField[locale] : getMaxLengthError(ruleState.simple, locale);
+
   return (
     <div className={styles.container}>
       <Modal
         open={targetId !== null}
         onClose={() => setTargetId(null)}
-        title={T.deleteRuleTitle[locale]}
+        title={`${T.deleteRuleTitle[locale]}?`}
         actionButtonTitle={T.deleteConfirm[locale]}
         onAction={handleDeleteRuleConfirm}
       />
@@ -154,25 +182,37 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
         openItems={isOpen ? ["rule"] : []}
         onToggle={(_, data) => setIsOpen(data.openItems.includes("rule"))}
       >
-        <AccordionItem value="rule" className={styles.accordionItem}>
+        <AccordionItem value="rule" className={commonStyles.accordionItem}>
           <AccordionHeader
-            className={styles.accordionHeader}
+            className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
             expandIcon={isOpen ? <TriangleDownFilled style={iconStyle} /> : <TriangleRightFilled style={iconStyle} />}
           >
             {T.ruleTitle[locale]}
             {index + 1}
+            <div className={mergeClasses(styles.ruleFlag, styles[ruleType])}>
+              {ruleType === "simple" ? T.ruleSimpleFlag[locale] : T.ruleAdvancedFlag[locale]}
+            </div>
           </AccordionHeader>
 
           <AccordionPanel className={styles.accordionPanel}>
             <div ref={fieldsRef} className={styles.fields}>
               {ruleType === "simple" ? (
-                <Field label={SIMPLE_RULE_FIELD.label[locale]} required>
+                <Field
+                  label={SIMPLE_RULE_FIELD.label[locale]}
+                  required
+                  validationState={validationField ? "error" : "none"}
+                  validationMessage={validationField}
+                >
                   <Textarea
                     resize="none"
                     value={ruleState.simple}
                     onChange={(event, data) => {
                       handleSimpleChange(sanitizeFieldValue(data.value));
                       autoResize(event);
+                    }}
+                    onBlur={() => {
+                      setSimpleTouched(true);
+                      handleSimpleChange(normalizeFieldValue(ruleState.simple));
                     }}
                     placeholder={SIMPLE_RULE_FIELD.placeholder[locale]}
                   />
@@ -182,7 +222,15 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
               )}
 
               <div className={styles.riskSection}>
-                <Field label={T.riskLevel[locale]} required>
+                <Field
+                  required={ruleType === "advanced"}
+                  label={
+                    <>
+                      {T.riskLevel[locale]}
+                      {ruleType === "simple" && <span className={styles.labelOptional}> {T.optional[locale]}</span>}
+                    </>
+                  }
+                >
                   <div className={styles.riskBtnBlock}>
                     {Object.values(RiskLevel).map((risk) => (
                       <Button
@@ -192,7 +240,12 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                           styles.btnRiskHover,
                           ruleState.riskLevel === risk && styles.btnRiskSelected
                         )}
-                        style={{ "--risk-color": customColors.accent.risk[risk] } as React.CSSProperties}
+                        style={
+                          {
+                            "--risk-color-bg": customColors.accent.risk[risk].bg,
+                            "--risk-color-text": customColors.accent.risk[risk].text,
+                          } as React.CSSProperties
+                        }
                         appearance="outline"
                         onClick={() => handleRiskLevelChange(risk)}
                       >
@@ -206,19 +259,21 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                       resize="none"
                       value={ruleState.riskTrigger}
                       onChange={(event, data) => {
-                        update({ riskTrigger: data.value });
+                        update({ riskTrigger: sanitizeFieldValue(data.value) });
                         autoResize(event);
                       }}
+                      onBlur={() => update({ riskTrigger: normalizeFieldValue(ruleState.riskTrigger) })}
                       placeholder={T.riskTriggerPlaceholder[locale]}
                     />
                   )}
                 </Field>
 
-                <Button
-                  className={styles.btnDelete}
-                  appearance="subtle"
+                <IconButton
+                  tooltip={T.deleteRuleTitle[locale]}
                   icon={<Delete24Regular color={customColors.accent.delete} />}
                   onClick={handleDeleteRule}
+                  positioning="above-end"
+                  className={styles.btnDelete}
                 />
               </div>
             </div>

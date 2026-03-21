@@ -1,4 +1,5 @@
 import { diff_match_patch } from "diff-match-patch";
+import { customColors } from "../theme/theme";
 
 export function getDifferencesSemantic(text1: string, text2: string) {
   let dmp = new diff_match_patch();
@@ -26,9 +27,9 @@ export function htmlChangesMatching(source: string, target: string): string | nu
 
         switch (true) {
           case isDeleteItem:
-            return `<del  style="color: #db690d;">${textItem}</del>`;
+            return `<del  style="color: ${customColors.accent.risk.high.text};">${textItem}</del>`;
           case isCreateItem:
-            return `<inc style="color: #099e1a; font-weight: bold;
+            return `<inc style="color: ${customColors.accent.risk.low.text};
            ">${textItem}</inc>`;
           case isStetItem:
             return `${textItem}`;

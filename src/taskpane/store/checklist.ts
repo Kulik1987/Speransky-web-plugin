@@ -84,12 +84,14 @@ class CheckList {
       this.checklistDescription = checklist.description ?? "";
       this.checklistDocType = checklist.doc_type ?? "";
       this.checklistParty = checklist.party ?? "";
-      this.checklistRules = checklist.rules.map(
-        (rule): DraftRule =>
-          Object.fromEntries(
-            Object.entries(rule).filter(([key, value]) => key !== "created_at" && value !== null)
-          ) as DraftRule
-      );
+      this.checklistRules = [...checklist.rules]
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        .map(
+          (rule): DraftRule =>
+            Object.fromEntries(
+              Object.entries(rule).filter(([key, value]) => key !== "created_at" && value !== null)
+            ) as DraftRule
+        );
       this.originalDraft = {
         checklistName: this.checklistName,
         checklistDescription: this.checklistDescription,

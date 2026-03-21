@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button, Tab, TabList } from "@fluentui/react-components";
+import React, { useRef, useState } from "react";
+import { mergeClasses, Tab, TabList } from "@fluentui/react-components";
 import { Add16Regular } from "@fluentui/react-icons";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
@@ -7,6 +7,8 @@ import { PayloadChecklistAddRuleDto, RiskLevel } from "../../../api/types";
 import { DraftRule } from "../../../store/checklist";
 import { ChecklistRules, RuleType } from "../checklistRules";
 import { useChecklistStyles } from "./styles";
+import { IconButton } from "../../atoms";
+const emptyState = require("../../../assets/empty-state.svg");
 
 const T = {
   modeSimpleTitle: {
@@ -29,6 +31,14 @@ const T = {
     ru: "Добавить правило проверки",
     en: "Add check rule",
   },
+  addRuleTooltip: {
+    ru: "Добавить правило",
+    en: "Add rule",
+  },
+  emptyRulesTitle: {
+    ru: "Добавьте хотя бы одно правило",
+    en: "Add at least one rule",
+  },
 };
 
 type ChecklistFormProps = {
@@ -45,6 +55,7 @@ const ChecklistForm = ({ onRulesChange, initialRules }: ChecklistFormProps) => {
   const { locale } = menuStore;
   const styles = useChecklistStyles();
 
+  const rulesContainerRef = useRef<HTMLDivElement>(null);
   const [ruleMode, setRuleMode] = useState<RuleType>("simple");
   const [rules, setRules] = useState<DraftRule[]>(initialRules ?? []);
 
@@ -72,6 +83,9 @@ const ChecklistForm = ({ onRulesChange, initialRules }: ChecklistFormProps) => {
             risk_level: RiskLevel.LOW,
           };
     updateRules([...rules, newRule]);
+    setTimeout(() => {
+      rulesContainerRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
   };
 
   const handleChangeRule = (index: number, rule: PayloadChecklistAddRuleDto) => {
@@ -105,20 +119,33 @@ const ChecklistForm = ({ onRulesChange, initialRules }: ChecklistFormProps) => {
 
       <div className={styles.rulesHeader}>
         <span className={styles.rulesLabel}>{T.addRulesLabel[locale]}</span>
-        <Button size="small" appearance="primary" icon={<Add16Regular />} onClick={handleAddRule} />
+        <IconButton
+          tooltip={T.addRuleTooltip[locale]}
+          icon={<Add16Regular />}
+          onClick={handleAddRule}
+          positioning="above-end"
+          appearance="primary"
+        />
       </div>
 
-      <div className={styles.rules}>
-        {rules.map((rule, index) => (
-          <ChecklistRules
-            key={rule.id ?? index}
-            index={index}
-            ruleType={getRuleType(rule)}
-            initialValue={rule}
-            onChange={handleChangeRule}
-            onRemove={handleRemoveRule}
-          />
-        ))}
+      <div ref={rulesContainerRef} className={styles.rules}>
+        {rules.length > 0 ? (
+          rules.map((rule, index) => (
+            <ChecklistRules
+              key={rule.id ?? index}
+              index={index}
+              ruleType={getRuleType(rule)}
+              initialValue={rule}
+              onChange={handleChangeRule}
+              onRemove={handleRemoveRule}
+            />
+          ))
+        ) : (
+          <div className={mergeClasses(styles.rules, styles.emptyBlock)}>
+            <img alt="empty" src={emptyState} width="64px" height="66px" />
+            <span className={styles.emptyTitle}>{T.emptyRulesTitle[locale]}</span>
+          </div>
+        )}
       </div>
     </div>
   );

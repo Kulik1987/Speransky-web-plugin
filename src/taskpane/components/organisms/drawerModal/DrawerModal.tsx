@@ -14,6 +14,7 @@ import {
   mergeClasses,
 } from "@fluentui/react-components";
 import {
+  ArrowCircleRight16Regular,
   ArrowLeft16Regular,
   Chat20Regular,
   Dismiss24Regular,
@@ -28,6 +29,7 @@ import { AuthStepperEnum } from "../../../store/auth";
 import { LocaleEnums } from "../../../store/menu";
 import { useDrawerModalStyles } from "./styles";
 import { RoutePathEnum } from "../../../enums";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 type DrawerModalT = {
   isOpen: boolean;
@@ -79,6 +81,7 @@ const DrawerModal = (props: DrawerModalT) => {
   const { isOpen, onClose } = props;
   const { menuStore, authStore } = useStores();
   const { locale, setLocale } = menuStore;
+  const commonStyles = useCommonStyles();
   const styles = useDrawerModalStyles();
   const navigate = useNavigate();
   const [level, setLevel] = useState<1 | 2>(1);
@@ -122,45 +125,48 @@ const DrawerModal = (props: DrawerModalT) => {
               <div>
                 <div className={styles.sectionHeader}>{T.account[locale]}</div>
                 <div className={styles.sectionContent}>
-                  <div>
+                  <span className={styles.sectionRowLabel}>
                     <MailCopy20Regular /> {authStore.clientEmail}
-                  </div>
+                  </span>
                 </div>
               </div>
 
               <div>
                 <div className={styles.sectionHeader}>{T.tariff[locale]}</div>
                 <div className={styles.sectionContent}>
-                  <div>
+                  <span className={styles.sectionRowLabel}>
                     <FolderPeople20Regular />
                     {authStore.clientData?.active_tariffs[0].name || "Speransky Corp"}
-                  </div>
+                  </span>
                 </div>
               </div>
 
               <div>
                 <div className={styles.sectionHeader}>{T.quickAccess[locale]}</div>
                 <div className={styles.sectionContent}>
+                  <span className={styles.sectionRowLabel}>
+                    <DocumentTableCheckmark20Regular /> {T.checklists[locale]}
+                  </span>
                   <Button
                     appearance="transparent"
-                    className={mergeClasses(styles.button, styles.sectionButton)}
-                    icon={<DocumentTableCheckmark20Regular />}
+                    className={styles.sectionValue}
+                    icon={<ArrowCircleRight16Regular />}
                     onClick={handleGoToChecklists}
-                  >
-                    {T.checklists[locale]}
-                  </Button>
+                  />
                 </div>
               </div>
 
               <div>
                 <div className={styles.sectionHeader}>{T.settings[locale]}</div>
                 <div className={styles.sectionContent}>
-                  <div>
+                  <span className={styles.sectionRowLabel}>
                     <Globe20Regular /> {T.settingsLang[locale]}
-                    <Button appearance="transparent" className={styles.sectionValue} onClick={() => setLevel(2)}>
-                      {T.language[locale]}
-                    </Button>
-                  </div>
+                  </span>
+                  <Button appearance="transparent" className={styles.sectionValue} onClick={() => setLevel(2)}>
+                    {T.language[locale]}
+                  </Button>
+                </div>
+                <div className={styles.sectionContent}>
                   <Button
                     appearance="transparent"
                     className={mergeClasses(styles.button, styles.sectionButton)}
@@ -176,7 +182,7 @@ const DrawerModal = (props: DrawerModalT) => {
 
           {level === 2 && (
             <>
-              <div className={styles.langHeader}>
+              <div className={mergeClasses(commonStyles.pageTitle, styles.langHeader)}>
                 <Button
                   appearance="transparent"
                   aria-label="Back"
@@ -192,7 +198,7 @@ const DrawerModal = (props: DrawerModalT) => {
               >
                 <div className={styles.langRadioButton}>
                   <Radio
-                    className={styles.langRadio}
+                    className={mergeClasses(commonStyles.radio, styles.langRadio)}
                     value={LocaleEnums.RU}
                     label={
                       <div className={styles.langLabel}>
@@ -201,11 +207,11 @@ const DrawerModal = (props: DrawerModalT) => {
                       </div>
                     }
                   />
-                  <Divider />
+                  <Divider className={commonStyles.divider} />
                 </div>
                 <div className={styles.langRadioButton}>
                   <Radio
-                    className={styles.langRadio}
+                    className={mergeClasses(commonStyles.radio, styles.langRadio)}
                     value={LocaleEnums.EN}
                     label={
                       <div className={styles.langLabel}>
@@ -214,7 +220,7 @@ const DrawerModal = (props: DrawerModalT) => {
                       </div>
                     }
                   />
-                  <Divider />
+                  <Divider className={commonStyles.divider} />
                 </div>
               </RadioGroup>
             </>
@@ -223,14 +229,16 @@ const DrawerModal = (props: DrawerModalT) => {
       )}
 
       <DrawerFooter className={styles.footer}>
-        <Button
-          appearance="transparent"
-          className={mergeClasses(styles.button, styles.logoutButton)}
-          onClick={handleLogout}
-          icon={<DoorArrowLeft20Regular />}
-        >
-          {T.btnLogout[locale]}
-        </Button>
+        {isDisplayButtonLogout && (
+          <Button
+            appearance="transparent"
+            className={mergeClasses(styles.button, styles.logoutButton)}
+            onClick={handleLogout}
+            icon={<DoorArrowLeft20Regular />}
+          >
+            {T.btnLogout[locale]}
+          </Button>
+        )}
         <div className={styles.version}>v.{appBuildNumber}</div>
       </DrawerFooter>
     </Drawer>

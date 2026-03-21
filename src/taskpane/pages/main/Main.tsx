@@ -2,17 +2,23 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react";
 import {
-  DocumentSignature24Regular,
-  Settings24Regular,
-  TextBulletListSquareSearch20Regular,
+  ClipboardTaskListRtl24Regular,
+  TaskListSquareAdd24Regular,
+  TextBulletListSquareEdit24Regular,
 } from "@fluentui/react-icons";
 import { useStores } from "../../store";
 import { useMainStyles } from "./styles";
 import { Card } from "../../components/molecules";
 import { RoutePathEnum } from "../../enums";
-import { Anonymizer } from "../review/anonymizer";
+// import { Anonymizer } from "../review/anonymizer";
+import { Text } from "@fluentui/react-components";
+import { useCommonStyles } from "../../theme/commonStyles";
 
 const T = {
+  pageTitle: {
+    ru: "Выбрать действие",
+    en: "Select action",
+  },
   reviewTitle: {
     ru: "Проверить договор",
     en: "Check the contract",
@@ -55,6 +61,7 @@ const Main = () => {
   const { menuStore, documentStore } = useStores();
   const { locale } = menuStore;
   const navigate = useNavigate();
+  const commonStyles = useCommonStyles();
   const styles = useMainStyles();
 
   const handleNavigateToDraft = () => navigate(RoutePathEnum.DRAFT);
@@ -75,30 +82,33 @@ const Main = () => {
 
   return (
     <div className={styles.root}>
+      <Text as="h1" weight="semibold" className={commonStyles.pageTitle}>
+        {T.pageTitle[locale]}
+      </Text>
       <Card
         title={T.reviewTitle[locale]}
         subtitle={T.reviewSubtitle[locale]}
         text={T.reviewText[locale]}
-        icon={<TextBulletListSquareSearch20Regular />}
+        icon={<ClipboardTaskListRtl24Regular />}
         onClick={handleNavigateToReview}
         disabled={isLoading}
-      />
-      <Card
-        title={T.draftTitle[locale]}
-        subtitle={T.draftSubtitle[locale]}
-        text={T.draftText[locale]}
-        icon={<DocumentSignature24Regular />}
-        onClick={handleNavigateToDraft}
-        disabled
       />
       <Card
         title={T.checklistTitle[locale]}
         subtitle={T.checklistSubtitle[locale]}
         text={T.checklistText[locale]}
-        icon={<Settings24Regular />}
+        icon={<TaskListSquareAdd24Regular />}
         onClick={handleNavigateToChecklist}
       />
-      <Anonymizer />
+      <Card
+        title={T.draftTitle[locale]}
+        subtitle={T.draftSubtitle[locale]}
+        text={T.draftText[locale]}
+        icon={<TextBulletListSquareEdit24Regular />}
+        onClick={handleNavigateToDraft}
+        disabled
+      />
+      {/* <Anonymizer /> */}
     </div>
   );
 };

@@ -8,11 +8,14 @@ import {
   AccordionPanel,
   Button,
   Dropdown,
+  mergeClasses,
   Option,
 } from "@fluentui/react-components";
 import { Add16Filled, TriangleDownFilled, TriangleRightFilled } from "@fluentui/react-icons";
 import { PartyDropdown } from "../../../components/molecules";
 import { useReviewTypeBaseStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
+import { IconButton, SearchBox } from "../../../components/atoms";
 
 const T = {
   docTypePlaceholder: {
@@ -35,6 +38,10 @@ const T = {
     ru: "Сохранённые чек-листы",
     en: "Saved checklists",
   },
+  searchBoxPlaceholder: {
+    ru: "Найти по названию",
+    en: "Search by name",
+  },
   btnStartReview: {
     ru: "Начать проверку",
     en: "Start review",
@@ -43,17 +50,20 @@ const T = {
 
 type ReviewTypeBaseProps = {
   listContent: ReactNode;
+  searchQuery?: string;
+  onSearchChange?: (value: string) => void;
   actionIcon?: ReactElement;
   actionHandleClick?: () => void;
   onStartReview: () => void;
 };
 
-const iconStyle = { width: "9px", height: "9px", padding: "8px" };
+const iconStyle = { width: "12px", height: "12px", padding: "5px" };
 
 const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
-  const { listContent, actionIcon, actionHandleClick, onStartReview } = props;
+  const { listContent, searchQuery = "", onSearchChange, actionIcon, actionHandleClick, onStartReview } = props;
   const { menuStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
+  const commonStyles = useCommonStyles();
   const styles = useReviewTypeBaseStyles();
 
   const [isPartySelected, setIsPartySelected] = useState(false);
@@ -69,30 +79,39 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         placeholder={T.docTypePlaceholder[locale]}
         onOptionSelect={(_, data) => setDocType(data.optionValue ?? "")}
         disabled={!suggestionsStore.documentType}
+        className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
       >
         <Option key={suggestionsStore.documentType} value={suggestionsStore.documentType}>
           {suggestionsStore.documentType}
         </Option>
       </Dropdown>
 
-      <PartyDropdown placeholder={T.partyPlaceholder[locale]} onSelect={setIsPartySelected} />
+      <PartyDropdown
+        placeholder={T.partyPlaceholder[locale]}
+        onSelect={setIsPartySelected}
+        isFilled={isPartySelected}
+      />
 
-      <Accordion collapsible className={styles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
-        <AccordionItem className={styles.accordionItem} value={1}>
+      <Accordion collapsible className={commonStyles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
+        <AccordionItem className={commonStyles.accordionItem} value={1}>
           <AccordionHeader
-            className={styles.accordionHeader}
+            className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
             expandIcon={isOpen ? <TriangleDownFilled style={iconStyle} /> : <TriangleRightFilled style={iconStyle} />}
           >
             {T.listTitle[locale]}
           </AccordionHeader>
-          <AccordionPanel className={styles.accordionPanel}>{listContent}</AccordionPanel>
+          <AccordionPanel className={mergeClasses(commonStyles.accordionPanel, styles.accordionPanel)}>
+            <SearchBox value={searchQuery} onChange={onSearchChange} placeholder={T.searchBoxPlaceholder[locale]} />
+            {listContent}
+          </AccordionPanel>
           {(actionIcon || actionHandleClick) && isOpen && (
-            <Button
+            <IconButton
+              tooltip={T.btnCreateChecklist[locale]}
               icon={actionIcon || <Add16Filled />}
-              appearance="primary"
-              size="small"
               onClick={actionHandleClick}
-              className={styles.accordionActions}
+              positioning="above-end"
+              appearance="primary"
+              className={commonStyles.accordionActions}
             />
           )}
         </AccordionItem>

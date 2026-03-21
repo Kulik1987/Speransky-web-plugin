@@ -59,9 +59,12 @@ const StepPinCode = () => {
         </Text>
       </div>
 
-      <PinCode ref={pinCodeRef} onSuccess={handleEnteredPinCode} />
-
-      {errorPinCode && <ErrorText error={T.errorPinCode[locale]} />}
+      <PinCode
+        ref={pinCodeRef}
+        onSuccess={handleEnteredPinCode}
+        hasError={errorPinCode}
+        errorMessage={T.errorPinCode[locale]}
+      />
     </div>
   );
 };

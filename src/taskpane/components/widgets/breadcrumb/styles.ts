@@ -14,6 +14,10 @@ export const useBreadcrumbStyles = makeStyles({
     ...shorthands.padding(0),
     "&:hover": {
       color: customColors.text.primary[90],
+      backgroundColor: "transparent",
+      "&:active": {
+        backgroundColor: "transparent",
+      },
     },
   },
   default: {
@@ -21,5 +25,13 @@ export const useBreadcrumbStyles = makeStyles({
   },
   active: {
     color: customColors.text.primary[90],
+  },
+  ellipsisPopover: {
+    minWidth: "unset",
+    ...shorthands.padding(tokens.spacingVerticalXXS),
+  },
+  ellipsisMenuItem: {
+    fontSize: tokens.fontSizeBase200,
+    minHeight: "24px",
   },
 });

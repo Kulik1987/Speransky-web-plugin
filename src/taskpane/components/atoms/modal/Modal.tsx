@@ -20,6 +20,7 @@ interface ModalProps {
   actionButtonTitle: string;
   onAction: () => void;
   children?: ReactNode;
+  reverseActions?: boolean;
 }
 
 const T = {
@@ -30,7 +31,7 @@ const T = {
 };
 
 const Modal = (props: ModalProps) => {
-  const { open, onClose, title, actionButtonTitle, onAction, children } = props;
+  const { open, onClose, title, actionButtonTitle, onAction, children, reverseActions } = props;
   const { menuStore } = useStores();
   const { locale } = menuStore;
   const commonStyles = useCommonStyles();
@@ -43,11 +44,11 @@ const Modal = (props: ModalProps) => {
           <DialogTitle className={commonStyles.pageTitle}>{title}</DialogTitle>
           {children && <DialogContent>{children}</DialogContent>}
           <DialogActions className={styles.actionsBlock}>
-            <Button appearance="subtle" onClick={onClose} className={styles.btnCancel}>
-              {T.cancel[locale]}
+            <Button appearance="subtle" onClick={reverseActions ? onAction : onClose} className={styles.btnCancel}>
+              {reverseActions ? actionButtonTitle : T.cancel[locale]}
             </Button>
-            <Button appearance="primary" onClick={onAction}>
-              {actionButtonTitle}
+            <Button appearance="primary" onClick={reverseActions ? onClose : onAction}>
+              {reverseActions ? T.cancel[locale] : actionButtonTitle}
             </Button>
           </DialogActions>
         </DialogBody>

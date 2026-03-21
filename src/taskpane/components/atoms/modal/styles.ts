@@ -1,16 +1,18 @@
 import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../../theme/theme";
 
 export const useModalStyles = makeStyles({
   container: {
-    maxWidth: "300px",
-    ...shorthands.padding(tokens.spacingVerticalXXXL),
+    maxWidth: "388px",
+    ...shorthands.padding(tokens.spacingVerticalXXL),
     "@media screen and (max-width: 480px)": {
-      maxWidth: "300px",
+      maxWidth: "260px",
     },
   },
   body: {
     display: "flex",
     flexDirection: "column",
+    color: customColors.text.primary[90],
   },
   bodyGapSmall: {
     ...shorthands.gap("10px"),
@@ -21,15 +23,18 @@ export const useModalStyles = makeStyles({
   withContent: {
     maxWidth: "388px",
     "@media screen and (max-width: 480px)": {
-      maxWidth: "388px",
+      maxWidth: "340px",
     },
   },
   actionsBlock: {
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     "@media screen and (max-width: 480px)": {
       flexDirection: "row",
-      justifyContent: "space-between",
+      justifyContent: "flex-end",
+    },
+    "& button": {
+      minWidth: "auto",
     },
   },
   btnCancel: {

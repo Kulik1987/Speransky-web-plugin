@@ -29,4 +29,9 @@ export const useSuggestionCardStyles = makeStyles({
     display: "flex",
     ...shorthands.gap(tokens.spacingHorizontalMNudge),
   },
+  commentLink: {
+    color: tokens.colorBrandForeground1,
+    textDecorationLine: "underline",
+    cursor: "pointer",
+  },
 });

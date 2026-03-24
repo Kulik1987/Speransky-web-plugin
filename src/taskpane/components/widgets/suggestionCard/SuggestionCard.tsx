@@ -14,6 +14,7 @@ import { ApplyService } from "../../../services/applyService";
 import { SearchService } from "../../../services/searchService";
 import { SuggestionT } from "../../../store/suggestions";
 import { htmlChangesMatching } from "../../../helpers/diff";
+import { MARKDOWN_LINK_SOURCE } from "../../../helpers/convert";
 import { RecommendationTypeEnum } from "../../../enums";
 import { useSuggestionCardStyles } from "./styles";
 import { customColors } from "../../../theme/theme";
@@ -150,6 +151,35 @@ const SuggestionCard = (props: SuggestionPropT) => {
     handleDismiss();
   };
 
+  const renderWithLinks = (text: string, linkClassName?: string): React.ReactNode[] => {
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    const re = new RegExp(MARKDOWN_LINK_SOURCE, "g");
+    while ((match = re.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+      parts.push(
+        <a
+          key={match.index}
+          href={match[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className={linkClassName}
+        >
+          {match[1]}
+        </a>
+      );
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+    return parts;
+  };
+
   return (
     <div className={styles.container} onClick={handleShowInDocument}>
       <Modal
@@ -185,7 +215,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
         {isCommentExist && (
           <div>
             <Text weight="bold">{T.labelComment[locale]}</Text>
-            <Text block>{commentText}</Text>
+            <Text block>{renderWithLinks(commentText, styles.commentLink)}</Text>
           </div>
         )}
       </div>

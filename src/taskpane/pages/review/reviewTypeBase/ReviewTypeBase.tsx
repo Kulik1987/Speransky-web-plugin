@@ -16,6 +16,8 @@ import { PartyDropdown } from "../../../components/molecules";
 import { useReviewTypeBaseStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
 import { IconButton, SearchBox } from "../../../components/atoms";
+import { ReviewTypesEnums } from "../../../enums";
+const emptyState = require("../../../assets/empty-state-2.svg");
 
 const T = {
   docTypePlaceholder: {
@@ -34,13 +36,21 @@ const T = {
     ru: "Все стороны",
     en: "All parties",
   },
-  listTitle: {
-    ru: "Сохранённые чек-листы",
-    en: "Saved checklists",
+  listTitleGeneral: {
+    ru: "Чек-листы Speransky",
+    en: "Speransky checklists",
+  },
+  listTitleCustom: {
+    ru: "Пользовательские чек-листы",
+    en: "Custom checklists",
   },
   searchBoxPlaceholder: {
     ru: "Найти по названию",
     en: "Search by name",
+  },
+  emptyTitle: {
+    ru: "У Вас пока не создано ни одного чек-листа",
+    en: "You have no checklists yet",
   },
   btnStartReview: {
     ru: "Начать проверку",
@@ -49,6 +59,7 @@ const T = {
 };
 
 type ReviewTypeBaseProps = {
+  type: ReviewTypesEnums;
   listContent: ReactNode;
   searchQuery?: string;
   onSearchChange?: (value: string) => void;
@@ -60,16 +71,17 @@ type ReviewTypeBaseProps = {
 const iconStyle = { width: "12px", height: "12px", padding: "5px" };
 
 const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
-  const { listContent, searchQuery = "", onSearchChange, actionIcon, actionHandleClick, onStartReview } = props;
+  const { type, listContent, searchQuery = "", onSearchChange, actionIcon, actionHandleClick, onStartReview } = props;
   const { menuStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
   const commonStyles = useCommonStyles();
   const styles = useReviewTypeBaseStyles();
 
   const [isPartySelected, setIsPartySelected] = useState(false);
-  const [docType, setDocType] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [docType, setDocType] = useState(suggestionsStore.documentType);
+  const [isOpen, setIsOpen] = useState(true);
 
+  const isGeneral = type === ReviewTypesEnums.GENERAL;
   const handleToggle = () => setIsOpen((prev) => !prev);
 
   return (
@@ -78,6 +90,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         size="large"
         placeholder={T.docTypePlaceholder[locale]}
         onOptionSelect={(_, data) => setDocType(data.optionValue ?? "")}
+        value={docType}
         disabled={!suggestionsStore.documentType}
         className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
       >
@@ -92,18 +105,38 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         isFilled={isPartySelected}
       />
 
-      <Accordion collapsible className={commonStyles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
+      <Accordion
+        collapsible={!isGeneral}
+        className={commonStyles.accordion}
+        onToggle={isGeneral ? undefined : handleToggle}
+        openItems={isGeneral ? [1] : isOpen ? [1] : []}
+      >
         <AccordionItem className={commonStyles.accordionItem} value={1}>
           <AccordionHeader
             className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
-            expandIcon={isOpen ? <TriangleDownFilled style={iconStyle} /> : <TriangleRightFilled style={iconStyle} />}
+            expandIcon={
+              isGeneral ? null : isOpen ? (
+                <TriangleDownFilled style={iconStyle} />
+              ) : (
+                <TriangleRightFilled style={iconStyle} />
+              )
+            }
           >
-            {T.listTitle[locale]}
+            {isGeneral ? T.listTitleGeneral[locale] : T.listTitleCustom[locale]}
           </AccordionHeader>
-          <AccordionPanel className={mergeClasses(commonStyles.accordionPanel, styles.accordionPanel)}>
-            <SearchBox value={searchQuery} onChange={onSearchChange} placeholder={T.searchBoxPlaceholder[locale]} />
-            {listContent}
+
+          <AccordionPanel className={commonStyles.accordionPanel}>
+            {!isGeneral && listContent && (
+              <SearchBox value={searchQuery} onChange={onSearchChange} placeholder={T.searchBoxPlaceholder[locale]} />
+            )}
+            {listContent || (
+              <div className={styles.emptyBlock}>
+                <span className={styles.emptyTitle}>{T.emptyTitle[locale]}</span>
+                <img alt="empty" src={emptyState} width="68px" height="66px" />
+              </div>
+            )}
           </AccordionPanel>
+
           {(actionIcon || actionHandleClick) && isOpen && (
             <IconButton
               tooltip={T.btnCreateChecklist[locale]}

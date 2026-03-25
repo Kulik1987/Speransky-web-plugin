@@ -35,6 +35,10 @@ export const useReviewTypeStyles = makeStyles({
     "&[aria-selected='true'] span, &[aria-selected='true']:hover span, &[aria-selected='true']:active span": {
       color: "#FFFFFF",
     },
+    "&[aria-selected='true'] .fui-Tab__content, &[aria-selected='true']:hover .fui-Tab__content, &[aria-selected='true']:active .fui-Tab__content":
+      {
+        color: "#FFFFFF",
+      },
   },
   radioGroup: {
     display: "flex",
@@ -52,12 +56,9 @@ export const useReviewTypeStyles = makeStyles({
     "&:hover": {
       ...shorthands.borderColor(tokens.colorBrandForeground2),
     },
-    "&:has(input:checked)": {
-      ...shorthands.borderColor(tokens.colorBrandForeground2),
-    },
-    "& input:enabled:not(:checked) ~ .fui-Radio__label": {
-      color: tokens.colorNeutralForeground1,
-    },
+  },
+  radioItemSelected: {
+    ...shorthands.borderColor(tokens.colorBrandForeground2),
   },
   radioItemLabel: {
     fontSize: tokens.fontSizeBase400,

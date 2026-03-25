@@ -1,4 +1,4 @@
-import { mergeClasses, Radio, RadioGroup, Tab, TabList } from "@fluentui/react-components";
+import { mergeClasses, Tab, TabList } from "@fluentui/react-components";
 import type { SelectTabData, SelectTabEvent } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
@@ -10,7 +10,6 @@ import { ReviewTypeBase } from "../reviewTypeBase";
 import { ChecklistCard } from "../../../components/molecules";
 import { Modal } from "../../../components/atoms";
 import { SUPPORTED_CONTRACT_TYPES } from "../../../constants";
-import { useCommonStyles } from "../../../theme/commonStyles";
 
 const T = {
   titleGeneral: {
@@ -39,8 +38,7 @@ const ReviewType = () => {
   const { menuStore, suggestionsStore, checkList } = useStores();
   const { locale } = menuStore;
   const styles = useReviewTypeStyles();
-  const commonStyles = useCommonStyles();
-  const location = useLocation();
+const location = useLocation();
   const navigate = useNavigate();
 
   const state = location.state as { tab?: ReviewTypesEnums } | null;
@@ -48,6 +46,11 @@ const ReviewType = () => {
   const [selectedTab, setSelectedTab] = useState<string>(initialTab);
 
   const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
+  const [selectedContractType, setSelectedContractType] = useState<string>(() => {
+    const docType = suggestionsStore.documentType;
+    return docType && SUPPORTED_CONTRACT_TYPES.includes(docType) ? docType : "";
+  });
+
   const [targetId, setTargetId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -89,17 +92,20 @@ const ReviewType = () => {
     : SUPPORTED_CONTRACT_TYPES;
 
   const reviewGeneralChecklists = (
-    <RadioGroup className={styles.radioGroup}>
+    <div className={styles.radioGroup}>
       {filteredContractTypes.map((item: string) => (
         <div
           key={item}
-          onClick={(e) => e.currentTarget.querySelector<HTMLInputElement>("input")?.click()}
-          className={mergeClasses(commonStyles.radio, styles.radioItem)}
+          onClick={() => setSelectedContractType(item)}
+          className={mergeClasses(
+            styles.radioItem,
+            selectedContractType === item && styles.radioItemSelected
+          )}
         >
-          <Radio label={{ className: styles.radioItemLabel, children: item }} value={item} />
+          <span className={styles.radioItemLabel}>{item}</span>
         </div>
       ))}
-    </RadioGroup>
+    </div>
   );
 
   const filteredChecklists = searchQuery
@@ -142,22 +148,14 @@ const ReviewType = () => {
         </Tab>
       </TabList>
 
-      {selectedTab === ReviewTypesEnums.GENERAL ? (
-        <ReviewTypeBase
-          listContent={reviewGeneralChecklists}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onStartReview={handleStartAnalysis}
-        />
-      ) : (
-        <ReviewTypeBase
-          listContent={reviewCustomChecklists}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onStartReview={handleStartAnalysis}
-          actionHandleClick={navigateToChecklistPage}
-        />
-      )}
+      <ReviewTypeBase
+        type={selectedTab as ReviewTypesEnums}
+        listContent={selectedTab === ReviewTypesEnums.GENERAL ? reviewGeneralChecklists : reviewCustomChecklists}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onStartReview={handleStartAnalysis}
+        actionHandleClick={selectedTab === ReviewTypesEnums.CUSTOM ? navigateToChecklistPage : undefined}
+      />
     </div>
   );
 };

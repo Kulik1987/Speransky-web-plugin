@@ -118,7 +118,7 @@ export const useCommonStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalL),
-    ...shorthands.margin(tokens.spacingVerticalL, tokens.spacingHorizontalS),
+    ...shorthands.margin(tokens.spacingVerticalM, tokens.spacingHorizontalS),
   },
   accordionActions: {
     position: "absolute",

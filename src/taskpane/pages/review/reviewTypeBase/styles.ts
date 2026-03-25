@@ -13,7 +13,16 @@ export const useReviewTypeBaseStyles = makeStyles({
       fontWeight: tokens.fontWeightSemibold,
     },
   },
-  accordionPanel: {
+  emptyBlock: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
     ...shorthands.gap(tokens.spacingVerticalL),
+    ...shorthands.padding(0, tokens.spacingHorizontalS),
+  },
+  emptyTitle: {
+    fontSize: tokens.fontSizeBase400,
+    lineHeight: tokens.lineHeightBase400,
+    alignSelf: "flex-start",
   },
 });

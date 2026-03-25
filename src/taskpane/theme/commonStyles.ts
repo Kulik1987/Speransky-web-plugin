@@ -117,8 +117,8 @@ export const useCommonStyles = makeStyles({
   accordionPanel: {
     display: "flex",
     flexDirection: "column",
-    ...shorthands.gap(tokens.spacingVerticalM),
-    ...shorthands.margin(tokens.spacingHorizontalM, tokens.spacingVerticalS),
+    ...shorthands.gap(tokens.spacingVerticalL),
+    ...shorthands.margin(tokens.spacingVerticalL, tokens.spacingHorizontalS),
   },
   accordionActions: {
     position: "absolute",

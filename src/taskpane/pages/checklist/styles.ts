@@ -11,6 +11,7 @@ export const useChecklistStyles = makeStyles({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    minHeight: "26px",
   },
   btnTitle: {
     width: "auto",

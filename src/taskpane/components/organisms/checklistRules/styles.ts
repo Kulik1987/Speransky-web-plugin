@@ -43,6 +43,7 @@ export const useChecklistRuleStyles = makeStyles({
     "& textarea": {
       ...shorthands.overflow("auto"),
       minHeight: "56px",
+      lineHeight: "18px",
       paddingTop: tokens.spacingVerticalXS,
       paddingBottom: tokens.spacingVerticalXXXL,
       paddingLeft: tokens.spacingHorizontalSNudge,
@@ -99,9 +100,9 @@ export const useChecklistRuleStyles = makeStyles({
     top: "8px",
     right: "8px",
     ...shorthands.borderRadius("16px"),
-    fontSize: tokens.fontSizeBase100,
+    fontSize: tokens.fontSizeBase200,
     lineHeight: tokens.lineHeightBase100,
-    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalSNudge),
+    ...shorthands.padding("5px", "9px"),
   },
   simple: {
     backgroundColor: customColors.accent.rule.standard,

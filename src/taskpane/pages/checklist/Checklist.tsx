@@ -66,8 +66,8 @@ const T = {
     en: "Recommended checklist name",
   },
   listTitle: {
-    ru: "Сохранённые чек-листы",
-    en: "Saved checklists",
+    ru: "Пользовательские чек-листы",
+    en: "Custom checklists",
   },
   modalDeleteTitle: {
     ru: "Удалить чек-лист",

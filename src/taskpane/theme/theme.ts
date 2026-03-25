@@ -14,15 +14,17 @@ export const customColors = {
     10: "#5E5E5E",
     20: "#CCD0D6",
     30: "#E4E8ED",
+    40: "#465A6E1A",
   },
   bg: {
     accordion: "#E4E8EDB2",
     textarea: "#F0F0F059",
     header: "#E1E4EA",
-    partyflag: "#032C4526",
+    partyflag: "#032C4512",
   },
   accent: {
     delete: "#C50F1F",
+    removeText: "#EC6100",
     copy: "#0F6CBD",
     rule: {
       standard: "#F6D2B5",
@@ -31,7 +33,7 @@ export const customColors = {
     risk: {
       low: {
         bg: "#DFF2D7",
-        text: "#3B6B3E",
+        text: "#089408",
       },
       medium: {
         bg: "#F9B7804D",

@@ -16,10 +16,10 @@ export const useChecklistStyles = makeStyles({
     paddingTop: tokens.spacingVerticalSNudge,
     paddingBottom: tokens.spacingVerticalS,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.borderBottom("2px", "solid", tokens.colorNeutralStroke1),
+    boxShadow: `inset 0 -2px 0 ${tokens.colorNeutralStroke1}`,
     "&[aria-selected='true'], &[aria-selected='true']:hover": {
       backgroundColor: customColors.bg.accordion,
-      ...shorthands.borderBottom("2px", "solid", tokens.colorBrandForegroundOnLightPressed),
+      boxShadow: `inset 0 -2px 0 ${tokens.colorBrandForegroundOnLightPressed}`,
     },
     "& .fui-Tab__content": {
       display: "flex",

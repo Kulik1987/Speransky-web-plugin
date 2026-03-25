@@ -69,11 +69,11 @@ const T = {
     en: "Required field",
   },
   ruleSimpleFlag: {
-    ru: "Стандартный",
+    ru: "Стандартное",
     en: "Standard",
   },
   ruleAdvancedFlag: {
-    ru: "Продвинутый",
+    ru: "Продвинутое",
     en: "Advanced",
   },
 };

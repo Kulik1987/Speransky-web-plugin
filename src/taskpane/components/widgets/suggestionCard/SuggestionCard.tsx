@@ -200,13 +200,9 @@ const SuggestionCard = (props: SuggestionPropT) => {
           <div>
             <Text weight="bold">{T.labelChange[locale]}</Text>
             {isTypeAdd ? (
-              <Text block style={{ color: customColors.accent.risk.low.text }}>
-                {changeText}
-              </Text>
+              <Text className={styles.addText}>{changeText}</Text>
             ) : isTypeDelete ? (
-              <Text block style={{ textDecoration: "line-through", color: customColors.accent.risk.high.text }}>
-                {sourceText}
-              </Text>
+              <Text className={styles.deleteText}>{sourceText}</Text>
             ) : (
               <div dangerouslySetInnerHTML={{ __html: htmlChangesMatchingText || changeText }} />
             )}

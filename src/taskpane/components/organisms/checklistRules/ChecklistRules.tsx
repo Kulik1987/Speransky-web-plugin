@@ -69,11 +69,11 @@ const T = {
     en: "Required field",
   },
   ruleSimpleFlag: {
-    ru: "Стандартный",
+    ru: "Стандартное",
     en: "Standard",
   },
   ruleAdvancedFlag: {
-    ru: "Продвинутый",
+    ru: "Продвинутое",
     en: "Advanced",
   },
 };
@@ -120,6 +120,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
   const styles = useChecklistRuleStyles();
 
   const [simpleTouched, setSimpleTouched] = useState(false);
+  const [risksTouched, setRisksTouched] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [targetId, setTargetId] = useState<string | number | null>(null);
   const fieldsRef = useRef<HTMLDivElement>(null);
@@ -164,8 +165,10 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
     setTargetId(null);
   };
 
-  const validationField =
+  const validationSimpleField =
     simpleTouched && !ruleState.simple ? T.requiredField[locale] : getMaxLengthError(ruleState.simple, locale);
+  const validationRisksField =
+    risksTouched && !ruleState.riskTrigger ? T.requiredField[locale] : getMaxLengthError(ruleState.riskTrigger, locale);
 
   return (
     <div className={styles.container}>
@@ -200,8 +203,8 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                 <Field
                   label={SIMPLE_RULE_FIELD.label[locale]}
                   required
-                  validationState={validationField ? "error" : "none"}
-                  validationMessage={validationField}
+                  validationState={validationSimpleField ? "error" : "none"}
+                  validationMessage={validationSimpleField}
                 >
                   <Textarea
                     resize="none"
@@ -255,16 +258,25 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                   </div>
 
                   {ruleType === "advanced" && (
-                    <Textarea
-                      resize="none"
-                      value={ruleState.riskTrigger}
-                      onChange={(event, data) => {
-                        update({ riskTrigger: sanitizeFieldValue(data.value) });
-                        autoResize(event);
-                      }}
-                      onBlur={() => update({ riskTrigger: normalizeFieldValue(ruleState.riskTrigger) })}
-                      placeholder={T.riskTriggerPlaceholder[locale]}
-                    />
+                    <Field
+                      required={ruleType === "advanced"}
+                      validationState={validationRisksField ? "error" : "none"}
+                      validationMessage={validationRisksField}
+                    >
+                      <Textarea
+                        resize="none"
+                        value={ruleState.riskTrigger}
+                        onChange={(event, data) => {
+                          update({ riskTrigger: sanitizeFieldValue(data.value) });
+                          autoResize(event);
+                        }}
+                        onBlur={() => {
+                          setRisksTouched(true);
+                          update({ riskTrigger: normalizeFieldValue(ruleState.riskTrigger) });
+                        }}
+                        placeholder={T.riskTriggerPlaceholder[locale]}
+                      />
+                    </Field>
                   )}
                 </Field>
 

@@ -21,7 +21,7 @@ export const useChecklistRuleStyles = makeStyles({
     "& label": {
       fontWeight: tokens.fontWeightSemibold,
       lineHeight: tokens.lineHeightBase400,
-      marginBottom: tokens.spacingVerticalS,
+      marginBottom: tokens.spacingVerticalXS,
       color: customColors.text.primary[90],
       "& > span[aria-hidden]": {
         color: tokens.colorBrandForeground2,
@@ -42,9 +42,10 @@ export const useChecklistRuleStyles = makeStyles({
     },
     "& textarea": {
       ...shorthands.overflow("auto"),
-      minHeight: "56px",
+      minHeight: "64px",
+      lineHeight: "18px",
       paddingTop: tokens.spacingVerticalXS,
-      paddingBottom: tokens.spacingVerticalXXXL,
+      paddingBottom: tokens.spacingVerticalL,
       paddingLeft: tokens.spacingHorizontalSNudge,
       paddingRight: tokens.spacingHorizontalSNudge,
       backgroundColor: customColors.bg.textarea,
@@ -99,9 +100,9 @@ export const useChecklistRuleStyles = makeStyles({
     top: "8px",
     right: "8px",
     ...shorthands.borderRadius("16px"),
-    fontSize: tokens.fontSizeBase100,
+    fontSize: tokens.fontSizeBase200,
     lineHeight: tokens.lineHeightBase100,
-    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalSNudge),
+    ...shorthands.padding("5px", "9px"),
   },
   simple: {
     backgroundColor: customColors.accent.rule.standard,

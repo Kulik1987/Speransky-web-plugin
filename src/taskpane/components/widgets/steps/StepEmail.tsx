@@ -139,7 +139,6 @@ const StepEmail = () => {
           placeholder="example@gmail.com"
           type="email"
           disabled={isLoading}
-          autoFocus
           appearance="outline"
           size="large"
         />

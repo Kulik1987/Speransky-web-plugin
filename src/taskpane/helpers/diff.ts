@@ -27,9 +27,9 @@ export function htmlChangesMatching(source: string, target: string): string | nu
 
         switch (true) {
           case isDeleteItem:
-            return `<del  style="color: ${customColors.accent.risk.high.text};">${textItem}</del>`;
+            return `<del  style="color: ${customColors.accent.removeText};">${textItem}</del>`;
           case isCreateItem:
-            return `<inc style="color: ${customColors.accent.risk.low.text};
+            return `<inc style="color: ${customColors.accent.risk.low.text}; font-weight: 600;
            ">${textItem}</inc>`;
           case isStetItem:
             return `${textItem}`;

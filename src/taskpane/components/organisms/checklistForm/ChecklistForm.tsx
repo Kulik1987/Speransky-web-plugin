@@ -12,7 +12,7 @@ const emptyState = require("../../../assets/empty-state.svg");
 
 const T = {
   modeSimpleTitle: {
-    ru: "Стандартный",
+    ru: "Стандартное",
     en: "Standard",
   },
   modeSimpleSubtitle: {
@@ -20,7 +20,7 @@ const T = {
     en: "2 questions per rule",
   },
   modeAdvancedTitle: {
-    ru: "Продвинутый",
+    ru: "Продвинутое",
     en: "Advanced",
   },
   modeAdvancedSubtitle: {

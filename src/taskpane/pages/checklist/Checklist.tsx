@@ -66,8 +66,8 @@ const T = {
     en: "Recommended checklist name",
   },
   listTitle: {
-    ru: "Сохранённые чек-листы",
-    en: "Saved checklists",
+    ru: "Пользовательские чек-листы",
+    en: "Custom checklists",
   },
   modalDeleteTitle: {
     ru: "Удалить чек-лист",
@@ -124,6 +124,8 @@ const Checklist = () => {
   const [checklistSearch, setChecklistSearch] = useState("");
 
   const [checklistNameTouched, setChecklistNameTouched] = useState(false);
+  const [isChecklistNameManual, setIsChecklistNameManual] = useState(false);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
@@ -140,10 +142,13 @@ const Checklist = () => {
 
   useEffect(() => {
     checkList.getChecklists();
+    return () => {
+      checkList.setEditingChecklistId(null);
+    };
   }, []);
 
   useEffect(() => {
-    if (!isEditing && !checklistName) {
+    if (!isEditing && !isChecklistNameManual) {
       setChecklistName([docType, party].filter(Boolean).join(" - "));
     }
   }, [docType, party, checkList.editingChecklistId]);
@@ -184,6 +189,7 @@ const Checklist = () => {
       setChecklistRules([]);
       setChecklistName("");
       setChecklistNameTouched(false);
+      setIsChecklistNameManual(false);
       setDocType("");
       setParty("");
       setOpenItems([2]);
@@ -211,10 +217,11 @@ const Checklist = () => {
       setIsChecklistPage(false);
       setIsFormOpen(false);
       setChecklistName("");
+      setChecklistNameTouched(false);
+      setIsChecklistNameManual(false);
       setDocType("");
       setParty("");
       setChecklistRules([]);
-      setChecklistNameTouched(false);
     } else {
       checkList.setEditingChecklistId(null);
       navigate(-1);
@@ -241,7 +248,11 @@ const Checklist = () => {
         size="large"
         placeholder={T.checklistNamePlaceholder[locale]}
         value={checklistName}
-        onChange={(_, data) => setChecklistName(sanitizeFieldValue(data.value))}
+        onChange={(_, data) => {
+          const value = sanitizeFieldValue(data.value);
+          setIsChecklistNameManual(!!value);
+          setChecklistName(value);
+        }}
         onBlur={(e) => {
           setChecklistNameTouched(true);
           setChecklistName(normalizeFieldValue(e.target.value));

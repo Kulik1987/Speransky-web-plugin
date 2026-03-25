@@ -20,6 +20,19 @@ export const useSuggestionCardStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalM),
+    lineHeight: "18px",
+  },
+  addText: {
+    display: "block",
+    lineHeight: "18px",
+    color: customColors.accent.risk.low.text,
+    fontWeight: tokens.fontWeightSemibold,
+  },
+  deleteText: {
+    display: "block",
+    lineHeight: "18px",
+    ...shorthands.textDecoration("line-through"),
+    color: customColors.accent.removeText,
   },
   buttonsBlock: {
     display: "flex",
@@ -28,5 +41,10 @@ export const useSuggestionCardStyles = makeStyles({
   changeButtons: {
     display: "flex",
     ...shorthands.gap(tokens.spacingHorizontalMNudge),
+  },
+  commentLink: {
+    color: tokens.colorBrandForeground1,
+    textDecorationLine: "underline",
+    cursor: "pointer",
   },
 });

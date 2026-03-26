@@ -86,12 +86,18 @@ class CheckList {
       this.checklistParty = checklist.party ?? "";
       this.checklistRules = [...checklist.rules]
         .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-        .map(
-          (rule): DraftRule =>
-            Object.fromEntries(
-              Object.entries(rule).filter(([key, value]) => key !== "created_at" && value !== null)
-            ) as DraftRule
-        );
+        .map((rule): DraftRule => {
+          const { risk_triggers, ...rest } = rule;
+          const cleanedRule = Object.fromEntries(
+            Object.entries(rest).filter(([key, value]) => key !== "created_at" && value !== null)
+          );
+          return {
+            ...cleanedRule,
+            risk_triggers: risk_triggers
+              ? risk_triggers.map(({ risk_level, risk_trigger }) => ({ risk_level, risk_trigger }))
+              : null,
+          } as DraftRule;
+        });
       this.originalDraft = {
         checklistName: this.checklistName,
         checklistDescription: this.checklistDescription,
@@ -232,12 +238,17 @@ class CheckList {
         description: data.description,
         doc_type: data.doc_type,
         party: data.party,
-        rules: data.rules.map(
-          (rule): PayloadChecklistAddRuleDto =>
-            Object.fromEntries(
-              Object.entries(rule).filter(([key, value]) => !["id", "created_at"].includes(key) && value !== null)
-            ) as PayloadChecklistAddRuleDto
-        ),
+        rules: data.rules.map((rule): PayloadChecklistAddRuleDto => {
+          const { risk_triggers, ...rest } = rule;
+          return {
+            ...Object.fromEntries(
+              Object.entries(rest).filter(([key, value]) => !["id", "created_at"].includes(key) && value !== null)
+            ),
+            risk_triggers: risk_triggers
+              ? risk_triggers.map(({ risk_level, risk_trigger }) => ({ risk_level, risk_trigger }))
+              : null,
+          } as PayloadChecklistAddRuleDto;
+        }),
       });
 
       await this.getChecklists();

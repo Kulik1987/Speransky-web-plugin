@@ -14,7 +14,7 @@ export const useReviewTypeStyles = makeStyles({
     ...shorthands.gap(tokens.spacingHorizontalS),
   },
   tab: {
-    width: "50%",
+    width: "49%",
     cursor: "pointer",
     ...shorthands.border("1px", "solid", customColors.border[30]),
     "& span": {
@@ -40,31 +40,29 @@ export const useReviewTypeStyles = makeStyles({
         color: "#FFFFFF",
       },
   },
-  radioGroup: {
+  list: {
     display: "flex",
     flexDirection: "column",
-    ...shorthands.gap(tokens.spacingVerticalL),
+    ...shorthands.gap(tokens.spacingVerticalM),
     position: "relative",
   },
-  radioItem: {
-    cursor: "pointer",
+  listItem: {
+    cursor: "default",
     width: "100%",
     boxSizing: "border-box",
     ...shorthands.border("1px", "solid", customColors.border[20]),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.padding(tokens.spacingHorizontalS),
-    "&:hover": {
-      ...shorthands.borderColor(tokens.colorBrandForeground2),
-    },
+    paddingTop: tokens.spacingVerticalS,
+    paddingBottom: tokens.spacingVerticalM,
+    paddingLeft: tokens.spacingHorizontalMNudge,
+    paddingRight: tokens.spacingHorizontalMNudge,
   },
-  radioItemSelected: {
+  itemSelected: {
     ...shorthands.borderColor(tokens.colorBrandForeground2),
   },
-  radioItemLabel: {
+  itemLabel: {
     fontSize: tokens.fontSizeBase400,
     lineHeight: tokens.lineHeightBase400,
     fontWeight: tokens.fontWeightSemibold,
-    ...shorthands.padding(0, tokens.spacingHorizontalXS),
-    cursor: "pointer",
   },
 });

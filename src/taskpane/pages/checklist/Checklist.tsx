@@ -171,6 +171,16 @@ const Checklist = () => {
     });
   }, [checkList.editingChecklistId]);
 
+  const resetForm = () => {
+    setIsFormOpen(false);
+    setChecklistName("");
+    setChecklistNameTouched(false);
+    setIsChecklistNameManual(false);
+    setDocType("");
+    setParty("");
+    setChecklistRules([]);
+  };
+
   const handleOpenChecklistForm = () => {
     setIsFormOpen(true);
     setOpenItems([1]);
@@ -185,13 +195,7 @@ const Checklist = () => {
       checklistRules
     );
     if (success) {
-      setIsFormOpen(false);
-      setChecklistRules([]);
-      setChecklistName("");
-      setChecklistNameTouched(false);
-      setIsChecklistNameManual(false);
-      setDocType("");
-      setParty("");
+      resetForm();
       setOpenItems([2]);
     }
   };
@@ -207,27 +211,28 @@ const Checklist = () => {
 
   const handleDelete = (id: string) => setTargetId(id);
   const handleDeleteConfirm = async () => {
+    const wasEditing = targetId === checkList.editingChecklistId;
     await checkList.deleteChecklist(targetId);
     setTargetId(null);
+    if (wasEditing) {
+      resetForm();
+      setIsChecklistPage(false);
+    }
   };
 
   const handleGoBack = () => {
     if (isEditing && isChecklistPage) {
       checkList.setEditingChecklistId(null);
       setIsChecklistPage(false);
-      setIsFormOpen(false);
-      setChecklistName("");
-      setChecklistNameTouched(false);
-      setIsChecklistNameManual(false);
-      setDocType("");
-      setParty("");
-      setChecklistRules([]);
+      resetForm();
     } else {
       checkList.setEditingChecklistId(null);
       navigate(-1);
     }
   };
 
+  const validationDocType = getMaxLengthError(docType, locale, 255);
+  const validationParty = getMaxLengthError(party, locale, 100);
   const validationName =
     checklistNameTouched && !checklistName ? T.requiredField[locale] : getMaxLengthError(checklistName, locale, 255);
 
@@ -249,7 +254,7 @@ const Checklist = () => {
         placeholder={T.checklistNamePlaceholder[locale]}
         value={checklistName}
         onChange={(_, data) => {
-          const value = sanitizeFieldValue(data.value);
+          const value = sanitizeFieldValue(data.value, 255);
           setIsChecklistNameManual(!!value);
           setChecklistName(value);
         }}
@@ -262,6 +267,14 @@ const Checklist = () => {
       />
     </Field>
   );
+
+  const filteredDocTypes = docTypeSearch
+    ? ALL_CONTRACT_TYPES.filter((type) => type.toLowerCase().includes(docTypeSearch.toLowerCase()))
+    : ALL_CONTRACT_TYPES;
+
+  const filteredParties = partySearch
+    ? ALL_PARTIES.filter((type) => type.toLowerCase().includes(partySearch.toLowerCase()))
+    : ALL_PARTIES;
 
   const filteredChecklists = checklistSearch
     ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(checklistSearch.toLowerCase()))
@@ -328,59 +341,63 @@ const Checklist = () => {
               {isEditing ? checklistName : T.formCreatingTitle[locale]}
             </AccordionHeader>
             <AccordionPanel className={commonStyles.accordionPanel}>
-              <Combobox
-                freeform
-                size="large"
-                placeholder={T.docTypePlaceholder[locale]}
-                value={docType}
-                onOptionSelect={(_, data) => {
-                  setDocType(data.optionText ?? "");
-                  setDocTypeSearch("");
-                }}
-                onChange={(e) => {
-                  setDocType(e.target.value);
-                  setDocTypeSearch(e.target.value);
-                }}
-                listbox={{ className: styles.dropdownList }}
-                className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
-                input={{ maxLength: 255 }}
-              >
-                {(docTypeSearch
-                  ? ALL_CONTRACT_TYPES.filter((type) => type.toLowerCase().includes(docTypeSearch.toLowerCase()))
-                  : ALL_CONTRACT_TYPES
-                ).map((type) => (
-                  <Option key={type} value={type}>
-                    {type}
-                  </Option>
-                ))}
-              </Combobox>
+              <Field validationState={validationDocType ? "error" : "none"} validationMessage={validationDocType}>
+                <Combobox
+                  freeform
+                  size="large"
+                  placeholder={T.docTypePlaceholder[locale]}
+                  value={docType}
+                  onOptionSelect={(_, data) => {
+                    setDocType(data.optionText ?? "");
+                    setDocTypeSearch("");
+                  }}
+                  onChange={(e) => {
+                    const value = sanitizeFieldValue(e.target.value, 255);
+                    setDocType(value);
+                    setDocTypeSearch(value);
+                  }}
+                  listbox={{
+                    className: styles.dropdownList,
+                    style: { display: filteredDocTypes.length === 0 ? "none" : undefined },
+                  }}
+                  className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
+                >
+                  {filteredDocTypes.map((type) => (
+                    <Option key={type} value={type}>
+                      {type}
+                    </Option>
+                  ))}
+                </Combobox>
+              </Field>
 
-              <Combobox
-                freeform
-                size="large"
-                placeholder={T.partyPlaceholder[locale]}
-                value={party}
-                onOptionSelect={(_, data) => {
-                  setParty(data.optionText ?? "");
-                  setPartySearch("");
-                }}
-                onChange={(e) => {
-                  setParty(e.target.value);
-                  setPartySearch(e.target.value);
-                }}
-                listbox={{ className: styles.dropdownList }}
-                className={mergeClasses(commonStyles.dropdown, party && commonStyles.inputFill)}
-                input={{ maxLength: 100 }}
-              >
-                {(partySearch
-                  ? ALL_PARTIES.filter((type) => type.toLowerCase().includes(partySearch.toLowerCase()))
-                  : ALL_PARTIES
-                ).map((type) => (
-                  <Option key={type} value={type}>
-                    {type}
-                  </Option>
-                ))}
-              </Combobox>
+              <Field validationState={validationParty ? "error" : "none"} validationMessage={validationParty}>
+                <Combobox
+                  freeform
+                  size="large"
+                  placeholder={T.partyPlaceholder[locale]}
+                  value={party}
+                  onOptionSelect={(_, data) => {
+                    setParty(data.optionText ?? "");
+                    setPartySearch("");
+                  }}
+                  onChange={(e) => {
+                    const value = sanitizeFieldValue(e.target.value, 100);
+                    setParty(value);
+                    setPartySearch(value);
+                  }}
+                  listbox={{
+                    className: styles.dropdownList,
+                    style: { display: filteredParties.length === 0 ? "none" : undefined },
+                  }}
+                  className={mergeClasses(commonStyles.dropdown, party && commonStyles.inputFill)}
+                >
+                  {filteredParties.map((type) => (
+                    <Option key={type} value={type}>
+                      {type}
+                    </Option>
+                  ))}
+                </Combobox>
+              </Field>
 
               {checklistNameField}
 
@@ -391,15 +408,16 @@ const Checklist = () => {
               />
             </AccordionPanel>
 
-            <IconButton
-              tooltip={T.modalSaveConfirm[locale]}
-              icon={<Save16Regular />}
-              onClick={() => setIsSaveModalOpen(true)}
-              positioning="above-end"
-              appearance="primary"
-              className={commonStyles.accordionActions}
-              disabled={!canSave}
-            />
+            {canSave && (
+              <IconButton
+                tooltip={T.modalSaveConfirm[locale]}
+                icon={<Save16Regular />}
+                onClick={() => setIsSaveModalOpen(true)}
+                positioning="above-end"
+                appearance="primary"
+                className={commonStyles.accordionActions}
+              />
+            )}
           </AccordionItem>
         )}
 

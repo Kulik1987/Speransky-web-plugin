@@ -38,7 +38,7 @@ const ReviewType = () => {
   const { menuStore, suggestionsStore, checkList } = useStores();
   const { locale } = menuStore;
   const styles = useReviewTypeStyles();
-const location = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const state = location.state as { tab?: ReviewTypesEnums } | null;
@@ -46,7 +46,7 @@ const location = useLocation();
   const [selectedTab, setSelectedTab] = useState<string>(initialTab);
 
   const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
-  const [selectedContractType, setSelectedContractType] = useState<string>(() => {
+  const [selectedDocType] = useState<string>(() => {
     const docType = suggestionsStore.documentType;
     return docType && SUPPORTED_CONTRACT_TYPES.includes(docType) ? docType : "";
   });
@@ -92,17 +92,10 @@ const location = useLocation();
     : SUPPORTED_CONTRACT_TYPES;
 
   const reviewGeneralChecklists = (
-    <div className={styles.radioGroup}>
+    <div className={styles.list}>
       {filteredContractTypes.map((item: string) => (
-        <div
-          key={item}
-          onClick={() => setSelectedContractType(item)}
-          className={mergeClasses(
-            styles.radioItem,
-            selectedContractType === item && styles.radioItemSelected
-          )}
-        >
-          <span className={styles.radioItemLabel}>{item}</span>
+        <div key={item} className={mergeClasses(styles.listItem, selectedDocType === item && styles.itemSelected)}>
+          <span className={styles.itemLabel}>{item}</span>
         </div>
       ))}
     </div>

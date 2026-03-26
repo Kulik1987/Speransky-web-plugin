@@ -4,9 +4,14 @@ export enum RiskLevel {
   "HIGH" = "high",
 }
 
+interface RiskTriggerItem {
+  risk_level: RiskLevel;
+  risk_trigger: string;
+}
+
 interface SimpleRule {
   simple_rule: string;
-  risk_level: RiskLevel;
+  risk_triggers: RiskTriggerItem[] | null;
 }
 
 interface AdvancedRule {
@@ -15,8 +20,7 @@ interface AdvancedRule {
   required_formulation?: string;
   why_important?: string;
   counterparty_explanation?: string;
-  risk_trigger?: string;
-  risk_level: RiskLevel;
+  risk_triggers: RiskTriggerItem[] | null;
 }
 
 export type PayloadChecklistAddRuleDto = SimpleRule | AdvancedRule;

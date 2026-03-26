@@ -66,16 +66,31 @@ type ChecklistRuleProps = {
 
 type RuleState = {
   simple: string;
-  riskLevel: RiskLevel;
-  riskTriggers: RiskTriggers;
   advanced: AdvancedFieldsState;
+  riskTriggers: RiskTriggers;
+};
+
+const riskTriggersToPayload = (triggers: RiskTriggers) => {
+  const result = Object.entries(triggers)
+    .filter(([, v]) => v.trim() !== "")
+    .map(([level, trigger]) => ({ risk_level: level as RiskLevel, risk_trigger: trigger }));
+  return result.length > 0 ? result : null;
+};
+
+const riskTriggersFromPayload = (triggers?: { risk_level: RiskLevel; risk_trigger: string }[] | null): RiskTriggers => {
+  const base: RiskTriggers = { [RiskLevel.LOW]: "", [RiskLevel.MEDIUM]: "", [RiskLevel.HIGH]: "" };
+  if (!triggers) return base;
+  for (const t of triggers) {
+    base[t.risk_level] = t.risk_trigger;
+  }
+  return base;
 };
 
 const buildPayload = (type: RuleType, state: RuleState): PayloadChecklistAddRuleDto =>
   type === "simple"
     ? {
         simple_rule: state.simple,
-        risk_level: state.riskLevel,
+        risk_triggers: riskTriggersToPayload(state.riskTriggers),
       }
     : {
         check_condition: state.advanced.checkCondition,
@@ -83,8 +98,7 @@ const buildPayload = (type: RuleType, state: RuleState): PayloadChecklistAddRule
         required_formulation: state.advanced.requiredFormulation || undefined,
         why_important: state.advanced.whyImportant || undefined,
         counterparty_explanation: state.advanced.counterpartyExplanation || undefined,
-        risk_trigger: state.riskTriggers[state.riskLevel] || undefined,
-        risk_level: state.riskLevel,
+        risk_triggers: riskTriggersToPayload(state.riskTriggers),
       };
 
 const iconStyle = { width: "12px", height: "12px", padding: "5px" };
@@ -110,12 +124,6 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
 
   const [ruleState, setRuleState] = useState<RuleState>({
     simple: simpleIv?.simple_rule ?? "",
-    riskLevel: initialValue?.risk_level ?? RiskLevel.LOW,
-    riskTriggers: {
-      [RiskLevel.LOW]: advancedIv?.risk_level === RiskLevel.LOW ? advancedIv?.risk_trigger ?? "" : "",
-      [RiskLevel.MEDIUM]: advancedIv?.risk_level === RiskLevel.MEDIUM ? advancedIv?.risk_trigger ?? "" : "",
-      [RiskLevel.HIGH]: advancedIv?.risk_level === RiskLevel.HIGH ? advancedIv?.risk_trigger ?? "" : "",
-    },
     advanced: {
       checkCondition: advancedIv?.check_condition ?? "",
       requiredAction: advancedIv?.required_action ?? "",
@@ -123,6 +131,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
       whyImportant: advancedIv?.why_important ?? "",
       counterpartyExplanation: advancedIv?.counterparty_explanation ?? "",
     },
+    riskTriggers: riskTriggersFromPayload(initialValue?.risk_triggers),
   });
 
   const update = (patch: Partial<RuleState>) => {
@@ -135,8 +144,6 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
 
   const handleAdvancedChange = (field: AdvancedField, value: string) =>
     update({ advanced: { ...ruleState.advanced, [field]: value } });
-
-  const handleRiskLevelChange = (level: RiskLevel) => update({ riskLevel: level });
 
   const handleRiskTriggerChange = (level: RiskLevel, value: string) =>
     update({ riskTriggers: { ...ruleState.riskTriggers, [level]: value } });
@@ -208,9 +215,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
               )}
 
               <RiskLevelField
-                selectedLevel={ruleState.riskLevel}
                 riskTriggers={ruleState.riskTriggers}
-                onLevelChange={handleRiskLevelChange}
                 onTriggerChange={handleRiskTriggerChange}
                 onTriggerBlur={handleRiskTriggerBlur}
               />

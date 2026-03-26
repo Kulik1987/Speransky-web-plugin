@@ -32,23 +32,16 @@ const T = {
 export type RiskTriggers = Record<RiskLevel, string>;
 
 type RiskLevelFieldProps = {
-  selectedLevel: RiskLevel;
   riskTriggers: RiskTriggers;
-  onLevelChange: (level: RiskLevel) => void;
   onTriggerChange: (level: RiskLevel, value: string) => void;
   onTriggerBlur: (level: RiskLevel, value: string) => void;
 };
 
-const RiskLevelField = ({
-  selectedLevel = RiskLevel.LOW,
-  riskTriggers,
-  onLevelChange,
-  onTriggerChange,
-  onTriggerBlur,
-}: RiskLevelFieldProps) => {
+const RiskLevelField = ({ riskTriggers, onTriggerChange, onTriggerBlur }: RiskLevelFieldProps) => {
   const { menuStore } = useStores();
   const { locale } = menuStore;
   const styles = useChecklistRuleStyles();
+  const [selectedLevel, setSelectedLevel] = React.useState<RiskLevel>(RiskLevel.LOW);
 
   const currentValue = riskTriggers[selectedLevel];
   const validationError = getMaxLengthError(currentValue, locale);
@@ -62,7 +55,7 @@ const RiskLevelField = ({
         appearance="transparent"
         size="small"
         selectedValue={selectedLevel}
-        onTabSelect={(_, data) => onLevelChange(data.value as RiskLevel)}
+        onTabSelect={(_, data) => setSelectedLevel(data.value as RiskLevel)}
         className={styles.riskTabList}
       >
         {Object.values(RiskLevel).map((level) => (

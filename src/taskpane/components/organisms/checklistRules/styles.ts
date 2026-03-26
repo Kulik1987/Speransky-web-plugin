@@ -24,7 +24,7 @@ export const useChecklistRuleStyles = makeStyles({
       marginBottom: tokens.spacingVerticalXS,
       color: customColors.text.primary[90],
       "& > span[aria-hidden]": {
-        color: tokens.colorBrandForeground2,
+        color: customColors.accent.delete,
       },
     },
     "& span": {
@@ -112,7 +112,7 @@ export const useChecklistRuleStyles = makeStyles({
     },
   },
   riskTextarea: {
-    "& span": {
+    "&>span:first-of-type": {
       borderLeftWidth: "2px",
       borderLeftStyle: "solid",
       borderLeftColor: "var(--risk-color)",

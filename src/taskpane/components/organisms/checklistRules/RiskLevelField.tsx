@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Field, Tab, TabList, Textarea } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { RiskLevel } from "../../../api/types";
 import { useChecklistRuleStyles } from "./styles";
 import { customColors } from "../../../theme/theme";
-import { autoResize, getMaxLengthError, normalizeFieldValue, sanitizeFieldValue } from "../../../helpers";
+import {
+  autoResize,
+  getMaxLengthError,
+  normalizeFieldValue,
+  resizeTextarea,
+  sanitizeFieldValue,
+} from "../../../helpers";
 
 const T = {
   riskLevel: {
@@ -42,6 +48,12 @@ const RiskLevelField = ({ riskTriggers, onTriggerChange, onTriggerBlur }: RiskLe
   const { locale } = menuStore;
   const styles = useChecklistRuleStyles();
   const [selectedLevel, setSelectedLevel] = React.useState<RiskLevel>(RiskLevel.LOW);
+  const fieldRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = fieldRef.current?.querySelector("textarea");
+    if (el) resizeTextarea(el);
+  }, [selectedLevel]);
 
   const currentValue = riskTriggers[selectedLevel];
   const validationError = getMaxLengthError(currentValue, locale);
@@ -65,22 +77,25 @@ const RiskLevelField = ({ riskTriggers, onTriggerChange, onTriggerBlur }: RiskLe
         ))}
       </TabList>
 
-      <div className={styles.riskTextarea}>
-        <Field validationState={validationError ? "error" : "none"} validationMessage={validationError}>
-          <Textarea
-            resize="none"
-            value={currentValue}
-            onChange={(event, data) => {
-              onTriggerChange(selectedLevel, sanitizeFieldValue(data.value));
-              autoResize(event);
-            }}
-            onBlur={() => {
-              onTriggerBlur(selectedLevel, normalizeFieldValue(currentValue));
-            }}
-            placeholder={T.riskTriggerPlaceholder[locale]}
-          />
-        </Field>
-      </div>
+      <Field
+        ref={fieldRef}
+        className={styles.riskTextarea}
+        validationState={validationError ? "error" : "none"}
+        validationMessage={validationError}
+      >
+        <Textarea
+          resize="none"
+          value={currentValue}
+          onChange={(event, data) => {
+            onTriggerChange(selectedLevel, sanitizeFieldValue(data.value));
+            autoResize(event);
+          }}
+          onBlur={() => {
+            onTriggerBlur(selectedLevel, normalizeFieldValue(currentValue));
+          }}
+          placeholder={T.riskTriggerPlaceholder[locale]}
+        />
+      </Field>
     </Field>
   );
 };

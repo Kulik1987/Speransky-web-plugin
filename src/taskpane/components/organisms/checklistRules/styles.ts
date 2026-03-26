@@ -61,40 +61,6 @@ export const useChecklistRuleStyles = makeStyles({
   btnDelete: {
     alignSelf: "flex-end",
   },
-  riskSection: {
-    display: "flex",
-    flexDirection: "column",
-    ...shorthands.gap(tokens.spacingVerticalXS),
-  },
-  riskBtnBlock: {
-    display: "flex",
-    flexDirection: "row",
-    ...shorthands.gap(tokens.spacingHorizontalS),
-    marginBottom: tokens.spacingVerticalS,
-  },
-  btnRisk: {
-    maxHeight: "24px",
-    ...shorthands.flex(1),
-    minWidth: 0,
-    fontSize: tokens.fontSizeBase200,
-    fontWeight: tokens.fontWeightRegular,
-  },
-  btnRiskHover: {
-    ":hover, :active": {
-      ...shorthands.borderColor("var(--risk-color-bg)"),
-      backgroundColor: "transparent",
-      color: "var(--risk-color-text)",
-    },
-  },
-  btnRiskSelected: {
-    backgroundColor: "var(--risk-color-bg)",
-    ...shorthands.borderColor("var(--risk-color-bg)"),
-    color: "var(--risk-color-text)",
-    ":hover": {
-      backgroundColor: "var(--risk-color-bg)",
-      color: "var(--risk-color-text)",
-    },
-  },
   ruleFlag: {
     position: "absolute",
     top: "8px",
@@ -109,5 +75,51 @@ export const useChecklistRuleStyles = makeStyles({
   },
   advanced: {
     backgroundColor: customColors.accent.rule.advanced,
+  },
+  riskTabList: {
+    marginTop: "-8px",
+    marginBottom: tokens.spacingVerticalS,
+  },
+  riskTab: {
+    ...shorthands.padding(tokens.spacingVerticalSNudge),
+    "&[aria-selected='true']": {
+      fontWeight: tokens.fontWeightSemibold,
+      color: "var(--risk-color)",
+      "::after": {
+        backgroundColor: "var(--risk-color)",
+      },
+      "& span": {
+        color: "var(--risk-color)",
+      },
+    },
+    "&[aria-selected='true']:hover": {
+      color: "var(--risk-color)",
+      "::after": {
+        backgroundColor: "var(--risk-color)",
+      },
+      "& span": {
+        color: "var(--risk-color)",
+      },
+    },
+    "&[aria-selected='true']:active": {
+      color: "var(--risk-color)",
+      "::after": {
+        backgroundColor: "var(--risk-color)",
+      },
+      "& span": {
+        color: "var(--risk-color)",
+      },
+    },
+  },
+  riskTextarea: {
+    "& span": {
+      borderLeftWidth: "2px",
+      borderLeftStyle: "solid",
+      borderLeftColor: "var(--risk-color)",
+      "&:hover, &:focus-within, &:active": {
+        borderLeftWidth: "2px",
+        borderLeftColor: "var(--risk-color)",
+      },
+    },
   },
 });

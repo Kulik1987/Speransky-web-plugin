@@ -4,7 +4,6 @@ import {
   AccordionHeader,
   AccordionItem,
   AccordionPanel,
-  Button,
   Field,
   Textarea,
   mergeClasses,
@@ -14,6 +13,7 @@ import { observer } from "mobx-react";
 import { useStores } from "../../../store";
 import { PayloadChecklistAddRuleDto, RiskLevel } from "../../../api/types";
 import RuleAdvancedFields, { AdvancedField, AdvancedFieldsState } from "./RuleAdvancedFields";
+import RiskLevelField, { RiskTriggers } from "./RiskLevelField";
 import { useChecklistRuleStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
 import { SIMPLE_RULE_FIELD } from "../../../constants";
@@ -31,30 +31,6 @@ const T = {
   ruleTitle: {
     ru: "Правило ",
     en: "Rule ",
-  },
-  riskLevel: {
-    ru: "Степень риска",
-    en: "Risk level",
-  },
-  optional: {
-    ru: "(опционально)",
-    en: "(optional)",
-  },
-  low: {
-    ru: "Низкая",
-    en: "Low",
-  },
-  medium: {
-    ru: "Средняя",
-    en: "Medium",
-  },
-  high: {
-    ru: "Высокая",
-    en: "High",
-  },
-  riskTriggerPlaceholder: {
-    ru: "Какое отклонение от правила определяет данную степень риска?",
-    en: "What deviation from the rule determines this risk level?",
   },
   deleteRuleTitle: {
     ru: "Удалить правило",
@@ -91,7 +67,7 @@ type ChecklistRuleProps = {
 type RuleState = {
   simple: string;
   riskLevel: RiskLevel;
-  riskTrigger: string;
+  riskTriggers: RiskTriggers;
   advanced: AdvancedFieldsState;
 };
 
@@ -107,7 +83,7 @@ const buildPayload = (type: RuleType, state: RuleState): PayloadChecklistAddRule
         required_formulation: state.advanced.requiredFormulation || undefined,
         why_important: state.advanced.whyImportant || undefined,
         counterparty_explanation: state.advanced.counterpartyExplanation || undefined,
-        risk_trigger: state.riskTrigger || undefined,
+        risk_trigger: state.riskTriggers[state.riskLevel] || undefined,
         risk_level: state.riskLevel,
       };
 
@@ -120,7 +96,6 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
   const styles = useChecklistRuleStyles();
 
   const [simpleTouched, setSimpleTouched] = useState(false);
-  const [risksTouched, setRisksTouched] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [targetId, setTargetId] = useState<string | number | null>(null);
   const fieldsRef = useRef<HTMLDivElement>(null);
@@ -136,7 +111,11 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
   const [ruleState, setRuleState] = useState<RuleState>({
     simple: simpleIv?.simple_rule ?? "",
     riskLevel: initialValue?.risk_level ?? RiskLevel.LOW,
-    riskTrigger: advancedIv?.risk_trigger ?? "",
+    riskTriggers: {
+      [RiskLevel.LOW]: advancedIv?.risk_level === RiskLevel.LOW ? advancedIv?.risk_trigger ?? "" : "",
+      [RiskLevel.MEDIUM]: advancedIv?.risk_level === RiskLevel.MEDIUM ? advancedIv?.risk_trigger ?? "" : "",
+      [RiskLevel.HIGH]: advancedIv?.risk_level === RiskLevel.HIGH ? advancedIv?.risk_trigger ?? "" : "",
+    },
     advanced: {
       checkCondition: advancedIv?.check_condition ?? "",
       requiredAction: advancedIv?.required_action ?? "",
@@ -159,6 +138,12 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
 
   const handleRiskLevelChange = (level: RiskLevel) => update({ riskLevel: level });
 
+  const handleRiskTriggerChange = (level: RiskLevel, value: string) =>
+    update({ riskTriggers: { ...ruleState.riskTriggers, [level]: value } });
+
+  const handleRiskTriggerBlur = (level: RiskLevel, value: string) =>
+    update({ riskTriggers: { ...ruleState.riskTriggers, [level]: value } });
+
   const handleDeleteRule = () => setTargetId(index);
   const handleDeleteRuleConfirm = () => {
     onRemove(index);
@@ -167,8 +152,6 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
 
   const validationSimpleField =
     simpleTouched && !ruleState.simple ? T.requiredField[locale] : getMaxLengthError(ruleState.simple, locale);
-  const validationRisksField =
-    risksTouched && !ruleState.riskTrigger ? T.requiredField[locale] : getMaxLengthError(ruleState.riskTrigger, locale);
 
   return (
     <div className={styles.container}>
@@ -224,70 +207,21 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
                 <RuleAdvancedFields {...ruleState.advanced} onChange={handleAdvancedChange} />
               )}
 
-              <div className={styles.riskSection}>
-                <Field
-                  required={ruleType === "advanced"}
-                  label={
-                    <>
-                      {T.riskLevel[locale]}
-                      {ruleType === "simple" && <span className={styles.labelOptional}> {T.optional[locale]}</span>}
-                    </>
-                  }
-                >
-                  <div className={styles.riskBtnBlock}>
-                    {Object.values(RiskLevel).map((risk) => (
-                      <Button
-                        key={risk}
-                        className={mergeClasses(
-                          styles.btnRisk,
-                          styles.btnRiskHover,
-                          ruleState.riskLevel === risk && styles.btnRiskSelected
-                        )}
-                        style={
-                          {
-                            "--risk-color-bg": customColors.accent.risk[risk].bg,
-                            "--risk-color-text": customColors.accent.risk[risk].text,
-                          } as React.CSSProperties
-                        }
-                        appearance="outline"
-                        onClick={() => handleRiskLevelChange(risk)}
-                      >
-                        {T[risk][locale]}
-                      </Button>
-                    ))}
-                  </div>
+              <RiskLevelField
+                selectedLevel={ruleState.riskLevel}
+                riskTriggers={ruleState.riskTriggers}
+                onLevelChange={handleRiskLevelChange}
+                onTriggerChange={handleRiskTriggerChange}
+                onTriggerBlur={handleRiskTriggerBlur}
+              />
 
-                  {ruleType === "advanced" && (
-                    <Field
-                      required={ruleType === "advanced"}
-                      validationState={validationRisksField ? "error" : "none"}
-                      validationMessage={validationRisksField}
-                    >
-                      <Textarea
-                        resize="none"
-                        value={ruleState.riskTrigger}
-                        onChange={(event, data) => {
-                          update({ riskTrigger: sanitizeFieldValue(data.value) });
-                          autoResize(event);
-                        }}
-                        onBlur={() => {
-                          setRisksTouched(true);
-                          update({ riskTrigger: normalizeFieldValue(ruleState.riskTrigger) });
-                        }}
-                        placeholder={T.riskTriggerPlaceholder[locale]}
-                      />
-                    </Field>
-                  )}
-                </Field>
-
-                <IconButton
-                  tooltip={T.deleteRuleTitle[locale]}
-                  icon={<Delete24Regular color={customColors.accent.delete} />}
-                  onClick={handleDeleteRule}
-                  positioning="above-end"
-                  className={styles.btnDelete}
-                />
-              </div>
+              <IconButton
+                tooltip={T.deleteRuleTitle[locale]}
+                icon={<Delete24Regular color={customColors.accent.delete} />}
+                onClick={handleDeleteRule}
+                positioning="above-end"
+                className={styles.btnDelete}
+              />
             </div>
           </AccordionPanel>
         </AccordionItem>

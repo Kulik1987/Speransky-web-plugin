@@ -3,7 +3,7 @@ import { mergeClasses, Tab, TabList } from "@fluentui/react-components";
 import { Add16Regular } from "@fluentui/react-icons";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
-import { PayloadChecklistAddRuleDto, RiskLevel } from "../../../api/types";
+import { PayloadChecklistAddRuleDto } from "../../../api/types";
 import { DraftRule } from "../../../store/checklist";
 import { ChecklistRules, RuleType } from "../checklistRules";
 import { useChecklistStyles } from "./styles";
@@ -70,7 +70,7 @@ const ChecklistForm = ({ onRulesChange, initialRules }: ChecklistFormProps) => {
         ? {
             id: `_local_${Date.now()}`,
             simple_rule: "",
-            risk_level: RiskLevel.LOW,
+            risk_triggers: null,
           }
         : {
             id: `_local_${Date.now()}`,
@@ -79,8 +79,7 @@ const ChecklistForm = ({ onRulesChange, initialRules }: ChecklistFormProps) => {
             required_formulation: "",
             why_important: "",
             counterparty_explanation: "",
-            risk_trigger: "",
-            risk_level: RiskLevel.LOW,
+            risk_triggers: null,
           };
     updateRules([...rules, newRule]);
     setTimeout(() => {

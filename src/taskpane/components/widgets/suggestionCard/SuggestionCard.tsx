@@ -69,7 +69,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
   const { data, index: indexSuggestion } = props;
 
   const {
-    risk_description: commentText,
+    recommendation: commentText,
     risk_level,
     new_clause_wording: changeText,
     target_snippet_full: sourceText,

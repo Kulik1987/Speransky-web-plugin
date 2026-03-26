@@ -57,7 +57,7 @@ const Summary = () => {
       const {
         target_snippet_full: sourceText,
         new_clause_wording: changeText,
-        risk_description: commentText,
+        recommendation: commentText,
         is_new_clause,
         is_removed_clause,
       } = itemSuggestion;

@@ -74,7 +74,7 @@ const riskTriggersToPayload = (triggers: RiskTriggers) => {
   const result = Object.entries(triggers)
     .filter(([, v]) => v.trim() !== "")
     .map(([level, trigger]) => ({ risk_level: level as RiskLevel, risk_trigger: trigger }));
-  return result.length > 0 ? result : null;
+  return result;
 };
 
 const riskTriggersFromPayload = (triggers?: { risk_level: RiskLevel; risk_trigger: string }[] | null): RiskTriggers => {

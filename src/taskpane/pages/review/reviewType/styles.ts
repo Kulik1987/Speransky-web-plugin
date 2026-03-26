@@ -14,7 +14,7 @@ export const useReviewTypeStyles = makeStyles({
     ...shorthands.gap(tokens.spacingHorizontalS),
   },
   tab: {
-    width: "50%",
+    width: "49%",
     cursor: "pointer",
     ...shorthands.border("1px", "solid", customColors.border[30]),
     "& span": {
@@ -52,7 +52,10 @@ export const useReviewTypeStyles = makeStyles({
     boxSizing: "border-box",
     ...shorthands.border("1px", "solid", customColors.border[20]),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.padding(tokens.spacingHorizontalS),
+    paddingTop: tokens.spacingVerticalS,
+    paddingBottom: tokens.spacingVerticalM,
+    paddingLeft: tokens.spacingHorizontalMNudge,
+    paddingRight: tokens.spacingHorizontalMNudge,
   },
   itemSelected: {
     ...shorthands.borderColor(tokens.colorBrandForeground2),
@@ -61,6 +64,5 @@ export const useReviewTypeStyles = makeStyles({
     fontSize: tokens.fontSizeBase400,
     lineHeight: tokens.lineHeightBase400,
     fontWeight: tokens.fontWeightSemibold,
-    ...shorthands.padding(0, tokens.spacingHorizontalXS),
   },
 });

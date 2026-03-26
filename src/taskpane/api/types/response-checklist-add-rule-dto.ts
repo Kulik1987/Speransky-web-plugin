@@ -9,7 +9,7 @@ export interface ResponseChecklistAddRuleDto {
   required_formulation?: string | null;
   why_important?: string | null;
   counterparty_explanation?: string | null;
-  risk_triggers?: RiskTriggers[];
+  risk_triggers?: RiskTriggers[] | null;
 }
 
 interface RiskTriggers {

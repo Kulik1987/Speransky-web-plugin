@@ -82,34 +82,20 @@ export const useChecklistRuleStyles = makeStyles({
   },
   riskTab: {
     ...shorthands.padding(tokens.spacingVerticalSNudge),
-    "&[aria-selected='true']": {
+    "&[aria-selected='true'], &[aria-selected='true']:hover, &[aria-selected='true']:active": {
       fontWeight: tokens.fontWeightSemibold,
       color: "var(--risk-color)",
       "::after": {
         backgroundColor: "var(--risk-color)",
       },
-      "& span": {
-        color: "var(--risk-color)",
-      },
     },
-    "&[aria-selected='true']:hover": {
+    "&[aria-selected='true'] span, &[aria-selected='true']:hover span, &[aria-selected='true']:active span": {
       color: "var(--risk-color)",
-      "::after": {
-        backgroundColor: "var(--risk-color)",
-      },
-      "& span": {
+    },
+    "&[aria-selected='true'] .fui-Tab__content, &[aria-selected='true']:hover .fui-Tab__content, &[aria-selected='true']:active .fui-Tab__content":
+      {
         color: "var(--risk-color)",
       },
-    },
-    "&[aria-selected='true']:active": {
-      color: "var(--risk-color)",
-      "::after": {
-        backgroundColor: "var(--risk-color)",
-      },
-      "& span": {
-        color: "var(--risk-color)",
-      },
-    },
   },
   riskTextarea: {
     "&>span:first-of-type": {

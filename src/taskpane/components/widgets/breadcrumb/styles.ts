@@ -12,9 +12,11 @@ export const useBreadcrumbStyles = makeStyles({
   button: {
     lineHeight: tokens.lineHeightBase600,
     ...shorthands.padding(0),
+    ...shorthands.border("none"),
     "&:hover": {
       color: customColors.text.primary[90],
       backgroundColor: "transparent",
+      ...shorthands.border("none"),
       "&:active": {
         backgroundColor: "transparent",
       },

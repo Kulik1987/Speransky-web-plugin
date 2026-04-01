@@ -262,7 +262,7 @@ class DocumentStore {
 
       const response = await api.contract.detectType({
         llm_provider: this.rootStore.menuStore.providerLLM,
-        file: file,
+        files: [file],
         source: SourceTypeEnums.PLUGIN,
       });
 

@@ -1,5 +1,5 @@
 export interface PayloadContractDetectTypeDto {
   llm_provider: "mistral" | "gigachat" | "openai";
-  file: File;
+  files: File[];
   source: "web" | "plugin";
 }

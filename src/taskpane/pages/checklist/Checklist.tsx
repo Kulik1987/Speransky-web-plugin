@@ -10,11 +10,9 @@ import {
   AccordionItem,
   AccordionPanel,
   Button,
-  Combobox,
   Field,
   Input,
   mergeClasses,
-  Option,
   Spinner,
 } from "@fluentui/react-components";
 import type { AccordionToggleData, AccordionToggleEvent } from "@fluentui/react-components";
@@ -26,7 +24,7 @@ import {
   TriangleRightFilled,
 } from "@fluentui/react-icons";
 import { ALL_PARTIES, ALL_CONTRACT_TYPES } from "../../constants";
-import { ChecklistCard } from "../../components/molecules";
+import { ChecklistCard, ComboboxField } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
 import { IconButton, Modal, SearchBox } from "../../components/atoms";
@@ -97,10 +95,6 @@ const T = {
     ru: "Найти по названию",
     en: "Search by name",
   },
-  searchOrAddPlaceholder: {
-    ru: "Введите или выберите название",
-    en: "Search or add new value",
-  },
 };
 
 const iconStyle = { width: "12px", height: "12px", padding: "5px" };
@@ -119,8 +113,6 @@ const Checklist = () => {
   const [checklistName, setChecklistName] = useState("");
   const [checklistRules, setChecklistRules] = useState<DraftRule[]>([]);
 
-  const [docTypeSearch, setDocTypeSearch] = useState("");
-  const [partySearch, setPartySearch] = useState("");
   const [checklistSearch, setChecklistSearch] = useState("");
 
   const [checklistNameTouched, setChecklistNameTouched] = useState(false);
@@ -268,14 +260,6 @@ const Checklist = () => {
     </Field>
   );
 
-  const filteredDocTypes = docTypeSearch
-    ? ALL_CONTRACT_TYPES.filter((type) => type.toLowerCase().includes(docTypeSearch.toLowerCase()))
-    : ALL_CONTRACT_TYPES;
-
-  const filteredParties = partySearch
-    ? ALL_PARTIES.filter((type) => type.toLowerCase().includes(partySearch.toLowerCase()))
-    : ALL_PARTIES;
-
   const filteredChecklists = checklistSearch
     ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(checklistSearch.toLowerCase()))
     : checkList.checklists;
@@ -341,63 +325,23 @@ const Checklist = () => {
               {isEditing ? checklistName : T.formCreatingTitle[locale]}
             </AccordionHeader>
             <AccordionPanel className={commonStyles.accordionPanel}>
-              <Field validationState={validationDocType ? "error" : "none"} validationMessage={validationDocType}>
-                <Combobox
-                  freeform
-                  size="large"
-                  placeholder={T.docTypePlaceholder[locale]}
-                  value={docType}
-                  onOptionSelect={(_, data) => {
-                    setDocType(data.optionText ?? "");
-                    setDocTypeSearch("");
-                  }}
-                  onChange={(e) => {
-                    const value = sanitizeFieldValue(e.target.value, 255);
-                    setDocType(value);
-                    setDocTypeSearch(value);
-                  }}
-                  listbox={{
-                    className: styles.dropdownList,
-                    style: { display: filteredDocTypes.length === 0 ? "none" : undefined },
-                  }}
-                  className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
-                >
-                  {filteredDocTypes.map((type) => (
-                    <Option key={type} value={type}>
-                      {type}
-                    </Option>
-                  ))}
-                </Combobox>
-              </Field>
+              <ComboboxField
+                value={docType}
+                onChange={setDocType}
+                options={ALL_CONTRACT_TYPES}
+                placeholder={T.docTypePlaceholder[locale]}
+                maxLength={255}
+                validationMessage={validationDocType}
+              />
 
-              <Field validationState={validationParty ? "error" : "none"} validationMessage={validationParty}>
-                <Combobox
-                  freeform
-                  size="large"
-                  placeholder={T.partyPlaceholder[locale]}
-                  value={party}
-                  onOptionSelect={(_, data) => {
-                    setParty(data.optionText ?? "");
-                    setPartySearch("");
-                  }}
-                  onChange={(e) => {
-                    const value = sanitizeFieldValue(e.target.value, 100);
-                    setParty(value);
-                    setPartySearch(value);
-                  }}
-                  listbox={{
-                    className: styles.dropdownList,
-                    style: { display: filteredParties.length === 0 ? "none" : undefined },
-                  }}
-                  className={mergeClasses(commonStyles.dropdown, party && commonStyles.inputFill)}
-                >
-                  {filteredParties.map((type) => (
-                    <Option key={type} value={type}>
-                      {type}
-                    </Option>
-                  ))}
-                </Combobox>
-              </Field>
+              <ComboboxField
+                value={party}
+                onChange={setParty}
+                options={ALL_PARTIES}
+                placeholder={T.partyPlaceholder[locale]}
+                maxLength={100}
+                validationMessage={validationParty}
+              />
 
               {checklistNameField}
 

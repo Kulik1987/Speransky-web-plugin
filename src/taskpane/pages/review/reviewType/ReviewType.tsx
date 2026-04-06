@@ -21,8 +21,8 @@ const T = {
     en: "Custom",
   },
   deleteTitle: {
-    ru: "Удалить чек-лист",
-    en: "Delete checklist",
+    ru: "Удалить чек-лист?",
+    en: "Delete checklist?",
   },
   deleteConfirm: {
     ru: "Удалить",

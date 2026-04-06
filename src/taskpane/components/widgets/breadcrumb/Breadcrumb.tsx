@@ -64,6 +64,10 @@ const T = {
     ru: "Рекомендации будут потеряны",
     en: "Recommendations will be lost",
   },
+  checklistLeaveSubtitle: {
+    ru: "Несохранённые изменения будут потеряны",
+    en: "Unsaved changes will be lost",
+  },
   modalConfirm: {
     ru: "Да",
     en: "Yes",
@@ -93,7 +97,7 @@ const BREADCRUMB_CONFIG: Partial<Record<RoutePathEnum, BreadcrumbStep[]>> = {
 };
 
 const Breadcrumb = () => {
-  const { menuStore, authStore } = useStores();
+  const { menuStore, authStore, checkList } = useStores();
   const { locale } = menuStore;
   const location = useLocation();
   const { pathname } = location;
@@ -104,9 +108,10 @@ const Breadcrumb = () => {
   const [pendingNav, setPendingNav] = useState<{ path: RoutePathEnum; state?: Record<string, unknown> } | null>(null);
 
   const isSummaryPage = pathname === RoutePathEnum.SUMMARY;
+  const isChecklistPage = pathname === RoutePathEnum.CHECKLIST;
 
   const handleStepClick = (path: RoutePathEnum, state?: Record<string, unknown>) => {
-    if (isSummaryPage) {
+    if (isSummaryPage || (isChecklistPage && checkList.isFormOpen)) {
       setPendingNav({ path, state });
       setIsModalOpen(true);
     } else {
@@ -186,7 +191,7 @@ const Breadcrumb = () => {
         title={T.modalTitle[locale]}
         actionButtonTitle={T.modalConfirm[locale]}
         onAction={handleConfirmLeave}
-        children={<span>{T.modalSubtitle[locale]}</span>}
+        children={<span>{isChecklistPage ? T.checklistLeaveSubtitle[locale] : T.modalSubtitle[locale]}</span>}
         reverseActions
       />
     </>

@@ -68,8 +68,8 @@ const T = {
     en: "Custom checklists",
   },
   modalDeleteTitle: {
-    ru: "Удалить чек-лист",
-    en: "Delete checklist",
+    ru: "Удалить чек-лист?",
+    en: "Delete checklist?",
   },
   modalDeleteConfirm: {
     ru: "Удалить",
@@ -86,6 +86,18 @@ const T = {
   modalSaveConfirm: {
     ru: "Сохранить",
     en: "Save",
+  },
+  modalLeaveTitle: {
+    ru: "Покинуть страницу?",
+    en: "Leave the page?",
+  },
+  modalLeaveSubtitle: {
+    ru: "Несохранённые изменения будут потеряны",
+    en: "Unsaved changes will be lost",
+  },
+  modalLeaveConfirm: {
+    ru: "Да",
+    en: "Yes",
   },
   requiredField: {
     ru: "Обязательное поле",
@@ -121,6 +133,11 @@ const Checklist = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+
+  useEffect(() => {
+    checkList.setIsFormOpen(isFormOpen);
+  }, [isFormOpen]);
 
   const [openItem, setOpenItems] = useState<number[]>([]);
 
@@ -217,15 +234,29 @@ const Checklist = () => {
     }
   };
 
-  const handleGoBack = () => {
+  const executeGoBack = () => {
     if (isEditing && isChecklistPage) {
       checkList.setEditingChecklistId(null);
       setIsChecklistPage(false);
       resetForm();
+      setOpenItems([2]);
     } else {
       checkList.setEditingChecklistId(null);
       navigate(-1);
     }
+  };
+
+  const handleGoBack = () => {
+    if (isFormOpen) {
+      setIsLeaveModalOpen(true);
+    } else {
+      executeGoBack();
+    }
+  };
+
+  const handleGoBackConfirm = () => {
+    setIsLeaveModalOpen(false);
+    executeGoBack();
   };
 
   const validationDocType = getMaxLengthError(docType, locale, 255);
@@ -288,6 +319,16 @@ const Checklist = () => {
         actionButtonTitle={T.modalSaveConfirm[locale]}
         onAction={handleSubmitChecklist}
         children={checklistNameField}
+      />
+
+      <Modal
+        open={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        title={T.modalLeaveTitle[locale]}
+        actionButtonTitle={T.modalLeaveConfirm[locale]}
+        onAction={handleGoBackConfirm}
+        children={<span>{T.modalLeaveSubtitle[locale]}</span>}
+        reverseActions
       />
 
       <div className={styles.blockTitle}>

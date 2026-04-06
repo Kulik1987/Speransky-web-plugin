@@ -46,6 +46,7 @@ class CheckList {
   // Состояние операций записи
   isSaving: boolean = false;
   isDraftLoading: boolean = false;
+  isFormOpen: boolean = false;
 
   // Черновик: поля формы создания/редактирования чек-листа
   editingChecklistId: string | null = initialDraft.editingChecklistId;
@@ -58,6 +59,10 @@ class CheckList {
 
   // Состояние чек-листа на момент загрузки с сервера
   private originalDraft: OriginalDraft | null = null;
+
+  setIsFormOpen = (value: boolean) => {
+    this.isFormOpen = value;
+  };
 
   setEditingChecklistId = (id: string | null) => {
     this.editingChecklistId = id;
@@ -342,6 +347,7 @@ class CheckList {
       this.isChecklistsLoading = false;
       this.isDraftLoading = false;
       this.isSaving = false;
+      this.isFormOpen = false;
       this.clearDraft();
     });
   };

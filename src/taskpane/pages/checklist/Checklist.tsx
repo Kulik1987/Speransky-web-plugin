@@ -112,6 +112,7 @@ const Checklist = () => {
   const [docType, setDocType] = useState("");
   const [checklistName, setChecklistName] = useState("");
   const [checklistRules, setChecklistRules] = useState<DraftRule[]>([]);
+  const [deletedRuleIds, setDeletedRuleIds] = useState<string[]>([]);
 
   const [checklistSearch, setChecklistSearch] = useState("");
 
@@ -140,7 +141,7 @@ const Checklist = () => {
   }, []);
 
   useEffect(() => {
-    if (!isEditing && !isChecklistNameManual) {
+    if (!isChecklistNameManual) {
       setChecklistName([docType, party].filter(Boolean).join(" - "));
     }
   }, [docType, party, checkList.editingChecklistId]);
@@ -151,12 +152,14 @@ const Checklist = () => {
 
     setIsFormOpen(false);
     setChecklistRules([]);
+    setDeletedRuleIds([]);
 
     checkList.getChecklistById(id).then((data) => {
       if (!data) return;
       setDocType(data.doc_type ?? "");
       setParty(data.party || T.allPartiesValue[locale]);
       setChecklistName(data.name);
+      setIsChecklistNameManual(true);
       setChecklistRules([...checkList.checklistRules]);
       setIsFormOpen(true);
       setOpenItems([1]);
@@ -171,6 +174,7 @@ const Checklist = () => {
     setDocType("");
     setParty("");
     setChecklistRules([]);
+    setDeletedRuleIds([]);
   };
 
   const handleOpenChecklistForm = () => {
@@ -184,7 +188,8 @@ const Checklist = () => {
       checklistName,
       docType,
       party === T.allPartiesValue[locale] ? "" : party,
-      checklistRules
+      checklistRules,
+      deletedRuleIds
     );
     if (success) {
       resetForm();
@@ -348,20 +353,22 @@ const Checklist = () => {
               <ChecklistForm
                 key={checkList.editingChecklistId ?? "new"}
                 initialRules={checklistRules}
-                onRulesChange={(rules) => setChecklistRules(rules)}
+                onRulesChange={(rules, deletedIds) => {
+                  setChecklistRules(rules);
+                  setDeletedRuleIds(deletedIds);
+                }}
               />
             </AccordionPanel>
 
-            {canSave && (
-              <IconButton
-                tooltip={T.modalSaveConfirm[locale]}
-                icon={<Save16Regular />}
-                onClick={() => setIsSaveModalOpen(true)}
-                positioning="above-end"
-                appearance="primary"
-                className={commonStyles.accordionActions}
-              />
-            )}
+            <IconButton
+              tooltip={T.modalSaveConfirm[locale]}
+              icon={<Save16Regular />}
+              onClick={() => setIsSaveModalOpen(true)}
+              positioning="above-end"
+              appearance="primary"
+              className={commonStyles.accordionActions}
+              disabled={!canSave}
+            />
           </AccordionItem>
         )}
 

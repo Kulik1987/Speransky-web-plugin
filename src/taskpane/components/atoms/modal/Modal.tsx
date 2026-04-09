@@ -1,0 +1,60 @@
+import React, { ReactNode } from "react";
+import {
+  Dialog,
+  DialogSurface,
+  DialogBody,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  mergeClasses,
+} from "@fluentui/react-components";
+import { useStores } from "../../../store";
+import { useModalStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
+
+interface ModalProps {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  actionButtonTitle: string;
+  onAction: () => void;
+  children?: ReactNode;
+  reverseActions?: boolean;
+}
+
+const T = {
+  cancel: {
+    ru: "Отменить",
+    en: "Cancel",
+  },
+};
+
+const Modal = (props: ModalProps) => {
+  const { open, onClose, title, actionButtonTitle, onAction, children, reverseActions } = props;
+  const { menuStore } = useStores();
+  const { locale } = menuStore;
+  const commonStyles = useCommonStyles();
+  const styles = useModalStyles();
+
+  return (
+    <Dialog open={open} onOpenChange={(_, data) => !data.open && onClose()}>
+      <DialogSurface className={mergeClasses(styles.container, children && styles.withContent)}>
+        <DialogBody className={mergeClasses(styles.body, children ? styles.bodyGapSmall : styles.bodyGapLarge)}>
+          <DialogTitle className={commonStyles.pageTitle}>{title}</DialogTitle>
+          {children && <DialogContent>{children}</DialogContent>}
+          <DialogActions className={styles.actionsBlock}>
+            <Button appearance="subtle" onClick={reverseActions ? onAction : onClose} className={styles.btnCancel}>
+              {reverseActions ? actionButtonTitle : T.cancel[locale]}
+            </Button>
+            <Button appearance="primary" onClick={reverseActions ? onClose : onAction}>
+              {reverseActions ? T.cancel[locale] : actionButtonTitle}
+            </Button>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
+    </Dialog>
+  );
+};
+
+export default Modal;

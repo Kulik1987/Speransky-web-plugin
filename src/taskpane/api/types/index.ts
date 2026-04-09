@@ -3,7 +3,7 @@ export * from "./payload-contract-detect-type-dto";
 
 export * from "./response-contract-analyze-dto";
 export * from "./response-contract-detect-type-dto";
-export * from "./response-contract-parties-dto";
+export * from "./response-contract-meta-dto";
 export * from "./response-contract-recommendation-dto";
 
 export * from "./response-client-check-dto";
@@ -14,3 +14,12 @@ export * from "./response-otp-verify-dto";
 
 export * from "./response-jwt-refresh-dto";
 export * from "./response-jwt-me-dto";
+
+export * from "./payload-checklist-create-dto";
+export * from "./payload-checklist-update-dto";
+export * from "./payload-checklist-add-rule-dto";
+
+export * from "./response-checklist-all-dto";
+export * from "./response-checklist-dto";
+export * from "./response-checklist-create-dto";
+export * from "./response-checklist-add-rule-dto";

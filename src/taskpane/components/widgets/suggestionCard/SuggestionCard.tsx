@@ -1,15 +1,23 @@
 /* global Word console */
-import React from "react";
+import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
-import { Button, Text, Tooltip } from "@fluentui/react-components";
-import { DismissFilled, LocationRippleRegular } from "@fluentui/react-icons";
-import { PriorityFlag } from "../../atoms";
+import { Text, tokens } from "@fluentui/react-components";
+import {
+  CheckboxChecked24Regular,
+  CommentNote24Regular,
+  Delete24Regular,
+  LocationRipple24Regular,
+} from "@fluentui/react-icons";
+import { IconButton, Modal, PartyFlag, PriorityFlag } from "../../atoms";
 import { ApplyService } from "../../../services/applyService";
 import { SearchService } from "../../../services/searchService";
 import { SuggestionT } from "../../../store/suggestions";
 import { htmlChangesMatching } from "../../../helpers/diff";
+import { MARKDOWN_LINK_SOURCE } from "../../../helpers/convert";
 import { RecommendationTypeEnum } from "../../../enums";
+import { useSuggestionCardStyles } from "./styles";
+import { customColors } from "../../../theme/theme";
 
 type SuggestionPropT = {
   index: number;
@@ -22,8 +30,8 @@ const T = {
     en: "Dismiss",
   },
   buttonLocation: {
-    ru: "Найти в тексте",
-    en: "Search a location",
+    ru: "Местоположение в документе",
+    en: "Location in contract",
   },
   labelChange: {
     ru: "Правка:",
@@ -41,6 +49,14 @@ const T = {
     ru: "Добавить комментарий",
     en: "Add comment",
   },
+  deleteRecommendationTitle: {
+    ru: "Удалить рекомендацию из списка?",
+    en: "Delete recommendation from list?",
+  },
+  deleteConfirm: {
+    ru: "Удалить",
+    en: "Delete",
+  },
 };
 
 const SuggestionCard = (props: SuggestionPropT) => {
@@ -48,14 +64,16 @@ const SuggestionCard = (props: SuggestionPropT) => {
   const { locale } = menuStore;
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
+  const styles = useSuggestionCardStyles();
 
   const { data, index: indexSuggestion } = props;
 
   const {
-    risk_description: commentText,
+    recommendation: commentText,
     risk_level,
     new_clause_wording: changeText,
     target_snippet_full: sourceText,
+    relevant_party,
     is_new_clause,
     is_removed_clause,
     isDismiss,
@@ -76,6 +94,8 @@ const SuggestionCard = (props: SuggestionPropT) => {
 
   const isChangeExist = !!changeText || isTypeDelete;
   const isCommentExist = !!commentText;
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleShowInDocument = async () => {
     await Word.run(async (context) => {
@@ -125,113 +145,109 @@ const SuggestionCard = (props: SuggestionPropT) => {
 
   if (isDismiss) return null;
 
+  const handleDeleteRecommendation = () => setIsModalOpen(true);
+  const handleDeleteConfirm = () => {
+    setIsModalOpen(false);
+    handleDismiss();
+  };
+
+  const renderWithLinks = (text: string, linkClassName?: string): React.ReactNode[] => {
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    const re = new RegExp(MARKDOWN_LINK_SOURCE, "g");
+    while ((match = re.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+      parts.push(
+        <a
+          key={match.index}
+          href={match[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className={linkClassName}
+        >
+          {match[1]}
+        </a>
+      );
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+    return parts;
+  };
+
   return (
-    <div
-      style={{
-        border: "1px solid rgba(0, 0, 0, 0.1)",
-        borderRadius: "8px",
-        padding: "16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
-        boxShadow: "0 3px 5px rgba(0, 0, 0, 0.25)",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+    <div className={styles.container} onClick={handleShowInDocument}>
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={T.deleteRecommendationTitle[locale]}
+        actionButtonTitle={T.deleteConfirm[locale]}
+        onAction={handleDeleteConfirm}
+      />
+
+      <div className={styles.flagBlock}>
         <PriorityFlag flag={risk_level} />
-        <Button
-          appearance="subtle"
-          size="small"
-          iconPosition="after"
-          onClick={handleDismiss}
-          icon={<DismissFilled fontSize={"1em"} color="grey" />}
-        >
-          {T.buttonDismiss[locale]}
-        </Button>
+        <PartyFlag flag={relevant_party} />
       </div>
-      {isChangeExist && (
-        <div>
-          <Text weight="bold">{T.labelChange[locale]} </Text>
-          {isTypeAdd ? (
-            <Text weight="bold" block style={{ color: "#099e1a" }}>
-              {changeText}
-            </Text>
-          ) : isTypeDelete ? (
-            <Text block style={{ textDecoration: "line-through", color: "#db690d" }}>
-              {sourceText}
-            </Text>
-          ) : (
-            <div dangerouslySetInnerHTML={{ __html: htmlChangesMatchingText || changeText }} />
-          )}
-        </div>
-      )}
-      {isCommentExist && (
-        <div>
-          <Text weight="bold">{T.labelComment[locale]} </Text>
-          <Text>{commentText}</Text>
-        </div>
-      )}
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          gap: "12px",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-          }}
-        >
-          <Tooltip content={T.buttonLocation[locale]} relationship="label">
-            <Button
-              appearance="outline"
-              size="medium"
-              onClick={handleShowInDocument}
-              icon={<LocationRippleRegular color="#0f6cbd" />}
-              style={{ borderColor: "#0f6cbd", borderWidth: "2px" }}
-            />
-          </Tooltip>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            flex: 1,
-          }}
-        >
-          {isChangeExist && (
-            <Button
-              appearance="primary"
-              size="medium"
-              onClick={handleApplyChange}
-              style={{ borderColor: "#0f6cbd", borderWidth: "2px", whiteSpace: "nowrap" }}
-            >
-              {T.buttonChange[locale]}
-            </Button>
-          )}
+
+      <div className={styles.changesBlock}>
+        {isChangeExist && (
+          <div>
+            <Text weight="bold">{T.labelChange[locale]}</Text>
+            {isTypeAdd ? (
+              <Text className={styles.addText}>{changeText}</Text>
+            ) : isTypeDelete ? (
+              <Text className={styles.deleteText}>{sourceText}</Text>
+            ) : (
+              <div dangerouslySetInnerHTML={{ __html: htmlChangesMatchingText || changeText }} />
+            )}
+          </div>
+        )}
+        {isCommentExist && (
+          <div>
+            <Text weight="bold">{T.labelComment[locale]}</Text>
+            <Text block>{renderWithLinks(commentText, styles.commentLink)}</Text>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.buttonsBlock}>
+        <div className={styles.changeButtons}>
+          <IconButton
+            tooltip={T.buttonLocation[locale]}
+            icon={<LocationRipple24Regular color={tokens.colorBrandForeground2} />}
+            onClick={handleShowInDocument}
+            positioning="above-start"
+          />
           {isCommentExist && (
-            <Button
-              appearance="primary"
-              size="medium"
+            <IconButton
+              tooltip={T.buttonComment[locale]}
+              icon={<CommentNote24Regular color={tokens.colorBrandForeground2} />}
               onClick={handleAddComment}
+              positioning="above-start"
               disabled={isAccessToRangeInsertComment === false}
-              style={{
-                borderColor: isAccessToRangeInsertComment ? "#0f6cbd" : "transparent",
-                borderWidth: "2px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {T.buttonComment[locale]}
-            </Button>
+            />
+          )}
+          {isChangeExist && (
+            <IconButton
+              tooltip={T.buttonChange[locale]}
+              icon={<CheckboxChecked24Regular color={tokens.colorBrandForeground2} />}
+              onClick={handleApplyChange}
+              positioning="above-start"
+            />
           )}
         </div>
+        <IconButton
+          tooltip={T.buttonDismiss[locale]}
+          icon={<Delete24Regular color={customColors.accent.delete} />}
+          onClick={handleDeleteRecommendation}
+          positioning="above-end"
+        />
       </div>
     </div>
   );

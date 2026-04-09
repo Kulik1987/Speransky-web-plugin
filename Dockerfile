@@ -19,7 +19,7 @@ RUN npm install --dev
 # Copy app files
 COPY . .
 # Build the app
-RUN npm run build
+RUN npm run build-anonymizer
 
 # Bundle static assets with nginx
 FROM nginx:1.21.0-alpine as production

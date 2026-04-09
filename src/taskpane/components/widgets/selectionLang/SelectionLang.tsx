@@ -1,43 +1,43 @@
 import React from "react";
-import { Divider, Text, ToggleButton } from "@fluentui/react-components";
+import { useLocation } from "react-router-dom";
+import { mergeClasses, ToggleButton } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
+import { AuthStepperEnum } from "../../../store/auth";
 import { LocaleEnums } from "../../../store/menu";
-
-const T = {
-  dividerLang: {
-    ru: "Язык интерфейса",
-    en: "Interface language",
-  },
-};
+import { useSelectionLangStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
+import { RoutePathEnum } from "../../../enums";
 
 const SelectionLang = () => {
-  const { menuStore } = useStores();
+  const { menuStore, authStore } = useStores();
   const { locale, setLocale } = menuStore;
+  const { pathname } = useLocation();
+  const commonStyles = useCommonStyles();
+  const styles = useSelectionLangStyles();
+
+  const isVisible =
+    authStore.authStatus === AuthStepperEnum.EMAIL ||
+    ((pathname === RoutePathEnum.ROOT) && authStore.authStatus === AuthStepperEnum.ACCESSED);
+
+  if (!isVisible) return null;
+
+  const isRU = locale === LocaleEnums.RU;
+
+  const toggleLocale = () => {
+    setLocale(isRU ? LocaleEnums.EN : LocaleEnums.RU);
+  };
 
   return (
-    <div
-      style={{
-        //border: "1px solid red"
-        display: "flex",
-        gap: "16px",
-        flexDirection: "column",
-      }}
-    >
-      <Divider alignContent="center" inset>
-        <Text size={300} weight="medium">
-          {T.dividerLang[locale]}
-        </Text>
-      </Divider>
-
-      <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
-        <ToggleButton checked={locale === LocaleEnums.RU} onClick={() => setLocale(LocaleEnums.RU)}>
-          RU
-        </ToggleButton>
-        <ToggleButton checked={locale === LocaleEnums.EN} onClick={() => setLocale(LocaleEnums.EN)}>
-          EN
-        </ToggleButton>
-      </div>
+    <div className={styles.btnSection}>
+      <ToggleButton
+        className={mergeClasses(commonStyles.button, styles.btn)}
+        appearance="primary"
+        size="medium"
+        onClick={toggleLocale}
+      >
+        {isRU ? "Ru" : "En"}
+      </ToggleButton>
     </div>
   );
 };

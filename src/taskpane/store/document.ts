@@ -6,7 +6,7 @@ import api from "../api/v1";
 import {
   replaceCompanyNames,
   removeAddressesByPart,
-  removeAmountByPart,
+  // removeAmountByPart,
   removeContract,
   removePayment,
   removePersonData,
@@ -17,6 +17,7 @@ const APP_SET_ANONYMIZER = process.env.APP_SET_ANONYMIZER === "true";
 
 class DocumentStore {
   rootStore: RootStore;
+  isFetchingDetectDocumentType: boolean = false;
   textContractSource: string | null = null;
   textContractAnonymized: string | null = null;
   docxFile: Blob | null = null;
@@ -52,6 +53,10 @@ class DocumentStore {
     this.documentName = value;
   };
 
+  setIsFetchingDetectDocumentType = (value: boolean) => {
+    this.isFetchingDetectDocumentType = value;
+  };
+
   /**
    * @description Создает анонимизированный текст контракта и обновляет им textContractAnonymized в сторе
    * */
@@ -62,7 +67,7 @@ class DocumentStore {
       this.textContractAnonymized = (() => {
         let modText = "";
         modText = removeAddressesByPart(docText);
-        modText = removeAmountByPart(modText);
+        // modText = removeAmountByPart(modText);
         modText = removePersonData(modText);
         modText = removeContract(modText);
         modText = removePayment(modText);
@@ -236,6 +241,7 @@ class DocumentStore {
    */
   detectDocumentType = async () => {
     try {
+      this.isFetchingDetectDocumentType = true;
       // Получаем документ и его имя
       const [blob, fileName] = await Promise.all([this.getDocumentAsBlob(), this.getDocumentName()]);
       if (!blob) {
@@ -272,6 +278,8 @@ class DocumentStore {
     } catch (error) {
       console.error("detectDocumentType [error]:", error);
       throw error;
+    } finally {
+      this.isFetchingDetectDocumentType = false;
     }
   };
 

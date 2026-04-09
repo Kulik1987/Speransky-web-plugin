@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
-import { Button, Input, InputProps, Text } from "@fluentui/react-components";
+import { Button, Field, Input, InputProps, Link, mergeClasses, Text } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import { useStepStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
+import { CheckBox } from "../../atoms";
 
 const T = {
   title: {
@@ -21,10 +23,6 @@ const T = {
     ru: "Отправка...",
     en: "Sending...",
   },
-  errorEmpty: {
-    ru: "Введите email",
-    en: "Enter your email",
-  },
   errorMaxLength: {
     ru: "Электронная почта не может превышать 100 символов",
     en: "Email cannot exceed 100 characters",
@@ -37,16 +35,26 @@ const T = {
     ru: "Не существует клиента с указанным email. Проверьте правильность ввода.",
     en: "No client found with this email. Please check your input.",
   },
+  agreementText1: {
+    ru: "Я согласен(-а) с ",
+    en: "I agree with ",
+  },
+  agreementText2: {
+    ru: "Политикой конфиденциальности",
+    en: "the Privacy Policy",
+  },
 };
 
 const StepEmail = () => {
   const { authStore, menuStore } = useStores();
+  const commonStyles = useCommonStyles();
   const styles = useStepStyles();
   const { locale } = menuStore;
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
 
   const handleEmailChange: InputProps["onChange"] = (_, data) => {
     const value = data.value;
@@ -61,7 +69,6 @@ const StepEmail = () => {
 
   const handleBlur = (_: React.FocusEvent<HTMLInputElement>) => {
     if (!email) {
-      setError(T.errorEmpty[locale]);
       return;
     }
     if (!validateEmail(email)) {
@@ -113,15 +120,18 @@ const StepEmail = () => {
         <Text as="h1" className={styles.title}>
           {T.title[locale]}
         </Text>
-
         <Text block className={styles.description}>
           {T.description[locale]}
         </Text>
       </div>
 
-      <div className={styles.block}>
+      <Field
+        validationState={isDisplayErrorMessage ? "error" : "none"}
+        validationMessage={error}
+        style={{ minWidth: "100%" }}
+      >
         <Input
-          className={styles.input}
+          className={mergeClasses(commonStyles.input, email && commonStyles.inputFill)}
           value={email}
           onChange={handleEmailChange}
           onBlur={handleBlur}
@@ -129,26 +139,34 @@ const StepEmail = () => {
           placeholder="example@gmail.com"
           type="email"
           disabled={isLoading}
-          autoFocus
           appearance="outline"
           size="large"
         />
-
-        {isDisplayErrorMessage && (
-          <Text block className={styles.error}>
-            {error}
-          </Text>
-        )}
-      </div>
+      </Field>
 
       <Button
         appearance="primary"
+        size="medium"
         onClick={handleSubmit}
-        disabled={!isEmailValid || isLoading}
-        className={styles.button}
+        disabled={!isEmailValid || isLoading || !isChecked}
+        className={commonStyles.button}
       >
         {isLoading ? T.btnSubmiting[locale] : T.btnSubmit[locale]}
       </Button>
+
+      <CheckBox
+        label={
+          <Text>
+            {T.agreementText1[locale]}
+            <Link href="https://speransky.legal/privacy_policy" target="_blank" inline>
+              {T.agreementText2[locale]}
+            </Link>
+          </Text>
+        }
+        disabled={isChecked && isLoading}
+        checked={isChecked}
+        onChange={setIsChecked}
+      />
     </div>
   );
 };

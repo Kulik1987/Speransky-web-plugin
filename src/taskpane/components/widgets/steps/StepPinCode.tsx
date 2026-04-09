@@ -4,6 +4,7 @@ import { Text } from "@fluentui/react-components";
 import { useStores } from "../../../store";
 import PinCode, { PinCodeRef } from "../../organisms/pinCode/PinCode";
 import { useStepStyles } from "./styles";
+import { ErrorText } from "../../atoms";
 
 const T = {
   title: {
@@ -16,7 +17,7 @@ const T = {
   },
   errorPinCode: {
     ru: "Код введён неверно. Введите код заново.",
-    en: "The code is incorrect. Please enter it again.",
+    en: "The code is incorrect. Please try again.",
   },
 };
 
@@ -58,9 +59,12 @@ const StepPinCode = () => {
         </Text>
       </div>
 
-      <PinCode ref={pinCodeRef} onSuccess={handleEnteredPinCode} />
-
-      {errorPinCode && <Text className={styles.error}>{T.errorPinCode[locale]}</Text>}
+      <PinCode
+        ref={pinCodeRef}
+        onSuccess={handleEnteredPinCode}
+        hasError={errorPinCode}
+        errorMessage={T.errorPinCode[locale]}
+      />
     </div>
   );
 };

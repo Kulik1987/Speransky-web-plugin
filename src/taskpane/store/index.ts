@@ -5,6 +5,7 @@ import Auth from "./auth";
 import Config from "./config";
 import Menu from "./menu";
 import Document from "./document";
+import CheckList from "./checklist";
 import Suggestions from "./suggestions";
 
 class RootStore {
@@ -12,6 +13,7 @@ class RootStore {
   configStore: Config;
   documentStore: Document;
   menuStore: Menu;
+  checkList: CheckList;
   suggestionsStore: Suggestions;
 
   constructor() {
@@ -19,6 +21,7 @@ class RootStore {
     this.configStore = new Config(this);
     this.documentStore = new Document(this);
     this.menuStore = new Menu(this);
+    this.checkList = new CheckList(this);
     this.suggestionsStore = new Suggestions(this);
   }
 }

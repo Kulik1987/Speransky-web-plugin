@@ -1,9 +1,10 @@
 import React from "react";
-import { Button, Text } from "@fluentui/react-components";
+import { Button, mergeClasses, Text } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { useStepStyles } from "./styles";
 import { useStores } from "../../../store";
 import { WebUrlEnums } from "../../../enums";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 const T = {
   title: {
@@ -24,6 +25,7 @@ const StepForbidden = () => {
   const styles = useStepStyles();
   const { authStore, menuStore } = useStores();
   const { locale } = menuStore;
+  const commonStyles = useCommonStyles();
 
   const handleBuyPlan = () => {
     const host = window.location.origin;
@@ -56,7 +58,7 @@ const StepForbidden = () => {
         </Text>
       </div>
 
-      <Button appearance="primary" onClick={handleBuyPlan} className={styles.button}>
+      <Button appearance="primary" onClick={handleBuyPlan} className={mergeClasses(styles.button, commonStyles.button)}>
         {T.btnCheck[locale]}
       </Button>
     </div>

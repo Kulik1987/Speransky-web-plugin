@@ -1,23 +1,123 @@
-import { tokens } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
+import { customColors } from "../../../theme/theme";
 
-const styles = {
-  instructions: {
-    fontWeight: tokens.fontWeightSemibold,
-    marginTop: "20px",
-    marginBottom: "10px",
-  },
-  textPromptAndInsertion: {
+export const useDrawerModalStyles = makeStyles({
+  container: {
     display: "flex",
     flexDirection: "column",
+    justifyContent: "space-between",
+    ...shorthands.padding(tokens.spacingVerticalL),
+    paddingBottom: "8px",
+  },
+  header: {
+    ...shorthands.padding(0),
+  },
+  body: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    ...shorthands.gap(tokens.spacingVerticalL),
+    alignItems: "flex-start",
+    ...shorthands.padding(0),
+  },
+  sections: {
+    display: "flex",
+    flexDirection: "column",
+    ...shorthands.gap(tokens.spacingVerticalXL),
+    color: customColors.text.primary[90],
+    width: "100%",
+  },
+  sectionHeader: {
+    fontSize: tokens.fontSizeBase400,
+    lineHeight: tokens.lineHeightBase400,
+    fontWeight: tokens.fontWeightSemibold,
+  },
+  sectionContent: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    lineHeight: tokens.lineHeightHero700,
+  },
+  sectionRowLabel: {
+    display: "flex",
+    alignItems: "center",
+    ...shorthands.gap(tokens.spacingHorizontalSNudge),
+  },
+  sectionValue: {
+    fontSize: tokens.fontSizeBase300,
+    lineHeight: tokens.lineHeightBase300,
+    color: tokens.colorBrandForeground2,
+    fontWeight: tokens.fontWeightRegular,
+    minWidth: "30px",
+    ...shorthands.padding(0),
+  },
+  sectionButton: {
+    fontWeight: tokens.fontWeightRegular,
+    color: customColors.text.primary[90],
+    "&:disabled, &:disabled:hover": {
+      color: customColors.text.secondary,
+    },
+  },
+  button: {
+    height: "36px",
+    width: "auto",
+    ...shorthands.padding(0),
+  },
+  bodyLevel2: {
+    justifyContent: "flex-start",
+    ...shorthands.gap(tokens.spacingVerticalM),
+  },
+  langHeader: {
+    display: "flex",
     alignItems: "center",
   },
-  textAreaField: {
-    marginLeft: "20px",
-    marginTop: "30px",
-    marginBottom: "20px",
-    marginRight: "20px",
-    maxWidth: "50%",
+  langList: {
+    display: "flex",
+    flexDirection: "column",
+    ...shorthands.gap(tokens.spacingVerticalS),
+    width: "100%",
   },
-};
-
-export default styles;
+  langRadioButton: {
+    width: "100%",
+  },
+  langRadio: {
+    alignItems: "center",
+    ...shorthands.padding(0),
+  },
+  langLabel: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  langTitle: {
+    fontSize: tokens.fontSizeBase300,
+    lineHeight: tokens.lineHeightBase300,
+    fontWeight: tokens.fontWeightRegular,
+    color: customColors.text.primary[90],
+  },
+  langSubtitle: {
+    fontSize: tokens.fontSizeBase200,
+    lineHeight: tokens.lineHeightBase200,
+    color: customColors.text.primary[65],
+  },
+  footer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    ...shorthands.padding(0),
+  },
+  logoutButton: {
+    fontSize: tokens.fontSizeBase400,
+    color: tokens.colorBrandForeground2,
+    textAlign: "left",
+  },
+  version: {
+    alignSelf: "flex-end",
+    fontSize: tokens.fontSizeBase200,
+    lineHeight: tokens.lineHeightBase400,
+    color: customColors.text.secondary,
+    fontWeight: 350,
+    ...shorthands.padding(0),
+    paddingRight: tokens.spacingHorizontalS,
+    paddingTop: tokens.spacingVerticalS,
+  },
+});

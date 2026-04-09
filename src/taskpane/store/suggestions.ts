@@ -2,7 +2,7 @@
 import { makeAutoObservable, runInAction, reaction } from "mobx";
 import type RootStore from ".";
 import api from "../api/v1";
-import mockParties from "./mock/mockParties";
+import { mockContractType, mockParties } from "./mock/mockParties";
 import mockSuggestions from "./mock/mockSuggestions_1";
 import { ContractPartieData, RecommendationRisks } from "../api/types";
 import { SourceTypeEnums } from "../enums";
@@ -20,10 +20,11 @@ export type SuggestionT = RecommendationRisks & SuggestionPropertyT;
 class SuggestionsStore {
   rootStore: RootStore;
 
-  // Стороны договора
+  // Мета-данные договора
+  metaDataError: string | null = null;
+  isMetaDataProcessing: boolean = false;
+  documentType: string | null = null;
   parties: ContractPartieData[] | null = null;
-  partiesError: string | null = null;
-  isPartiesProcessing: boolean = false;
   formPartySelected: string | null = null;
 
   // Анализ и рекомендации
@@ -34,6 +35,9 @@ class SuggestionsStore {
   // Кастомная инструкция пользователя
   formCustomInstructions: string | null = null;
 
+  // Чек-лист, выбранный для анализа
+  checklistId: string | null = null;
+
   constructor(rootStore: RootStore) {
     makeAutoObservable(this);
     this.rootStore = rootStore;
@@ -42,7 +46,7 @@ class SuggestionsStore {
       () => this.rootStore.documentStore.documentId,
       (documentId) => {
         if (documentId) {
-          this.requestParties(documentId);
+          this.requestMetaData(documentId);
         }
       }
     );
@@ -54,6 +58,10 @@ class SuggestionsStore {
 
   setFormCustomInstructions = (value: string | null) => {
     this.formCustomInstructions = value;
+  };
+
+  setChecklistId = (value: string | null) => {
+    this.checklistId = value;
   };
 
   setSuggestionProperty = (indexSuggestion: number, values: SuggestionPropertyT) => {
@@ -160,21 +168,19 @@ class SuggestionsStore {
       const documentId = this.rootStore.documentStore.documentId;
       const party = this.formPartySelected;
       const userComment = this.formCustomInstructions;
+      const checklistId = this.checklistId;
 
       if (!documentId) {
         throw new Error("Document not uploaded");
-      }
-
-      if (!party) {
-        throw new Error("Party not selected");
       }
 
       const payload = {
         document_id: documentId,
         llm_provider: this.rootStore.menuStore.providerLLM,
         source: SourceTypeEnums.PLUGIN,
-        selected_party: party,
+        selected_party: party || undefined,
         user_comment: userComment || undefined,
+        checklist_id: checklistId || undefined,
       };
 
       const response = await api.contract.analyze(payload);
@@ -230,37 +236,47 @@ class SuggestionsStore {
   // };
 
   /**
-   * @description Запрашивает стороны договора по document_id
+   * @description Запрашивает тип и стороны договора по document_id
    */
-  requestParties = async (documentId: string, retryCount = 0) => {
-    const MAX_RETRIES = 10; // Количество повторных запросов при ожидании ответа
+  requestMetaData = async (documentId: string, retryCount = 0) => {
+    const MAX_RETRIES = 15; // Количество повторных запросов при ожидании ответа
     const RETRY_DELAY = 5000; // Интервал запроса 5 секунд
 
     if (retryCount === 0) {
       runInAction(() => {
-        this.isPartiesProcessing = true;
-        this.partiesError = null;
+        this.isMetaDataProcessing = true;
+        this.metaDataError = null;
       });
     }
 
     try {
-      console.log(`requestParties [start] attempt ${retryCount + 1}/${MAX_RETRIES + 1}`);
+      console.log(`requestMetaData [start] attempt ${retryCount + 1}/${MAX_RETRIES + 1}`);
 
       if (!documentId) {
         throw new Error("document_id is required");
       }
 
-      const response = APP_SET_MOCK ? { data: mockParties } : await api.contract.parties(documentId);
-      const parties = response.data;
+      let documentType: string | null = null;
+      let parties: ContractPartieData[] | null = null;
+
+      if (APP_SET_MOCK) {
+        documentType = mockContractType;
+        parties = mockParties;
+      } else {
+        const response = await api.contract.meta(documentId);
+        documentType = response.data.contract_type.contract_type;
+        parties = response.data.parties;
+      }
 
       runInAction(() => {
+        this.documentType = documentType ?? null;
         this.parties = parties && parties.length > 0 ? parties : null;
-        this.formPartySelected = parties?.[0].role ?? null;
-        this.isPartiesProcessing = false;
-        this.partiesError = null;
+        this.formPartySelected = null;
+        this.isMetaDataProcessing = false;
+        this.metaDataError = null;
       });
 
-      console.log("requestParties [success]", { parties });
+      console.log("requestMetaData [success]", { parties });
       return;
     } catch (error) {
       const status = error?.response?.status ?? error?.status;
@@ -268,14 +284,14 @@ class SuggestionsStore {
 
       if (is409Error) {
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-        return this.requestParties(documentId, retryCount + 1);
+        return this.requestMetaData(documentId, retryCount + 1);
       } else {
-        console.error("requestParties [error]");
+        console.error("requestMetaData [error]");
         runInAction(() => {
           this.parties = null;
           this.formPartySelected = null;
-          this.isPartiesProcessing = false;
-          this.partiesError = "failed-to-load-parties";
+          this.isMetaDataProcessing = false;
+          this.metaDataError = "failed-to-load-meta-data";
         });
       }
     }
@@ -296,14 +312,16 @@ class SuggestionsStore {
 
   resetStore = () => {
     runInAction(() => {
+      this.documentType = null;
       this.parties = null;
-      this.partiesError = null;
+      this.metaDataError = null;
       this.formPartySelected = null;
-      this.isPartiesProcessing = false;
+      this.isMetaDataProcessing = false;
       this.suggestionsNew = null;
       this.suggestionsError = null;
       this.isAnalysisProcessing = false;
       this.formCustomInstructions = "";
+      this.checklistId = null;
     });
   };
 }

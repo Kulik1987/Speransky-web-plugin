@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { useStores } from "../../store";
 import { SuggestionCard } from "../../components/widgets";
-import { Button, Divider, Text } from "@fluentui/react-components";
+import { Button } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { ApplyService } from "../../services/applyService";
 import { ItemSkeleton } from "../../components/molecules";
 import { useSummaryStyles } from "./styles";
 import { RecommendationTypeEnum } from "../../enums";
+import { ErrorText } from "../../components/atoms";
 
 const T = {
   waitingNotification: {
@@ -14,12 +15,12 @@ const T = {
     en: "Please await",
   },
   buttonApplyAll: {
-    ru: "Применить все",
-    en: "Apply All",
+    ru: "Применить все правки",
+    en: "Apply all edits",
   },
   buttonDownloadArchive: {
-    ru: "Скачать результат",
-    en: "Download result",
+    ru: "Скачать результаты",
+    en: "Download results",
   },
   errorDescription: {
     ru: "Ошибка получения рекомендаций.\n Попробуйте ещё раз.",
@@ -56,7 +57,7 @@ const Summary = () => {
       const {
         target_snippet_full: sourceText,
         new_clause_wording: changeText,
-        risk_description: commentText,
+        recommendation: commentText,
         is_new_clause,
         is_removed_clause,
       } = itemSuggestion;
@@ -92,43 +93,29 @@ const Summary = () => {
   };
 
   if (isError || (!isAnalysisProcessing && !isSuggestionExist)) {
-    return (
-      <Text block className={styles.error}>
-        {T.errorDescription[locale]}
-      </Text>
-    );
+    return <ErrorText error={T.errorDescription[locale]} />;
+  }
+
+  if (isAnalysisProcessing) {
+    return <ItemSkeleton title={T.waitingNotification[locale]} />;
   }
 
   return (
     <div className={styles.container}>
-      {isAnalysisProcessing && (
-        <div className={styles.block}>
-          <Divider alignContent="center" inset>
-            <Text size={300} weight="medium">
-              {T.waitingNotification[locale]}
-            </Text>
-          </Divider>
-          <ItemSkeleton />
-        </div>
-      )}
-      {!isAnalysisProcessing &&
-        suggestionsNew?.map((data, index) => {
-          return <SuggestionCard data={data} key={index} index={index} />;
-        })}
-      {
-        // computedIsExistUntouchedSuggestions &&
-        !isAnalysisProcessing && (
-          <div className={styles.block}>
-            <Button appearance="primary" size="medium" onClick={handleApplyAll} className={styles.button}>
-              {T.buttonApplyAll[locale]}
-            </Button>
-            <Divider />
-            <Button appearance="primary" size="medium" onClick={handleDownloadArchive} className={styles.button}>
-              {T.buttonDownloadArchive[locale]}
-            </Button>
-          </div>
-        )
-      }
+      {suggestionsNew?.map((data, index) => {
+        return <SuggestionCard data={data} key={index} index={index} />;
+      })}
+
+      <div className={styles.block}>
+        {suggestionsNew && (
+          <Button appearance="primary" size="large" onClick={handleApplyAll}>
+            {T.buttonApplyAll[locale]}
+          </Button>
+        )}
+        <Button appearance="primary" size="large" onClick={handleDownloadArchive}>
+          {T.buttonDownloadArchive[locale]}
+        </Button>
+      </div>
     </div>
   );
 };

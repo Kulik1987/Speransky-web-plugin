@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction, autorun } from "mobx";
 import type RootStore from ".";
 import api from "../api/v1";
 import { setAuthRefreshFunction } from "../api/instanceAxios";
-// import { JwtClientDataResponseT } from "../api/v1/auth";
+import { ResponseJwtMeDto } from "../api/types";
 
 export enum AuthStepperEnum {
   EMAIL = "auth.email", // экран запроса email
@@ -15,7 +15,7 @@ export enum AuthStepperEnum {
 const initialState = {
   clientId: null as string | null,
   clientEmail: "",
-  // clientData: null as JwtClientDataResponseT | null,
+  clientData: null as ResponseJwtMeDto | null,
   authStatus: AuthStepperEnum.EMAIL,
   isClientVerify: false,
   isClientDataLoaded: false,
@@ -73,10 +73,10 @@ class AuthStore {
     this.clientEmail = email;
   };
 
-  // clientData: JwtClientDataResponseT | null = initialState.clientData;
-  // setClientData = (data: JwtClientDataResponseT) => {
-  //   this.clientData = data;
-  // };
+  clientData: ResponseJwtMeDto | null = initialState.clientData;
+  setClientData = (data: ResponseJwtMeDto) => {
+    this.clientData = data;
+  };
 
   authStatus: AuthStepperEnum = initialState.authStatus;
   setAuthStatus = (step: AuthStepperEnum) => {
@@ -109,14 +109,14 @@ class AuthStore {
     try {
       if (this.accessToken) {
         await this.runCheckCanUsePlugin();
-        // await this.runGetClientData();
+        await this.runGetClientData();
       } else {
         const { data } = await this.authApi.jwtRefresh(this.refreshToken);
         runInAction(() => {
           this.setAccessToken(data.access_token);
         });
         await this.runCheckCanUsePlugin();
-        // await this.runGetClientData();
+        await this.runGetClientData();
       }
     } catch (error) {
       console.error("initAuth: Error fetching client data", error);
@@ -215,7 +215,7 @@ class AuthStore {
         });
 
         await this.runCheckCanUsePlugin();
-        // await this.runGetClientData();
+        await this.runGetClientData();
 
         runInAction(() => {
           this.setIsClientVerify(true);
@@ -249,19 +249,19 @@ class AuthStore {
     }
   };
 
-  // /** @description получение данных клиента */
-  // runGetClientData = async () => {
-  //   try {
-  //     const { data } = await this.authApi.jwtClientData();
-  //     runInAction(() => {
-  //       this.setClientData(data as JwtClientDataResponseT);
-  //       this.setIsClientDataLoaded(true);
-  //     });
-  //   } catch (error) {
-  //     console.error("getClientData", error);
-  //     throw error;
-  //   }
-  // };
+  /** @description получение данных клиента */
+  runGetClientData = async () => {
+    try {
+      const { data } = await this.authApi.jwtClientData();
+      runInAction(() => {
+        this.setClientData(data as ResponseJwtMeDto);
+        this.setIsClientDataLoaded(true);
+      });
+    } catch (error) {
+      console.error("getClientData", error);
+      throw error;
+    }
+  };
 
   /** @description выход из системы */
   logout = async () => {

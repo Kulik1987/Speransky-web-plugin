@@ -1,31 +1,20 @@
 import React from "react";
-import { Spinner } from "@fluentui/react-components";
 import { AuthStepperEnum } from "../../store/auth";
 import { useStores } from "../../store";
 import { observer } from "mobx-react";
 import { Outlet } from "react-router-dom";
 import { StepEmail, StepForbidden, StepPinCode, StepError } from "../../components/widgets";
-import { useAuthProviderStyles } from "./styles";
 
 const AuthProvider = () => {
   const { authStore } = useStores();
-  const { authStatus, isClientVerify, isClientDataLoaded } = authStore;
-  const styles = useAuthProviderStyles();
-
-  if (isClientVerify && !isClientDataLoaded) {
-    return (
-      <div className={styles.container}>
-        <Spinner />
-      </div>
-    );
-  }
+  const { authStatus, isClientVerify } = authStore;
 
   if (isClientVerify && authStatus === AuthStepperEnum.ACCESSED) {
     return <Outlet />;
   }
 
   return (
-    <div className={styles.container}>
+    <div>
       {authStatus === AuthStepperEnum.EMAIL && <StepEmail />}
       {authStatus === AuthStepperEnum.PIN && <StepPinCode />}
       {authStatus === AuthStepperEnum.FORBIDDEN && <StepForbidden />}

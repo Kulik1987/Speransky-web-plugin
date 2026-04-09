@@ -1,37 +1,39 @@
 import React, { useEffect } from "react";
 import { observer } from "mobx-react";
-import { Divider, Text } from "@fluentui/react-components";
+import { mergeClasses, Text } from "@fluentui/react-components";
 import { useStores } from "../../store";
-import { ReviewTypeGeneral } from "./reviewTypeGeneral";
-import { ReviewTypeCustom } from "./reviewTypeCustom";
-import { Anonymizer } from "./anonymizer";
-import { PlayBook } from "./playBook";
-import { ItemSkeleton } from "../../components/molecules";
+import { Card, ItemSkeleton } from "../../components/molecules";
 import { useReviewStyles } from "./styles";
 import { useNavigate } from "react-router-dom";
-
-const APP_SET_ANONYMIZER = process.env.APP_SET_ANONYMIZER;
+import { ReviewTypesEnums, RoutePathEnum } from "../../enums";
+import { DocumentBulletList24Regular, Settings24Regular } from "@fluentui/react-icons";
+import { ErrorText } from "../../components/atoms";
+import { useCommonStyles } from "../../theme/commonStyles";
 
 const T = {
+  title: {
+    ru: "Тип проверки",
+    en: "Select review type",
+  },
+  generalTitle: {
+    ru: "Общая",
+    en: "General",
+  },
+  generalText: {
+    ru: "Анализ на базовые риски и спорные пункты",
+    en: "Scan for obvious risks and issues",
+  },
+  customTitle: {
+    ru: "Индивидуальная",
+    en: "Custom",
+  },
+  customText: {
+    ru: "Создавайте и сохраняйте свои правила для проверки",
+    en: "Create and save your own rules for review",
+  },
   waitingNotification: {
-    ru: "Идёт анализ сторон",
-    en: "Please await",
-  },
-  dividerSelectReviewType: {
-    ru: "Выберите тип проверки",
-    en: "Select a review",
-  },
-  dividerPlaybooks: {
-    ru: "Чек-листы",
-    en: "Playbooks",
-  },
-  dividerAnonymizer: {
-    ru: "Анонимайзер",
-    en: "Anonymizer",
-  },
-  buttonAnonymizer: {
-    ru: "Добавить",
-    en: "Add",
+    ru: "Определяем тип и стороны договора",
+    en: "Getting contract type and parties",
   },
   errorDescription: {
     ru: "Ошибка определения сторон договора.\n Попробуйте ещё раз.",
@@ -42,80 +44,56 @@ const T = {
 const Review = () => {
   const { menuStore, documentStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
-  const { parties, partiesError, isPartiesProcessing } = suggestionsStore;
-  const isError = Boolean(partiesError);
+  const { parties, metaDataError, isMetaDataProcessing } = suggestionsStore;
+  const isError = Boolean(metaDataError);
   const navigate = useNavigate();
+  const commonStyles = useCommonStyles();
   const styles = useReviewStyles();
 
   useEffect(() => {
     console.log("navigate to [page review]");
 
     const loadParties = async () => {
-      if (!documentStore.documentId) {
-        navigate("/");
-        return;
-      }
-
-      if (!parties && !isPartiesProcessing) {
-        await suggestionsStore.requestParties(documentStore.documentId);
+      if (!parties && !isMetaDataProcessing) {
+        await suggestionsStore.requestMetaData(documentStore.documentId);
       }
     };
 
     loadParties();
   }, []);
 
-  const isDisplayAnonymizer = APP_SET_ANONYMIZER === "true";
+  const handleNavigateToReviewType = (tab: ReviewTypesEnums) => {
+    navigate(RoutePathEnum.REVIEW_TYPE, { state: { tab } });
+  };
 
-  if (isError || (!parties && !isPartiesProcessing)) {
-    console.log("error parties review", isError, partiesError);
-    return (
-      <Text block className={styles.error}>
-        {T.errorDescription[locale]}
-      </Text>
-    );
+  if (isError || (!parties && !isMetaDataProcessing)) {
+    console.log("error parties review", isError, metaDataError);
+    return <ErrorText error={T.errorDescription[locale]} />;
+  }
+
+  if (documentStore.isFetchingDetectDocumentType || isMetaDataProcessing) {
+    return <ItemSkeleton title={T.waitingNotification[locale]} />;
   }
 
   return (
     <div className={styles.container}>
+      <Text as="h1" weight="semibold" className={mergeClasses(commonStyles.pageTitle, styles.title)}>
+        {T.title[locale]}
+      </Text>
       <div className={styles.block}>
-        <Divider alignContent="center" inset>
-          <Text size={300} weight="medium">
-            {isPartiesProcessing ? T.waitingNotification[locale] : T.dividerSelectReviewType[locale]}
-          </Text>
-        </Divider>
-        {isPartiesProcessing ? (
-          <ItemSkeleton />
-        ) : (
-          <>
-            <ReviewTypeGeneral />
-            <ReviewTypeCustom />
-          </>
-        )}
+        <Card
+          title={T.generalTitle[locale]}
+          text={T.generalText[locale]}
+          icon={<DocumentBulletList24Regular />}
+          onClick={() => handleNavigateToReviewType(ReviewTypesEnums.GENERAL)}
+        />
+        <Card
+          title={T.customTitle[locale]}
+          text={T.customText[locale]}
+          icon={<Settings24Regular />}
+          onClick={() => handleNavigateToReviewType(ReviewTypesEnums.CUSTOM)}
+        />
       </div>
-
-      {!isPartiesProcessing && (
-        <>
-          <div className={styles.block}>
-            <Divider alignContent="center" inset>
-              <Text size={300} weight="medium">
-                {T.dividerPlaybooks[locale]}
-              </Text>
-            </Divider>
-            <PlayBook />
-          </div>
-
-          {isDisplayAnonymizer && (
-            <div className={styles.block}>
-              <Divider alignContent="center" inset>
-                <Text size={300} weight="medium">
-                  {T.dividerAnonymizer[locale]}
-                </Text>
-              </Divider>
-              <Anonymizer />
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 };

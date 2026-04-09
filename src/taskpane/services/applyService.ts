@@ -2,6 +2,7 @@
 /// <reference types="office-js" />
 import { OptionsSupportedCurrentApiI } from "../store/config";
 import { getDifferencesSemantic } from "../helpers/diff";
+import { convert } from "../helpers/convert";
 import { SearchService } from "./searchService";
 import { RecommendationTypeEnum } from "../enums";
 
@@ -168,12 +169,13 @@ export class ApplyService {
         const comments = findRange.getComments();
         comments.load("items");
         await context.sync();
-        const isCommentExist = comments.items.some((el) => el.content === commentText);
+        const plainComment = convert.removeMarkdownLinks(commentText);
+        const isCommentExist = comments.items.some((el) => el.content === plainComment);
 
         if (isCommentExist) {
           console.log("Этот комментарий уже добавлен!");
         } else {
-          findRange.insertComment(commentText);
+          findRange.insertComment(plainComment);
         }
       } catch (error) {
         console.log("error", error);

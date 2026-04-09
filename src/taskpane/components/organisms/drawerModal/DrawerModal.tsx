@@ -1,13 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react";
-import { Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from "@fluentui/react-components";
-import { Dismiss24Regular, TextBulletListSquareSearchRegular } from "@fluentui/react-icons";
+import {
+  Button,
+  Divider,
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerHeaderTitle,
+  Radio,
+  RadioGroup,
+  mergeClasses,
+} from "@fluentui/react-components";
+import {
+  ArrowCircleRight16Regular,
+  ArrowLeft16Regular,
+  Chat20Regular,
+  Dismiss24Regular,
+  DocumentTableCheckmark20Regular,
+  DoorArrowLeft20Regular,
+  FolderPeople20Regular,
+  Globe20Regular,
+  MailCopy20Regular,
+} from "@fluentui/react-icons";
 import { useStores } from "../../../store";
 import { AuthStepperEnum } from "../../../store/auth";
-import {
-  SelectionLang,
-  // SelectionModelAi
-} from "../../widgets";
+import { LocaleEnums } from "../../../store/menu";
+import { useDrawerModalStyles } from "./styles";
+import { RoutePathEnum } from "../../../enums";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 type DrawerModalT = {
   isOpen: boolean;
@@ -15,16 +37,40 @@ type DrawerModalT = {
 };
 
 const T = {
-  title: {
+  account: {
+    ru: "Профиль",
+    en: "Account",
+  },
+  tariff: {
+    ru: "Тарифный план",
+    en: "Current tariff",
+  },
+  quickAccess: {
+    ru: "Быстрый доступ",
+    en: "Quick access",
+  },
+  checklists: {
+    ru: "Чек-листы",
+    en: "Checklists",
+  },
+  settings: {
     ru: "Настройки",
     en: "Settings",
   },
-  dividerLang: {
+  settingsLang: {
     ru: "Язык интерфейса",
     en: "Interface language",
   },
+  language: {
+    ru: "Русский",
+    en: "English",
+  },
+  settingsChat: {
+    ru: "Открыть AI чат",
+    en: "Open AI chat",
+  },
   btnLogout: {
-    ru: "Выйти",
+    ru: "Выход из аккаунта",
     en: "Logout",
   },
 };
@@ -34,59 +80,167 @@ const appBuildNumber = process.env.appBuildNumber;
 const DrawerModal = (props: DrawerModalT) => {
   const { isOpen, onClose } = props;
   const { menuStore, authStore } = useStores();
-  const { locale } = menuStore;
+  const { locale, setLocale } = menuStore;
+  const commonStyles = useCommonStyles();
+  const styles = useDrawerModalStyles();
+  const navigate = useNavigate();
+  const [level, setLevel] = useState<1 | 2>(1);
 
   const handleClose = () => {
+    setLevel(1);
     onClose();
   };
+
   const handleLogout = () => {
     authStore.logout();
+    navigate(RoutePathEnum.ROOT);
     onClose();
   };
 
-  const isDisplayButtonLogout =
-    authStore.authStatus === AuthStepperEnum.ACCESSED || authStore.authStatus === AuthStepperEnum.FORBIDDEN;
+  const handleGoToChecklists = () => {
+    navigate(RoutePathEnum.CHECKLIST);
+    onClose();
+  };
+
+  const handleSelectLang = (lang: LocaleEnums) => {
+    setLocale(lang);
+  };
+
+  const isAuthorized = authStore.authStatus === AuthStepperEnum.ACCESSED;
+
+  const isDisplayButtonLogout = isAuthorized || authStore.authStatus === AuthStepperEnum.FORBIDDEN;
 
   return (
-    <Drawer separator open={isOpen} onOpenChange={() => onClose()}>
-      <DrawerHeader>
+    <Drawer className={styles.container} separator open={isOpen} onOpenChange={() => onClose()}>
+      <DrawerHeader className={styles.header}>
         <DrawerHeaderTitle
           action={<Button appearance="subtle" aria-label="Close" icon={<Dismiss24Regular />} onClick={handleClose} />}
-        >
-          {T.title[locale]}
-        </DrawerHeaderTitle>
+        />
       </DrawerHeader>
 
-      <DrawerBody
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
-          justifyContent: "space-between",
-          padding: "24px",
-        }}
-      >
-        <div style={{ display: "flex", gap: "36px", flexDirection: "column" }}>
-          <SelectionLang />
-          {/* <SelectionModelAi /> */}
-        </div>
-        <div>
-          <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
-            {isDisplayButtonLogout && (
-              <Button
-                appearance="outline"
-                onClick={handleLogout}
-                style={{ borderColor: "#ce860f", color: "#ce860f" }}
-                icon={<TextBulletListSquareSearchRegular style={{ color: "#ce860f" }} />}
-                color="red"
+      {isAuthorized && (
+        <DrawerBody className={level === 1 ? styles.body : mergeClasses(styles.body, styles.bodyLevel2)}>
+          {level === 1 && (
+            <div className={styles.sections}>
+              <div>
+                <div className={styles.sectionHeader}>{T.account[locale]}</div>
+                <div className={styles.sectionContent}>
+                  <span className={styles.sectionRowLabel}>
+                    <MailCopy20Regular /> {authStore.clientEmail}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <div className={styles.sectionHeader}>{T.tariff[locale]}</div>
+                <div className={styles.sectionContent}>
+                  <span className={styles.sectionRowLabel}>
+                    <FolderPeople20Regular />
+                    {authStore.clientData?.active_tariffs[0].name || "Speransky Corp"}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <div className={styles.sectionHeader}>{T.quickAccess[locale]}</div>
+                <div className={styles.sectionContent}>
+                  <span className={styles.sectionRowLabel}>
+                    <DocumentTableCheckmark20Regular /> {T.checklists[locale]}
+                  </span>
+                  <Button
+                    appearance="transparent"
+                    className={styles.sectionValue}
+                    icon={<ArrowCircleRight16Regular />}
+                    onClick={handleGoToChecklists}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className={styles.sectionHeader}>{T.settings[locale]}</div>
+                <div className={styles.sectionContent}>
+                  <span className={styles.sectionRowLabel}>
+                    <Globe20Regular /> {T.settingsLang[locale]}
+                  </span>
+                  <Button appearance="transparent" className={styles.sectionValue} onClick={() => setLevel(2)}>
+                    {T.language[locale]}
+                  </Button>
+                </div>
+                <div className={styles.sectionContent}>
+                  <Button
+                    appearance="transparent"
+                    className={mergeClasses(styles.button, styles.sectionButton)}
+                    icon={<Chat20Regular />}
+                    disabled
+                  >
+                    {T.settingsChat[locale]}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {level === 2 && (
+            <>
+              <div className={mergeClasses(commonStyles.pageTitle, styles.langHeader)}>
+                <Button
+                  appearance="transparent"
+                  aria-label="Back"
+                  icon={<ArrowLeft16Regular />}
+                  onClick={() => setLevel(1)}
+                />
+                <span>{T.settingsLang[locale]}</span>
+              </div>
+              <RadioGroup
+                className={styles.langList}
+                value={locale}
+                onChange={(_, data) => handleSelectLang(data.value as LocaleEnums)}
               >
-                {T.btnLogout[locale]}
-              </Button>
-            )}
-          </div>
-          <div style={{ display: "flex", paddingTop: "12px", color: "#B7B7B7" }}>v.{appBuildNumber}</div>
-        </div>
-      </DrawerBody>
+                <div className={styles.langRadioButton}>
+                  <Radio
+                    className={mergeClasses(commonStyles.radio, styles.langRadio)}
+                    value={LocaleEnums.RU}
+                    label={
+                      <div className={styles.langLabel}>
+                        <span className={styles.langTitle}>Русский</span>
+                        <span className={styles.langSubtitle}>Russian</span>
+                      </div>
+                    }
+                  />
+                  <Divider className={commonStyles.divider} />
+                </div>
+                <div className={styles.langRadioButton}>
+                  <Radio
+                    className={mergeClasses(commonStyles.radio, styles.langRadio)}
+                    value={LocaleEnums.EN}
+                    label={
+                      <div className={styles.langLabel}>
+                        <span className={styles.langTitle}>Английский</span>
+                        <span className={styles.langSubtitle}>English</span>
+                      </div>
+                    }
+                  />
+                  <Divider className={commonStyles.divider} />
+                </div>
+              </RadioGroup>
+            </>
+          )}
+        </DrawerBody>
+      )}
+
+      <DrawerFooter className={styles.footer}>
+        {isDisplayButtonLogout && (
+          <Button
+            appearance="transparent"
+            className={mergeClasses(styles.button, styles.logoutButton)}
+            onClick={handleLogout}
+            icon={<DoorArrowLeft20Regular />}
+          >
+            {T.btnLogout[locale]}
+          </Button>
+        )}
+        <div className={styles.version}>v.{appBuildNumber}</div>
+      </DrawerFooter>
     </Drawer>
   );
 };

@@ -5,7 +5,7 @@ import {
   PayloadContractDetectTypeDto,
   ResponseContractAnalyzeDto,
   ResponseContractDetectTypeDto,
-  ResponseContractPartiesDto,
+  ResponseContractMetaDto,
   ResponseContractRecommendationDto,
 } from "../types";
 
@@ -35,6 +35,10 @@ const contract = {
       body.append("user_comment", data.user_comment);
     }
 
+    if (data.checklist_id) {
+      body.append("checklist_id", data.checklist_id);
+    }
+
     return axios.post<ResponseContractAnalyzeDto>(CONTRACT_ROUTES.analyze, body, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -42,14 +46,9 @@ const contract = {
     });
   },
 
-  /** @description Извлечение сторон юридического кейса */
-  // parties: (legal_case_id: string) => {
-  //   return axios.get<ResponseContractPartiesDto>(CONTRACT_ROUTES.parties(legal_case_id));
-  // },
-
-  /** @description Извлечение сторон договора */
-  parties: (document_id: string) => {
-    return axios.get<ResponseContractPartiesDto>(CONTRACT_ROUTES.parties(document_id));
+  /** @description Извлечение типа и сторон договора */
+  meta: (document_id: string) => {
+    return axios.get<ResponseContractMetaDto>(CONTRACT_ROUTES.meta(document_id));
   },
 
   /** @description Получение JSON-рекомендаций по id */

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useStores } from "../../store";
 import { SuggestionCard } from "../../components/widgets";
-import { Button } from "@fluentui/react-components";
+import { Button, Tooltip } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { ApplyService } from "../../services/applyService";
 import { ItemSkeleton } from "../../components/molecules";
@@ -19,8 +19,12 @@ const T = {
     en: "Apply all edits",
   },
   buttonDownloadArchive: {
-    ru: "Скачать результаты",
+    ru: "Скачать отчётные документы",
     en: "Download results",
+  },
+  tooltipDownloadArchive: {
+    ru: "Отчётная таблица о правовых рисках, Договор с правками и примечаниями, Протокол разногласий в формате .docx",
+    en: "Risk report table, Contract with tracked changes, Disagreement protocol in .docx format",
   },
   errorDescription: {
     ru: "Ошибка получения рекомендаций.\n Попробуйте ещё раз.",
@@ -112,9 +116,15 @@ const Summary = () => {
             {T.buttonApplyAll[locale]}
           </Button>
         )}
-        <Button appearance="primary" size="large" onClick={handleDownloadArchive}>
-          {T.buttonDownloadArchive[locale]}
-        </Button>
+        <Tooltip
+          content={{ children: T.tooltipDownloadArchive[locale], className: styles.tooltip }}
+          relationship="description"
+          positioning="above"
+        >
+          <Button appearance="primary" size="large" onClick={handleDownloadArchive}>
+            {T.buttonDownloadArchive[locale]}
+          </Button>
+        </Tooltip>
       </div>
     </div>
   );

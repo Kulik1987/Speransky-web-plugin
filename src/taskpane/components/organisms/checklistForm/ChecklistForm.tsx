@@ -42,7 +42,7 @@ const T = {
 };
 
 type ChecklistFormProps = {
-  onRulesChange: (rules: DraftRule[]) => void;
+  onRulesChange: (rules: DraftRule[], deletedServerIds: string[]) => void;
   initialRules?: DraftRule[];
 };
 
@@ -51,17 +51,18 @@ const getRuleType = (rule: DraftRule): RuleType => ("simple_rule" in rule ? "sim
 const isLocalId = (id: string) => id.startsWith("_local_");
 
 const ChecklistForm = ({ onRulesChange, initialRules }: ChecklistFormProps) => {
-  const { menuStore, checkList } = useStores();
+  const { menuStore } = useStores();
   const { locale } = menuStore;
   const styles = useChecklistStyles();
 
   const rulesContainerRef = useRef<HTMLDivElement>(null);
   const [ruleMode, setRuleMode] = useState<RuleType>("simple");
   const [rules, setRules] = useState<DraftRule[]>(initialRules ?? []);
+  const [deletedServerIds, setDeletedServerIds] = useState<string[]>([]);
 
-  const updateRules = (newRules: DraftRule[]) => {
+  const updateRules = (newRules: DraftRule[], newDeletedIds = deletedServerIds) => {
     setRules(newRules);
-    onRulesChange(newRules);
+    onRulesChange(newRules, newDeletedIds);
   };
 
   const handleAddRule = () => {
@@ -93,10 +94,14 @@ const ChecklistForm = ({ onRulesChange, initialRules }: ChecklistFormProps) => {
 
   const handleRemoveRule = (index: number) => {
     const rule = rules[index];
+    const newRules = rules.filter((_, i) => i !== index);
     if (rule.id && !isLocalId(rule.id)) {
-      checkList.removeRuleById(rule.id);
+      const newDeletedIds = [...deletedServerIds, rule.id];
+      setDeletedServerIds(newDeletedIds);
+      updateRules(newRules, newDeletedIds);
+    } else {
+      updateRules(newRules);
     }
-    updateRules(rules.filter((_, i) => i !== index));
   };
 
   return (

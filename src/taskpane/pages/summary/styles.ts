@@ -11,4 +11,11 @@ export const useSummaryStyles = makeStyles({
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalL),
   },
+  tooltip: {
+    maxWidth: "270px",
+    backgroundColor: tokens.colorBrandForegroundOnLightPressed,
+    color: "#FFFFFF",
+    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
+    ...shorthands.borderRadius("5px"),
+  },
 });

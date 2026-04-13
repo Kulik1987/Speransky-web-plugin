@@ -12,7 +12,12 @@ import {
 const contract = {
   /** @description Загрузка договора и определение его типа */
   detectType: (data: PayloadContractDetectTypeDto) => {
-    return axios.post<ResponseContractDetectTypeDto>(CONTRACT_ROUTES.detectType, data, {
+    const formData = new FormData();
+    formData.append("llm_provider", data.llm_provider);
+    formData.append("source", data.source);
+    data.files.forEach((file) => formData.append("files", file));
+
+    return axios.post<ResponseContractDetectTypeDto>(CONTRACT_ROUTES.detectType, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

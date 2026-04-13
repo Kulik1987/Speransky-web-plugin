@@ -106,21 +106,15 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
       />
 
       <Accordion
-        collapsible={!isGeneral}
+        collapsible
         className={commonStyles.accordion}
-        onToggle={isGeneral ? undefined : handleToggle}
-        openItems={isGeneral ? [1] : isOpen ? [1] : []}
+        onToggle={handleToggle}
+        openItems={isOpen ? [1] : []}
       >
         <AccordionItem className={commonStyles.accordionItem} value={1}>
           <AccordionHeader
             className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
-            expandIcon={
-              isGeneral ? null : isOpen ? (
-                <TriangleDownFilled style={iconStyle} />
-              ) : (
-                <TriangleRightFilled style={iconStyle} />
-              )
-            }
+            expandIcon={isOpen ? <TriangleDownFilled style={iconStyle} /> : <TriangleRightFilled style={iconStyle} />}
           >
             {isGeneral ? T.listTitleGeneral[locale] : T.listTitleCustom[locale]}
           </AccordionHeader>

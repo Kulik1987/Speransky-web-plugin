@@ -10,9 +10,10 @@ export const useBreadcrumbStyles = makeStyles({
     ...shorthands.padding(tokens.spacingVerticalXS),
   },
   button: {
-    lineHeight: tokens.lineHeightBase600,
+    lineHeight: tokens.lineHeightBase400,
     ...shorthands.padding(0),
     ...shorthands.border("none"),
+    letterSpacing: "-0.2px",
     "&:hover": {
       color: customColors.text.primary[90],
       backgroundColor: "transparent",

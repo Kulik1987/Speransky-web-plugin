@@ -343,15 +343,14 @@ const Checklist = () => {
         </Button>
 
         {!isFormOpen && (
-          <Button
+          <IconButton
             appearance="primary"
-            className={styles.btnAdd}
+            tooltip={T.btnCreateChecklist[locale]}
             icon={<Add16Filled />}
             onClick={handleOpenChecklistForm}
+            positioning="above-end"
             disabled={isFormOpen}
-          >
-            {T.btnCreateChecklist[locale]}
-          </Button>
+          />
         )}
       </div>
 

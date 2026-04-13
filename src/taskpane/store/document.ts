@@ -262,16 +262,16 @@ class DocumentStore {
 
       const response = await api.contract.detectType({
         llm_provider: this.rootStore.menuStore.providerLLM,
-        file: file,
+        files: [file],
         source: SourceTypeEnums.PLUGIN,
       });
 
-      const { legal_case_id, document_id } = response.data;
+      const { legal_case_id, documents, document_id } = response.data;
 
       // Сохраняем ID в стор
       runInAction(() => {
         this.legalCaseId = legal_case_id;
-        this.documentId = document_id;
+        this.documentId = (documents[0]?.document_id || document_id) ?? null;
       });
 
       return response.data;

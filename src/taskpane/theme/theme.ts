@@ -66,5 +66,9 @@ const themeColors: BrandVariants = {
   160: "#CFDFE1",
 };
 
-export const lightTheme: Theme = createLightTheme(themeColors);
+export const lightTheme: Theme = {
+  ...createLightTheme(themeColors),
+  colorStrokeFocus2: "transparent",
+};
+
 export const darkTheme: Theme = createDarkTheme(themeColors);

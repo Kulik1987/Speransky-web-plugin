@@ -10,11 +10,9 @@ import {
   AccordionItem,
   AccordionPanel,
   Button,
-  Combobox,
   Field,
   Input,
   mergeClasses,
-  Option,
   Spinner,
 } from "@fluentui/react-components";
 import type { AccordionToggleData, AccordionToggleEvent } from "@fluentui/react-components";
@@ -26,7 +24,7 @@ import {
   TriangleRightFilled,
 } from "@fluentui/react-icons";
 import { ALL_PARTIES, ALL_CONTRACT_TYPES } from "../../constants";
-import { ChecklistCard } from "../../components/molecules";
+import { ChecklistCard, ComboboxField } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
 import { IconButton, Modal, SearchBox } from "../../components/atoms";
@@ -70,8 +68,8 @@ const T = {
     en: "Custom checklists",
   },
   modalDeleteTitle: {
-    ru: "Удалить чек-лист",
-    en: "Delete checklist",
+    ru: "Удалить чек-лист?",
+    en: "Delete checklist?",
   },
   modalDeleteConfirm: {
     ru: "Удалить",
@@ -89,6 +87,18 @@ const T = {
     ru: "Сохранить",
     en: "Save",
   },
+  modalLeaveTitle: {
+    ru: "Покинуть страницу?",
+    en: "Leave the page?",
+  },
+  modalLeaveSubtitle: {
+    ru: "Несохранённые изменения будут потеряны",
+    en: "Unsaved changes will be lost",
+  },
+  modalLeaveConfirm: {
+    ru: "Да",
+    en: "Yes",
+  },
   requiredField: {
     ru: "Обязательное поле",
     en: "Required field",
@@ -96,10 +106,6 @@ const T = {
   searchChecklistPlaceholder: {
     ru: "Найти по названию",
     en: "Search by name",
-  },
-  searchOrAddPlaceholder: {
-    ru: "Введите или выберите название",
-    en: "Search or add new value",
   },
 };
 
@@ -118,9 +124,8 @@ const Checklist = () => {
   const [docType, setDocType] = useState("");
   const [checklistName, setChecklistName] = useState("");
   const [checklistRules, setChecklistRules] = useState<DraftRule[]>([]);
+  const [deletedRuleIds, setDeletedRuleIds] = useState<string[]>([]);
 
-  const [docTypeSearch, setDocTypeSearch] = useState("");
-  const [partySearch, setPartySearch] = useState("");
   const [checklistSearch, setChecklistSearch] = useState("");
 
   const [checklistNameTouched, setChecklistNameTouched] = useState(false);
@@ -128,6 +133,11 @@ const Checklist = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+
+  useEffect(() => {
+    checkList.setIsFormOpen(isFormOpen);
+  }, [isFormOpen]);
 
   const [openItem, setOpenItems] = useState<number[]>([]);
 
@@ -148,7 +158,7 @@ const Checklist = () => {
   }, []);
 
   useEffect(() => {
-    if (!isEditing && !isChecklistNameManual) {
+    if (!isChecklistNameManual) {
       setChecklistName([docType, party].filter(Boolean).join(" - "));
     }
   }, [docType, party, checkList.editingChecklistId]);
@@ -159,12 +169,14 @@ const Checklist = () => {
 
     setIsFormOpen(false);
     setChecklistRules([]);
+    setDeletedRuleIds([]);
 
     checkList.getChecklistById(id).then((data) => {
       if (!data) return;
       setDocType(data.doc_type ?? "");
       setParty(data.party || T.allPartiesValue[locale]);
       setChecklistName(data.name);
+      setIsChecklistNameManual(true);
       setChecklistRules([...checkList.checklistRules]);
       setIsFormOpen(true);
       setOpenItems([1]);
@@ -179,6 +191,7 @@ const Checklist = () => {
     setDocType("");
     setParty("");
     setChecklistRules([]);
+    setDeletedRuleIds([]);
   };
 
   const handleOpenChecklistForm = () => {
@@ -192,7 +205,8 @@ const Checklist = () => {
       checklistName,
       docType,
       party === T.allPartiesValue[locale] ? "" : party,
-      checklistRules
+      checklistRules,
+      deletedRuleIds
     );
     if (success) {
       resetForm();
@@ -220,15 +234,29 @@ const Checklist = () => {
     }
   };
 
-  const handleGoBack = () => {
+  const executeGoBack = () => {
     if (isEditing && isChecklistPage) {
       checkList.setEditingChecklistId(null);
       setIsChecklistPage(false);
       resetForm();
+      setOpenItems([2]);
     } else {
       checkList.setEditingChecklistId(null);
       navigate(-1);
     }
+  };
+
+  const handleGoBack = () => {
+    if (isFormOpen) {
+      setIsLeaveModalOpen(true);
+    } else {
+      executeGoBack();
+    }
+  };
+
+  const handleGoBackConfirm = () => {
+    setIsLeaveModalOpen(false);
+    executeGoBack();
   };
 
   const validationDocType = getMaxLengthError(docType, locale, 255);
@@ -268,14 +296,6 @@ const Checklist = () => {
     </Field>
   );
 
-  const filteredDocTypes = docTypeSearch
-    ? ALL_CONTRACT_TYPES.filter((type) => type.toLowerCase().includes(docTypeSearch.toLowerCase()))
-    : ALL_CONTRACT_TYPES;
-
-  const filteredParties = partySearch
-    ? ALL_PARTIES.filter((type) => type.toLowerCase().includes(partySearch.toLowerCase()))
-    : ALL_PARTIES;
-
   const filteredChecklists = checklistSearch
     ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(checklistSearch.toLowerCase()))
     : checkList.checklists;
@@ -301,6 +321,16 @@ const Checklist = () => {
         children={checklistNameField}
       />
 
+      <Modal
+        open={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        title={T.modalLeaveTitle[locale]}
+        actionButtonTitle={T.modalLeaveConfirm[locale]}
+        onAction={handleGoBackConfirm}
+        children={<span>{T.modalLeaveSubtitle[locale]}</span>}
+        reverseActions
+      />
+
       <div className={styles.blockTitle}>
         <Button
           size="small"
@@ -313,15 +343,14 @@ const Checklist = () => {
         </Button>
 
         {!isFormOpen && (
-          <Button
+          <IconButton
             appearance="primary"
-            className={styles.btnAdd}
+            tooltip={T.btnCreateChecklist[locale]}
             icon={<Add16Filled />}
             onClick={handleOpenChecklistForm}
+            positioning="above-end"
             disabled={isFormOpen}
-          >
-            {T.btnCreateChecklist[locale]}
-          </Button>
+          />
         )}
       </div>
 
@@ -341,83 +370,45 @@ const Checklist = () => {
               {isEditing ? checklistName : T.formCreatingTitle[locale]}
             </AccordionHeader>
             <AccordionPanel className={commonStyles.accordionPanel}>
-              <Field validationState={validationDocType ? "error" : "none"} validationMessage={validationDocType}>
-                <Combobox
-                  freeform
-                  size="large"
-                  placeholder={T.docTypePlaceholder[locale]}
-                  value={docType}
-                  onOptionSelect={(_, data) => {
-                    setDocType(data.optionText ?? "");
-                    setDocTypeSearch("");
-                  }}
-                  onChange={(e) => {
-                    const value = sanitizeFieldValue(e.target.value, 255);
-                    setDocType(value);
-                    setDocTypeSearch(value);
-                  }}
-                  listbox={{
-                    className: styles.dropdownList,
-                    style: { display: filteredDocTypes.length === 0 ? "none" : undefined },
-                  }}
-                  className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
-                >
-                  {filteredDocTypes.map((type) => (
-                    <Option key={type} value={type}>
-                      {type}
-                    </Option>
-                  ))}
-                </Combobox>
-              </Field>
+              <ComboboxField
+                value={docType}
+                onChange={setDocType}
+                options={ALL_CONTRACT_TYPES}
+                placeholder={T.docTypePlaceholder[locale]}
+                maxLength={255}
+                validationMessage={validationDocType}
+              />
 
-              <Field validationState={validationParty ? "error" : "none"} validationMessage={validationParty}>
-                <Combobox
-                  freeform
-                  size="large"
-                  placeholder={T.partyPlaceholder[locale]}
-                  value={party}
-                  onOptionSelect={(_, data) => {
-                    setParty(data.optionText ?? "");
-                    setPartySearch("");
-                  }}
-                  onChange={(e) => {
-                    const value = sanitizeFieldValue(e.target.value, 100);
-                    setParty(value);
-                    setPartySearch(value);
-                  }}
-                  listbox={{
-                    className: styles.dropdownList,
-                    style: { display: filteredParties.length === 0 ? "none" : undefined },
-                  }}
-                  className={mergeClasses(commonStyles.dropdown, party && commonStyles.inputFill)}
-                >
-                  {filteredParties.map((type) => (
-                    <Option key={type} value={type}>
-                      {type}
-                    </Option>
-                  ))}
-                </Combobox>
-              </Field>
+              <ComboboxField
+                value={party}
+                onChange={setParty}
+                options={ALL_PARTIES}
+                placeholder={T.partyPlaceholder[locale]}
+                maxLength={100}
+                validationMessage={validationParty}
+              />
 
               {checklistNameField}
 
               <ChecklistForm
                 key={checkList.editingChecklistId ?? "new"}
                 initialRules={checklistRules}
-                onRulesChange={(rules) => setChecklistRules(rules)}
+                onRulesChange={(rules, deletedIds) => {
+                  setChecklistRules(rules);
+                  setDeletedRuleIds(deletedIds);
+                }}
               />
             </AccordionPanel>
 
-            {canSave && (
-              <IconButton
-                tooltip={T.modalSaveConfirm[locale]}
-                icon={<Save16Regular />}
-                onClick={() => setIsSaveModalOpen(true)}
-                positioning="above-end"
-                appearance="primary"
-                className={commonStyles.accordionActions}
-              />
-            )}
+            <IconButton
+              tooltip={T.modalSaveConfirm[locale]}
+              icon={<Save16Regular />}
+              onClick={() => setIsSaveModalOpen(true)}
+              positioning="above-end"
+              appearance="primary"
+              className={commonStyles.accordionActions}
+              disabled={!canSave}
+            />
           </AccordionItem>
         )}
 

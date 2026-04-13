@@ -224,6 +224,14 @@ const SuggestionCard = (props: SuggestionPropT) => {
             onClick={handleShowInDocument}
             positioning="above-start"
           />
+          {isChangeExist && (
+            <IconButton
+              tooltip={T.buttonChange[locale]}
+              icon={<CheckboxChecked24Regular color={tokens.colorBrandForeground2} />}
+              onClick={handleApplyChange}
+              positioning="above-start"
+            />
+          )}
           {isCommentExist && (
             <IconButton
               tooltip={T.buttonComment[locale]}
@@ -231,14 +239,6 @@ const SuggestionCard = (props: SuggestionPropT) => {
               onClick={handleAddComment}
               positioning="above-start"
               disabled={isAccessToRangeInsertComment === false}
-            />
-          )}
-          {isChangeExist && (
-            <IconButton
-              tooltip={T.buttonChange[locale]}
-              icon={<CheckboxChecked24Regular color={tokens.colorBrandForeground2} />}
-              onClick={handleApplyChange}
-              positioning="above-start"
             />
           )}
         </div>

@@ -46,6 +46,7 @@ class CheckList {
   // Состояние операций записи
   isSaving: boolean = false;
   isDraftLoading: boolean = false;
+  isFormOpen: boolean = false;
 
   // Черновик: поля формы создания/редактирования чек-листа
   editingChecklistId: string | null = initialDraft.editingChecklistId;
@@ -58,6 +59,10 @@ class CheckList {
 
   // Состояние чек-листа на момент загрузки с сервера
   private originalDraft: OriginalDraft | null = null;
+
+  setIsFormOpen = (value: boolean) => {
+    this.isFormOpen = value;
+  };
 
   setEditingChecklistId = (id: string | null) => {
     this.editingChecklistId = id;
@@ -124,34 +129,26 @@ class CheckList {
    * @description Обновляет поля черновика и сохраняет чек-лист на сервере.
    * Параметры, не переданные явно, остаются без изменений.
    */
-  submitDraft = async (name?: string, docType?: string, party?: string, rules?: DraftRule[]): Promise<boolean> => {
+  submitDraft = async (
+    name?: string,
+    docType?: string,
+    party?: string,
+    rules?: DraftRule[],
+    deletedRuleIds?: string[]
+  ): Promise<boolean> => {
     this.checklistName = name ?? this.checklistName;
     this.checklistDocType = docType ?? this.checklistDocType;
     this.checklistParty = party ?? this.checklistParty;
     this.checklistRules = rules ?? this.checklistRules;
-    return this.saveChecklist();
-  };
-
-  /** @description Удаляет правило из чек-листа по id */
-  removeRuleById = async (ruleId: string): Promise<boolean> => {
-    try {
-      await this.checklistApi.deleteRule(ruleId);
-    } catch (error) {
-      console.error("removeRuleById [error]", error);
-      return false;
-    }
-    runInAction(() => {
-      this.checklistRules = this.checklistRules.filter((r) => r.id !== ruleId);
-    });
-    return true;
+    return this.saveChecklist(deletedRuleIds);
   };
 
   /**
    * @description Сохраняет чек-лист.
    * Создание: создает чек-лист с правилами.
-   * Редактирование: обновляет метаданные + параллельно обновляет/добавляет правила по id.
+   * Редактирование: обновляет метаданные + параллельно обновляет/добавляет/удаляет правила по id.
    */
-  saveChecklist = async (): Promise<boolean> => {
+  saveChecklist = async (deletedRuleIds?: string[]): Promise<boolean> => {
     runInAction(() => {
       this.isSaving = true;
     });
@@ -181,8 +178,8 @@ class CheckList {
           }
         }
 
-        await Promise.all(
-          this.checklistRules.map(({ id, ...ruleContent }) => {
+        await Promise.all([
+          ...this.checklistRules.map(({ id, ...ruleContent }) => {
             if (!id || id.startsWith("_local_"))
               return this.checklistApi.addRule(checklistId, ruleContent as PayloadChecklistAddRuleDto);
 
@@ -192,8 +189,9 @@ class CheckList {
               if (JSON.stringify(ruleContent) === origWithoutId) return Promise.resolve();
             }
             return this.checklistApi.updateRule(id, ruleContent as PayloadChecklistAddRuleDto);
-          })
-        );
+          }),
+          ...(deletedRuleIds ?? []).map((id) => this.checklistApi.deleteRule(id)),
+        ]);
       } else {
         await this.checklistApi.create({
           name: this.checklistName,
@@ -349,6 +347,7 @@ class CheckList {
       this.isChecklistsLoading = false;
       this.isDraftLoading = false;
       this.isSaving = false;
+      this.isFormOpen = false;
       this.clearDraft();
     });
   };

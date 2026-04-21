@@ -1,6 +1,10 @@
 import { diff_match_patch } from "diff-match-patch";
 import { customColors } from "../theme/theme";
 
+export function normalizeTabsForDisplay(text: string): string {
+  return text.replace(/\t+/g, "_____");
+}
+
 export function getDifferencesSemantic(text1: string, text2: string) {
   let dmp = new diff_match_patch();
   var diff = dmp.diff_main(text1, text2);
@@ -25,14 +29,16 @@ export function htmlChangesMatching(source: string, target: string): string | nu
         const isCreateItem = actionFlag === 1;
         const isStetItem = actionFlag === 0;
 
+        const displayText = normalizeTabsForDisplay(textItem);
+
         switch (true) {
           case isDeleteItem:
-            return `<del  style="color: ${customColors.accent.removeText};">${textItem}</del>`;
+            return `<del  style="color: ${customColors.accent.removeText};">${displayText}</del>`;
           case isCreateItem:
             return `<inc style="color: ${customColors.accent.risk.low.text}; font-weight: 600;
-           ">${textItem}</inc>`;
+           ">${displayText}</inc>`;
           case isStetItem:
-            return `${textItem}`;
+            return displayText;
           default:
             console.log("empty element", el);
             return ``;

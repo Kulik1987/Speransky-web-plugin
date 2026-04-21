@@ -13,7 +13,7 @@ import { IconButton, Modal, PartyFlag, PriorityFlag } from "../../atoms";
 import { ApplyService } from "../../../services/applyService";
 import { SearchService } from "../../../services/searchService";
 import { SuggestionT } from "../../../store/suggestions";
-import { htmlChangesMatching } from "../../../helpers/diff";
+import { htmlChangesMatching, normalizeTabsForDisplay } from "../../../helpers/diff";
 import { MARKDOWN_LINK_SOURCE } from "../../../helpers/convert";
 import { RecommendationTypeEnum } from "../../../enums";
 import { useSuggestionCardStyles } from "./styles";
@@ -96,46 +96,59 @@ const SuggestionCard = (props: SuggestionPropT) => {
   const isCommentExist = !!commentText;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingButton, setLoadingButton] = useState<"location" | "apply" | "comment" | null>(null);
 
-  const handleShowInDocument = async () => {
+  const locateInDocument = async () => {
     await Word.run(async (context) => {
       try {
         let findRange = await SearchService.findRange(context, changeText);
         if (findRange === null || isTypeDelete) {
           findRange = await SearchService.findRange(context, sourceText);
         }
-        console.log("[handleShowInDocument] findRange", findRange);
+        console.log("[locateInDocument] findRange", findRange);
 
         if (findRange === null) return;
-
         findRange.select();
         await context.sync();
       } catch (error) {
         throw error;
       }
     }).catch((error) => {
-      console.log("Error [handleShowInDocument]: " + error);
+      console.log("Error [locateInDocument]: " + error);
     });
   };
 
+  const handleShowInDocument = async () => {
+    setLoadingButton("location");
+    await locateInDocument().finally(() => setLoadingButton(null));
+  };
+
   const handleApplyChange = async () => {
+    setLoadingButton("apply");
     ApplyService.applyChange({ sourceText, changeText, optionsSupportedCurrentApi, type })
       .then(() => {
         // suggestionsStore.setSuggestionProperty(indexSuggestion, { isApplyChange: true });
       })
       .catch((error) => {
         console.log("Error [handleApplyChange]: " + error);
+      })
+      .finally(() => {
+        setLoadingButton(null);
       });
   };
 
   const handleAddComment = async () => {
     // const searchText = !isApplyChange ? sourceText : changeText;
+    setLoadingButton("comment");
     ApplyService.applyComment({ sourceText, changeText, commentText })
       .then(() => {
         // suggestionsStore.setSuggestionProperty(indexSuggestion, { isApplyComment: true });
       })
       .catch((error) => {
         console.log("Error [handleAddComment]: " + error);
+      })
+      .finally(() => {
+        setLoadingButton(null);
       });
   };
 
@@ -181,7 +194,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
   };
 
   return (
-    <div className={styles.container} onClick={handleShowInDocument}>
+    <div className={styles.container} onClick={locateInDocument}>
       <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -200,7 +213,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
           <div>
             <Text weight="bold">{T.labelChange[locale]}</Text>
             {isTypeAdd ? (
-              <Text className={styles.addText}>{changeText}</Text>
+              <Text className={styles.addText}>{normalizeTabsForDisplay(changeText)}</Text>
             ) : isTypeDelete ? (
               <Text className={styles.deleteText}>{sourceText}</Text>
             ) : (
@@ -218,18 +231,22 @@ const SuggestionCard = (props: SuggestionPropT) => {
 
       <div className={styles.buttonsBlock}>
         <div className={styles.changeButtons}>
-          <IconButton
-            tooltip={T.buttonLocation[locale]}
-            icon={<LocationRipple24Regular color={tokens.colorBrandForeground2} />}
-            onClick={handleShowInDocument}
-            positioning="above-start"
-          />
+          <span onClick={(e) => e.stopPropagation()}>
+            <IconButton
+              tooltip={T.buttonLocation[locale]}
+              icon={<LocationRipple24Regular color={tokens.colorBrandForeground2} />}
+              onClick={handleShowInDocument}
+              positioning="above-start"
+              loading={loadingButton === "location"}
+            />
+          </span>
           {isChangeExist && (
             <IconButton
               tooltip={T.buttonChange[locale]}
               icon={<CheckboxChecked24Regular color={tokens.colorBrandForeground2} />}
               onClick={handleApplyChange}
               positioning="above-start"
+              loading={loadingButton === "apply"}
             />
           )}
           {isCommentExist && (
@@ -239,6 +256,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
               onClick={handleAddComment}
               positioning="above-start"
               disabled={isAccessToRangeInsertComment === false}
+              loading={loadingButton === "comment"}
             />
           )}
         </div>

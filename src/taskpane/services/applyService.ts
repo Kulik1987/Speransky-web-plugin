@@ -32,9 +32,9 @@ export class ApplyService {
         await this.applyChangeDeleteParagraph(searchText);
       } else {
         if (isAccessToRangeInsertTextSemantic) {
-          this.applyChangeSemantic(searchText, editText);
+          await this.applyChangeSemantic(searchText, editText);
         } else if (isAccessToRangeInsertText) {
-          this.applyChangeBasic(searchText, editText);
+          await this.applyChangeBasic(searchText, editText);
         }
       }
     } catch (error) {

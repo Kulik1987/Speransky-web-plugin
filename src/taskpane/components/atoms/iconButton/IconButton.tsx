@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Tooltip } from "@fluentui/react-components";
+import { Button, Spinner, Tooltip } from "@fluentui/react-components";
 import { useIconButtonStyles } from "./styles";
 
 type IconButtonProps = {
@@ -10,6 +10,7 @@ type IconButtonProps = {
   appearance?: "primary" | "transparent";
   size?: "small" | "medium" | "large";
   disabled?: boolean;
+  loading?: boolean;
   className?: string;
 };
 
@@ -21,6 +22,7 @@ const IconButton = ({
   appearance = "transparent",
   size = "small",
   disabled,
+  loading,
   className,
 }: IconButtonProps) => {
   const styles = useIconButtonStyles();
@@ -31,8 +33,8 @@ const IconButton = ({
         appearance={appearance}
         size={size}
         onClick={onClick}
-        icon={icon}
-        disabled={disabled}
+        icon={loading ? <Spinner size="tiny" /> : icon}
+        disabled={disabled || loading}
         className={className}
       />
     </Tooltip>

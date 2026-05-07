@@ -18,7 +18,7 @@ const SelectionLang = () => {
 
   const isVisible =
     authStore.authStatus === AuthStepperEnum.EMAIL ||
-    ((pathname === RoutePathEnum.ROOT) && authStore.authStatus === AuthStepperEnum.ACCESSED);
+    (pathname === RoutePathEnum.ROOT && authStore.authStatus === AuthStepperEnum.ACCESSED);
 
   if (!isVisible) return null;
 
@@ -36,7 +36,7 @@ const SelectionLang = () => {
         size="medium"
         onClick={toggleLocale}
       >
-        {isRU ? "Ru" : "En"}
+        {isRU ? "En" : "Ru"}
       </ToggleButton>
     </div>
   );

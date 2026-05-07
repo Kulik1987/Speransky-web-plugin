@@ -53,7 +53,7 @@ export const useReviewTypeStyles = makeStyles({
     ...shorthands.border("1px", "solid", customColors.border[20]),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     paddingTop: tokens.spacingVerticalS,
-    paddingBottom: tokens.spacingVerticalM,
+    paddingBottom: tokens.spacingVerticalMNudge,
     paddingLeft: tokens.spacingHorizontalMNudge,
     paddingRight: tokens.spacingHorizontalMNudge,
   },
@@ -61,8 +61,8 @@ export const useReviewTypeStyles = makeStyles({
     ...shorthands.borderColor(tokens.colorBrandForeground2),
   },
   itemLabel: {
-    fontSize: tokens.fontSizeBase400,
-    lineHeight: tokens.lineHeightBase400,
+    fontSize: tokens.fontSizeBase300,
+    lineHeight: tokens.lineHeightBase300,
     fontWeight: tokens.fontWeightSemibold,
   },
 });

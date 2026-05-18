@@ -1,7 +1,9 @@
 export * from "./payload-contract-analyze-dto";
+export * from "./payload-contract-analyze-case-dto";
 export * from "./payload-contract-detect-type-dto";
 
 export * from "./response-contract-analyze-dto";
+export * from "./response-contract-analyze-case-dto";
 export * from "./response-contract-detect-type-dto";
 export * from "./response-contract-meta-dto";
 export * from "./response-contract-recommendation-dto";

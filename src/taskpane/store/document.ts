@@ -290,7 +290,7 @@ class DocumentStore {
     if (!this.documentId) return;
 
     try {
-      const response = await api.contract.archive(this.documentId, true, true, true);
+      const response = await api.contract.archiveCase(this.legalCaseId, true, true, true);
       const blob = response.data;
 
       const baseName = this.documentName ? this.documentName.replace(/\.docx$/i, "") : "";

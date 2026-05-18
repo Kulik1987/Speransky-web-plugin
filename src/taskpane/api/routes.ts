@@ -5,6 +5,7 @@ export const CONTRACT_ROUTES = {
   meta: (document_id: string) => `/v1/legal-case/document/${document_id}/meta`,
   recommendation: (document_id: string) => `/v1/legal-case/document/${document_id}/recommendation`,
   archive: (document_id: string) => `/v1/legal-case/document/${document_id}/archive`,
+  archiveCase: (legal_case_id: string) => `/v1/legal-case/${legal_case_id}/archive`,
 } as const;
 
 export const AUTH_CLIENT_EXISTS = "/v1/client";

@@ -110,6 +110,28 @@ const contract = {
       signal: config?.signal,
     });
   },
+
+  /** @description Получение ZIP-архива с результатами анализа кейса */
+  archiveCase: (
+    legal_case_id: string,
+    includeReport?: boolean,
+    includeReview?: boolean,
+    includeProtocol?: boolean,
+    config?: { signal?: AbortSignal }
+  ) => {
+    return axios.get<Blob>(CONTRACT_ROUTES.archiveCase(legal_case_id), {
+      params: {
+        includeReport,
+        includeReview,
+        includeProtocol,
+      },
+      headers: {
+        Accept: "application/json",
+      },
+      responseType: "blob",
+      signal: config?.signal,
+    });
+  },
 };
 
 export default contract;

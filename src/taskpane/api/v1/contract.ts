@@ -1,8 +1,10 @@
 import axios from "../instanceAxios";
 import { CONTRACT_ROUTES } from "../routes";
 import {
+  PayloadContractAnalyzeCaseDto,
   PayloadContractAnalyzeDto,
   PayloadContractDetectTypeDto,
+  ResponseContractAnalyzeCaseDto,
   ResponseContractAnalyzeDto,
   ResponseContractDetectTypeDto,
   ResponseContractMetaDto,
@@ -51,6 +53,32 @@ const contract = {
     });
   },
 
+  /** @description Запуск анализа договора как кейса */
+  analyzeCase: (legal_case_id: string, data: PayloadContractAnalyzeCaseDto) => {
+    const body = new URLSearchParams();
+
+    body.append("llm_provider", data.llm_provider);
+    body.append("source", data.source);
+
+    if (data.selected_party) {
+      body.append("selected_party", data.selected_party);
+    }
+
+    if (data.user_comment) {
+      body.append("user_comment", data.user_comment);
+    }
+
+    if (data.checklist_id) {
+      body.append("checklist_id", data.checklist_id);
+    }
+
+    return axios.post<ResponseContractAnalyzeCaseDto>(CONTRACT_ROUTES.analyzeCase(legal_case_id), body, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+  },
+
   /** @description Извлечение типа и сторон договора */
   meta: (document_id: string) => {
     return axios.get<ResponseContractMetaDto>(CONTRACT_ROUTES.meta(document_id));
@@ -70,6 +98,28 @@ const contract = {
     config?: { signal?: AbortSignal }
   ) => {
     return axios.get<Blob>(CONTRACT_ROUTES.archive(document_id), {
+      params: {
+        includeReport,
+        includeReview,
+        includeProtocol,
+      },
+      headers: {
+        Accept: "application/json",
+      },
+      responseType: "blob",
+      signal: config?.signal,
+    });
+  },
+
+  /** @description Получение ZIP-архива с результатами анализа кейса */
+  archiveCase: (
+    legal_case_id: string,
+    includeReport?: boolean,
+    includeReview?: boolean,
+    includeProtocol?: boolean,
+    config?: { signal?: AbortSignal }
+  ) => {
+    return axios.get<Blob>(CONTRACT_ROUTES.archiveCase(legal_case_id), {
       params: {
         includeReport,
         includeReview,

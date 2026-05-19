@@ -166,16 +166,16 @@ class SuggestionsStore {
       }
 
       const documentId = this.rootStore.documentStore.documentId;
+      const legalCaseId = this.rootStore.documentStore.legalCaseId;
       const party = this.formPartySelected;
       const userComment = this.formCustomInstructions;
       const checklistId = this.checklistId;
 
-      if (!documentId) {
+      if (!documentId || !legalCaseId) {
         throw new Error("Document not uploaded");
       }
 
       const payload = {
-        document_id: documentId,
         llm_provider: this.rootStore.menuStore.providerLLM,
         source: SourceTypeEnums.PLUGIN,
         selected_party: party || undefined,
@@ -183,7 +183,7 @@ class SuggestionsStore {
         checklist_id: checklistId || undefined,
       };
 
-      const response = await api.contract.analyze(payload);
+      const response = await api.contract.analyzeCase(legalCaseId, payload);
 
       console.log("createAnalysisTask [success]", response.data);
 

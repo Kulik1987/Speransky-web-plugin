@@ -33,6 +33,10 @@ const T = {
     ru: "Какое отклонение от правила определяет данную степень риска?",
     en: "What deviation from the rule determines this risk level?",
   },
+  requiredField: {
+    ru: "Заполните хотя бы одну степень риска",
+    en: "Fill in at least one risk level",
+  },
 };
 
 export type RiskTriggers = Record<RiskLevel, string>;
@@ -48,6 +52,7 @@ const RiskLevelField = ({ riskTriggers, onTriggerChange, onTriggerBlur }: RiskLe
   const { locale } = menuStore;
   const styles = useChecklistRuleStyles();
   const [selectedLevel, setSelectedLevel] = React.useState<RiskLevel>(RiskLevel.LOW);
+  const [touched, setTouched] = React.useState(false);
   const fieldRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,10 +62,15 @@ const RiskLevelField = ({ riskTriggers, onTriggerChange, onTriggerBlur }: RiskLe
 
   const currentValue = riskTriggers[selectedLevel];
   const validationError = getMaxLengthError(currentValue, locale);
+  const hasAnyTrigger = Object.values(riskTriggers).some((trigger) => trigger.trim() !== "");
+  const requiredError = touched && !hasAnyTrigger ? T.requiredField[locale] : undefined;
 
   return (
     <Field
       label={T.riskLevel[locale]}
+      required
+      validationState={requiredError ? "error" : "none"}
+      validationMessage={requiredError}
       style={{ "--risk-color": customColors.accent.risk[selectedLevel].text } as React.CSSProperties}
     >
       <TabList
@@ -80,7 +90,7 @@ const RiskLevelField = ({ riskTriggers, onTriggerChange, onTriggerBlur }: RiskLe
       <Field
         ref={fieldRef}
         className={styles.riskTextarea}
-        validationState={validationError ? "error" : "none"}
+        validationState={validationError || requiredError ? "error" : "none"}
         validationMessage={validationError}
       >
         <Textarea
@@ -91,6 +101,7 @@ const RiskLevelField = ({ riskTriggers, onTriggerChange, onTriggerBlur }: RiskLe
             autoResize(event);
           }}
           onBlur={() => {
+            setTouched(true);
             onTriggerBlur(selectedLevel, normalizeFieldValue(currentValue));
           }}
           placeholder={T.riskTriggerPlaceholder[locale]}

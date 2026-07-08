@@ -19,6 +19,7 @@ import type { AccordionToggleData, AccordionToggleEvent } from "@fluentui/react-
 import {
   Add16Filled,
   ArrowLeft16Regular,
+  Dismiss16Regular,
   Save16Regular,
   TriangleDownFilled,
   TriangleRightFilled,
@@ -271,8 +272,12 @@ const Checklist = () => {
     !getMaxLengthError(checklistName, locale, 255) &&
     checklistRules.length !== 0 &&
     checklistRules.every((rule) => {
-      const r = rule as { simple_rule?: string; check_condition?: string };
-      return !!(r.simple_rule || r.check_condition);
+      const r = rule as {
+        simple_rule?: string;
+        check_condition?: string;
+        risk_triggers?: { risk_trigger: string }[] | null;
+      };
+      return !!(r.simple_rule || r.check_condition) && !!r.risk_triggers?.length;
     });
 
   const checklistNameField = (
@@ -291,6 +296,19 @@ const Checklist = () => {
           setChecklistName(normalizeFieldValue(e.target.value));
         }}
         required
+        contentAfter={
+          checklistName
+            ? {
+                children: <Dismiss16Regular />,
+                onClick: () => {
+                  setIsChecklistNameManual(false);
+                  setChecklistName("");
+                },
+                onMouseDown: (e) => e.preventDefault(),
+                className: styles.clearIcon,
+              }
+            : undefined
+        }
         className={mergeClasses(commonStyles.input, checklistName && commonStyles.inputFill)}
       />
     </Field>

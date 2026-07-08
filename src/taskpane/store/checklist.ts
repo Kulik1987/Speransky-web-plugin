@@ -7,6 +7,7 @@ import {
   PayloadChecklistAddRuleDto,
   PayloadChecklistUpdateDto,
 } from "../api/types";
+import { getCopyName } from "../helpers";
 
 export type DraftRule = PayloadChecklistAddRuleDto & { id?: string };
 
@@ -230,9 +231,10 @@ class CheckList {
 
     try {
       const { data } = await this.checklistApi.get(checklistId);
+      const existingNames = this.checklists?.map((c) => c.name) ?? [];
 
       await this.checklistApi.create({
-        name: "Копия - " + data.name,
+        name: getCopyName(data.name, existingNames),
         description: data.description,
         doc_type: data.doc_type,
         party: data.party,

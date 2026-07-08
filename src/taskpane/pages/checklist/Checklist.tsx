@@ -23,7 +23,7 @@ import {
   TriangleDownFilled,
   TriangleRightFilled,
 } from "@fluentui/react-icons";
-import { ALL_PARTIES, ALL_CONTRACT_TYPES } from "../../constants";
+import { getContractTypesForParty, getPartiesForContractType } from "../../constants";
 import { ChecklistCard, ComboboxField } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
@@ -373,7 +373,7 @@ const Checklist = () => {
               <ComboboxField
                 value={docType}
                 onChange={setDocType}
-                options={ALL_CONTRACT_TYPES}
+                options={getContractTypesForParty(party)}
                 placeholder={T.docTypePlaceholder[locale]}
                 maxLength={255}
                 validationMessage={validationDocType}
@@ -382,7 +382,7 @@ const Checklist = () => {
               <ComboboxField
                 value={party}
                 onChange={setParty}
-                options={ALL_PARTIES}
+                options={getPartiesForContractType(docType)}
                 placeholder={T.partyPlaceholder[locale]}
                 maxLength={100}
                 validationMessage={validationParty}

@@ -37,4 +37,8 @@ export const useChecklistStyles = makeStyles({
       fontWeight: tokens.fontWeightSemibold,
     },
   },
+  clearIcon: {
+    ...shorthands.padding("4px"),
+    cursor: "pointer",
+  },
 });

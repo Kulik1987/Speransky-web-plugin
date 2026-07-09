@@ -19,11 +19,12 @@ import type { AccordionToggleData, AccordionToggleEvent } from "@fluentui/react-
 import {
   Add16Filled,
   ArrowLeft16Regular,
+  Dismiss16Regular,
   Save16Regular,
   TriangleDownFilled,
   TriangleRightFilled,
 } from "@fluentui/react-icons";
-import { ALL_PARTIES, ALL_CONTRACT_TYPES } from "../../constants";
+import { getContractTypesForParty, getPartiesForContractType } from "../../constants";
 import { ChecklistCard, ComboboxField } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
@@ -271,8 +272,12 @@ const Checklist = () => {
     !getMaxLengthError(checklistName, locale, 255) &&
     checklistRules.length !== 0 &&
     checklistRules.every((rule) => {
-      const r = rule as { simple_rule?: string; check_condition?: string };
-      return !!(r.simple_rule || r.check_condition);
+      const r = rule as {
+        simple_rule?: string;
+        check_condition?: string;
+        risk_triggers?: { risk_trigger: string }[] | null;
+      };
+      return !!(r.simple_rule || r.check_condition) && !!r.risk_triggers?.length;
     });
 
   const checklistNameField = (
@@ -291,6 +296,19 @@ const Checklist = () => {
           setChecklistName(normalizeFieldValue(e.target.value));
         }}
         required
+        contentAfter={
+          checklistName
+            ? {
+                children: <Dismiss16Regular />,
+                onClick: () => {
+                  setIsChecklistNameManual(false);
+                  setChecklistName("");
+                },
+                onMouseDown: (e) => e.preventDefault(),
+                className: styles.clearIcon,
+              }
+            : undefined
+        }
         className={mergeClasses(commonStyles.input, checklistName && commonStyles.inputFill)}
       />
     </Field>
@@ -373,7 +391,7 @@ const Checklist = () => {
               <ComboboxField
                 value={docType}
                 onChange={setDocType}
-                options={ALL_CONTRACT_TYPES}
+                options={getContractTypesForParty(party)}
                 placeholder={T.docTypePlaceholder[locale]}
                 maxLength={255}
                 validationMessage={validationDocType}
@@ -382,7 +400,7 @@ const Checklist = () => {
               <ComboboxField
                 value={party}
                 onChange={setParty}
-                options={ALL_PARTIES}
+                options={getPartiesForContractType(docType)}
                 placeholder={T.partyPlaceholder[locale]}
                 maxLength={100}
                 validationMessage={validationParty}

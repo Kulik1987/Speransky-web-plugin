@@ -55,6 +55,8 @@ const Summary = () => {
   }, []);
 
   const handleApplyAll = async () => {
+    if (!suggestionsNew) return;
+
     suggestionsNew.forEach(async (itemSuggestion, indexSuggestion) => {
       if (itemSuggestion.isDismiss) return;
 

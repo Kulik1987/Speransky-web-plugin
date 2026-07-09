@@ -35,7 +35,7 @@ class DocumentStore {
     reaction(
       () => this.textContractSource,
       () => {
-        if (this.textContractSource?.length > 0) {
+        if (this.textContractSource && this.textContractSource.length > 0) {
           if (APP_SET_ANONYMIZER) this.buildAnonymizedText();
           this.detectDocumentType();
         }
@@ -50,7 +50,7 @@ class DocumentStore {
   }
 
   setDocumentName = (value: string | null) => {
-    this.documentName = value;
+    this.documentName = value ?? "";
   };
 
   setIsFetchingDetectDocumentType = (value: boolean) => {
@@ -62,7 +62,7 @@ class DocumentStore {
    * */
   buildAnonymizedText = () => {
     const docText = this.textContractSource;
-    if (typeof docText !== "string") return null;
+    if (typeof docText !== "string") return;
     runInAction(() => {
       this.textContractAnonymized = (() => {
         let modText = "";
@@ -287,7 +287,7 @@ class DocumentStore {
    * @description Скачивает архив результатов анализа
    */
   downloadArchive = async () => {
-    if (!this.documentId) return;
+    if (!this.documentId || !this.legalCaseId) return;
 
     try {
       const response = await api.contract.archiveCase(this.legalCaseId, true, true, true);

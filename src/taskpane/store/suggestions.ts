@@ -1,4 +1,5 @@
 /* global process */
+import axios from "axios";
 import { makeAutoObservable, runInAction, reaction } from "mobx";
 import type RootStore from ".";
 import api from "../api/v1";
@@ -65,6 +66,7 @@ class SuggestionsStore {
   };
 
   setSuggestionProperty = (indexSuggestion: number, values: SuggestionPropertyT) => {
+    if (!this.suggestionsNew) return;
     const expand = this.suggestionsNew.map((item, index) => {
       if (index === indexSuggestion) return { ...item, ...values };
       return item;
@@ -75,7 +77,7 @@ class SuggestionsStore {
   /**
    * @description Получает JSON-рекомендации
    */
-  getSuggestions = async (retryCount = 0) => {
+  getSuggestions = async (retryCount = 0): Promise<void> => {
     const MAX_RETRIES = 60; // Количество повторных запросов при ожидании ответа
     const RETRY_DELAY = 20000; // Интервал запроса 20 секунд
 
@@ -133,7 +135,7 @@ class SuggestionsStore {
         this.isAnalysisProcessing = false;
       });
     } catch (error) {
-      const status = error?.response?.status ?? error?.status;
+      const status = axios.isAxiosError(error) ? error.response?.status : (error as { status?: number })?.status;
       const isPolling409 = status === 409 && retryCount < MAX_RETRIES;
 
       if (isPolling409) {
@@ -238,7 +240,7 @@ class SuggestionsStore {
   /**
    * @description Запрашивает тип и стороны договора по document_id
    */
-  requestMetaData = async (documentId: string, retryCount = 0) => {
+  requestMetaData = async (documentId: string, retryCount = 0): Promise<void> => {
     const MAX_RETRIES = 15; // Количество повторных запросов при ожидании ответа
     const RETRY_DELAY = 5000; // Интервал запроса 5 секунд
 
@@ -279,7 +281,7 @@ class SuggestionsStore {
       console.log("requestMetaData [success]", { parties });
       return;
     } catch (error) {
-      const status = error?.response?.status ?? error?.status;
+      const status = axios.isAxiosError(error) ? error.response?.status : (error as { status?: number })?.status;
       const is409Error = status === 409 && retryCount < MAX_RETRIES;
 
       if (is409Error) {

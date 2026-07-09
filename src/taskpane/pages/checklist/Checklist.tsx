@@ -226,6 +226,7 @@ const Checklist = () => {
 
   const handleDelete = (id: string) => setTargetId(id);
   const handleDeleteConfirm = async () => {
+    if (!targetId) return;
     const wasEditing = targetId === checkList.editingChecklistId;
     await checkList.deleteChecklist(targetId);
     setTargetId(null);
@@ -315,8 +316,8 @@ const Checklist = () => {
   );
 
   const filteredChecklists = checklistSearch
-    ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(checklistSearch.toLowerCase()))
-    : checkList.checklists;
+    ? (checkList.checklists ?? []).filter((item) => item.name.toLowerCase().includes(checklistSearch.toLowerCase()))
+    : checkList.checklists ?? [];
 
   if (checkList.isDraftLoading) return <Spinner />;
 

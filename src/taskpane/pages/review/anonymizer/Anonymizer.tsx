@@ -23,7 +23,7 @@ const Anonymizer = () => {
 
   const handleAddAnonymizedText = async () => {
     const { textContractAnonymized } = documentStore;
-    if (typeof textContractAnonymized !== "string") return null;
+    if (typeof textContractAnonymized !== "string") return;
     await Word.run(async (context) => {
       const body = context.document.body;
       // Создаем новый Range в конце документа для прокрутки к концу

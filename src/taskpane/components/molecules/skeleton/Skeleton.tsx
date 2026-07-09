@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { useSkeletonStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
 
-const ItemSkeleton = ({ title }) => {
+const ItemSkeleton = ({ title }: { title: string }) => {
   const styles = useSkeletonStyles();
   const commonStyles = useCommonStyles();
 

@@ -39,7 +39,7 @@ export class ApplyService {
       }
     } catch (error) {
       console.log("error", error);
-      return null;
+      return;
     }
   }
 
@@ -164,6 +164,10 @@ export class ApplyService {
         let findRange = await SearchService.findRange(context, changeText);
         if (findRange === null) {
           findRange = await SearchService.findRange(context, sourceText);
+          if (findRange === null) {
+            console.log("[applyComment] range not found");
+            return;
+          }
         }
 
         const comments = findRange.getComments();

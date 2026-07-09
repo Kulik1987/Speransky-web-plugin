@@ -90,11 +90,15 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         size="large"
         placeholder={T.docTypePlaceholder[locale]}
         onOptionSelect={(_, data) => setDocType(data.optionValue ?? "")}
-        value={docType}
+        value={docType ?? undefined}
         disabled={!suggestionsStore.documentType}
-        className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
+        className={mergeClasses(commonStyles.dropdown, docType ? commonStyles.inputFill : undefined)}
       >
-        <Option key={suggestionsStore.documentType} value={suggestionsStore.documentType}>
+        <Option
+          key={suggestionsStore.documentType}
+          value={suggestionsStore.documentType ?? undefined}
+          text={suggestionsStore.documentType ?? ""}
+        >
           {suggestionsStore.documentType}
         </Option>
       </Dropdown>
@@ -105,12 +109,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         isFilled={isPartySelected}
       />
 
-      <Accordion
-        collapsible
-        className={commonStyles.accordion}
-        onToggle={handleToggle}
-        openItems={isOpen ? [1] : []}
-      >
+      <Accordion collapsible className={commonStyles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
         <AccordionItem className={commonStyles.accordionItem} value={1}>
           <AccordionHeader
             className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
@@ -131,7 +130,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
             )}
           </AccordionPanel>
 
-          {(actionIcon || actionHandleClick) && isOpen && (
+          {actionHandleClick && isOpen && (
             <IconButton
               tooltip={T.btnCreateChecklist[locale]}
               icon={actionIcon || <Add16Filled />}

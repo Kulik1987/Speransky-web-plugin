@@ -39,7 +39,7 @@ const Modal = (props: ModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={(_, data) => !data.open && onClose()}>
-      <DialogSurface className={mergeClasses(styles.container, children && styles.withContent)}>
+      <DialogSurface className={mergeClasses(styles.container, children ? styles.withContent : undefined)}>
         <DialogBody className={mergeClasses(styles.body, children ? styles.bodyGapSmall : styles.bodyGapLarge)}>
           <DialogTitle className={commonStyles.pageTitle}>{title}</DialogTitle>
           {children && <DialogContent>{children}</DialogContent>}

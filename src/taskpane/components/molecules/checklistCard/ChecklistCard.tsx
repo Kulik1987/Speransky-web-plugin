@@ -55,11 +55,11 @@ const ChecklistCard = (props: ChecklistCardProps) => {
   const { base, suffix } = splitChecklistCopySuffix(name);
 
   return (
-    <div className={mergeClasses(styles.card, selected && styles.cardSelected)} onClick={() => onSelect(id)}>
+    <div className={mergeClasses(styles.card, selected && styles.cardSelected)} onClick={() => onSelect?.(id)}>
       {isRadio && (
         <Radio
           checked={selected}
-          onChange={() => onSelect(id)}
+          onChange={() => onSelect?.(id)}
           className={mergeClasses(commonStyles.radio, styles.radio)}
         />
       )}

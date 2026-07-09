@@ -1,3 +1,4 @@
+import axios from "axios";
 import { makeAutoObservable, runInAction, autorun } from "mobx";
 import type RootStore from ".";
 import api from "../api/v1";
@@ -177,9 +178,9 @@ class AuthStore {
     } catch (error) {
       console.error("clientCheck", error);
 
-      const status = error?.response?.status;
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
       if (status === 404) {
-        throw { type: "NOT_FOUND", message: error.message };
+        throw { type: "NOT_FOUND", message: axios.isAxiosError(error) ? error.message : String(error) };
       } else {
         this.setAuthStatus(AuthStepperEnum.ERROR);
         throw error;

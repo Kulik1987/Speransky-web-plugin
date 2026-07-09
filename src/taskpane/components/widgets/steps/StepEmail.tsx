@@ -94,7 +94,7 @@ const StepEmail = () => {
       setError("");
       await authStore.runSignIn(email);
     } catch (error) {
-      if (error?.type === "NOT_FOUND") {
+      if ((error as { type?: string })?.type === "NOT_FOUND") {
         setError(T.errorNotFound[locale]);
       }
     } finally {

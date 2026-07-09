@@ -3,7 +3,7 @@ import { Divider, Text, ToggleButton } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
 import { ProviderLLMEnums } from "../../../enums";
- 
+import { useSelectionModelAiStyles } from "./styles";
 
 const T = {
   dividerLang: {
@@ -14,24 +14,18 @@ const T = {
 
 const SelectionModelAi = () => {
   const { menuStore } = useStores();
-  const { locale, setLocale, providerLLM, setProviderLLM } = menuStore;
+  const { locale, providerLLM, setProviderLLM } = menuStore;
+  const styles = useSelectionModelAiStyles();
 
   return (
-    <div
-      style={{
-        //border: "1px solid red"
-        display: "flex",
-        gap: "16px",
-        flexDirection: "column",
-      }}
-    >
+    <div className={styles.container}>
       <Divider alignContent="center" inset>
         <Text size={300} weight="medium">
           {T.dividerLang[locale]}
         </Text>
       </Divider>
 
-      <div style={{ display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap" }}>
+      <div className={styles.toggleBtnBlock}>
         <ToggleButton
           checked={providerLLM === ProviderLLMEnums.OPEN_AI}
           onClick={() => setProviderLLM(ProviderLLMEnums.OPEN_AI)}

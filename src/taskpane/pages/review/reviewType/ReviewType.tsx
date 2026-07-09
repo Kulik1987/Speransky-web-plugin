@@ -83,6 +83,7 @@ const ReviewType = () => {
 
   const handleDelete = (id: string) => setTargetId(id);
   const handleDeleteConfirm = async () => {
+    if (!targetId) return;
     await checkList.deleteChecklist(targetId);
     setTargetId(null);
   };
@@ -102,8 +103,8 @@ const ReviewType = () => {
   );
 
   const filteredChecklists = searchQuery
-    ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : checkList.checklists;
+    ? (checkList.checklists ?? []).filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : checkList.checklists ?? [];
 
   const reviewCustomChecklists = checkList.hasChecklists
     ? filteredChecklists.map((item) => (

@@ -2,10 +2,8 @@ import axios from "../instanceAxios";
 import { CONTRACT_ROUTES } from "../routes";
 import {
   PayloadContractAnalyzeCaseDto,
-  PayloadContractAnalyzeDto,
   PayloadContractDetectTypeDto,
   ResponseContractAnalyzeCaseDto,
-  ResponseContractAnalyzeDto,
   ResponseContractDetectTypeDto,
   ResponseContractMetaDto,
   ResponseContractRecommendationDto,
@@ -22,33 +20,6 @@ const contract = {
     return axios.post<ResponseContractDetectTypeDto>(CONTRACT_ROUTES.detectType, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
-      },
-    });
-  },
-
-  /** @description Запуск анализа договора */
-  analyze: (data: PayloadContractAnalyzeDto) => {
-    const body = new URLSearchParams();
-
-    body.append("document_id", data.document_id);
-    body.append("llm_provider", data.llm_provider);
-    body.append("source", data.source);
-
-    if (data.selected_party) {
-      body.append("selected_party", data.selected_party);
-    }
-
-    if (data.user_comment) {
-      body.append("user_comment", data.user_comment);
-    }
-
-    if (data.checklist_id) {
-      body.append("checklist_id", data.checklist_id);
-    }
-
-    return axios.post<ResponseContractAnalyzeDto>(CONTRACT_ROUTES.analyze, body, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
       },
     });
   },

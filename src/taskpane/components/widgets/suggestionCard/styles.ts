@@ -12,9 +12,17 @@ export const useSuggestionCardStyles = makeStyles({
     ...shorthands.padding(tokens.spacingVerticalS),
     paddingBottom: tokens.spacingVerticalXXL,
   },
+  topBlock: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
   flagBlock: {
     display: "flex",
     ...shorthands.gap(tokens.spacingHorizontalMNudge),
+  },
+  checklistIcon: {
+    ...shorthands.padding(0, "5px"),
+    cursor: "default",
   },
   changesBlock: {
     display: "flex",

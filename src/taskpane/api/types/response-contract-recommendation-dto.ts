@@ -10,6 +10,8 @@ export interface ResponseContractRecommendationDto {
   };
   columns: string[];
   risks: RecommendationRisks[];
+  checklist_id: string | null;
+  checklist_name: string | null;
 }
 
 export interface RecommendationRisks {

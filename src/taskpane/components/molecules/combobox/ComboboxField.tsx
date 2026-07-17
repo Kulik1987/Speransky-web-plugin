@@ -46,6 +46,9 @@ const ComboboxField = ({ value, onChange, options, placeholder, maxLength, valid
             : undefined
         }
         onOptionSelect={(_, data) => {
+          if (data.optionValue === undefined) {
+            return;
+          }
           onChange(data.optionText ?? "");
           setSearch("");
         }}

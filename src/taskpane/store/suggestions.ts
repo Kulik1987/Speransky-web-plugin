@@ -32,6 +32,8 @@ class SuggestionsStore {
   suggestionsNew: SuggestionT[] | null = null;
   suggestionsError: string | null = null;
   isAnalysisProcessing: boolean = false;
+  resultChecklistId: string | null = null;
+  resultChecklistName: string | null = null;
 
   // Кастомная инструкция пользователя
   formCustomInstructions: string | null = null;
@@ -132,6 +134,8 @@ class SuggestionsStore {
 
       runInAction(() => {
         this.suggestionsNew = response.data.risks;
+        this.resultChecklistId = response.data.checklist_id;
+        this.resultChecklistName = response.data.checklist_name;
         this.isAnalysisProcessing = false;
       });
     } catch (error) {
@@ -310,6 +314,8 @@ class SuggestionsStore {
   clearSuggestions = () => {
     this.suggestionsNew = null;
     this.suggestionsError = null;
+    this.resultChecklistId = null;
+    this.resultChecklistName = null;
   };
 
   resetStore = () => {
@@ -324,6 +330,8 @@ class SuggestionsStore {
       this.isAnalysisProcessing = false;
       this.formCustomInstructions = "";
       this.checklistId = null;
+      this.resultChecklistId = null;
+      this.resultChecklistName = null;
     });
   };
 }

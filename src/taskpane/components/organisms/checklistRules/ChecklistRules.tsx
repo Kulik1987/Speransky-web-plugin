@@ -222,7 +222,7 @@ const ChecklistRules = ({ index, ruleType, initialValue, onChange, onRemove }: C
 
               <IconButton
                 tooltip={T.deleteRuleTitle[locale]}
-                icon={<Delete24Regular color={customColors.accent.delete} />}
+                icon={<Delete24Regular color={customColors.text.primary[65]} />}
                 onClick={handleDeleteRule}
                 positioning="above-end"
                 className={styles.btnDelete}

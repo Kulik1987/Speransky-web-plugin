@@ -13,7 +13,7 @@ export const customColors = {
   border: {
     10: "#5E5E5E",
     20: "#CCD0D6",
-    30: "#E4E8ED",
+    30: "#CED5DF",
     40: "#465A6E1A",
   },
   bg: {
@@ -26,6 +26,7 @@ export const customColors = {
     delete: "#C50F1F",
     removeText: "#EC6100",
     copy: "#0F6CBD",
+    note: "#124796",
     rule: {
       standard: "#F6D2B5",
       advanced: "#B9EBA5",

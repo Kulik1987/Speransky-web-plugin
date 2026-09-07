@@ -4,3 +4,4 @@ export * from "./checkbox";
 export * from "./modal";
 export * from "./iconButton";
 export * from "./searchBox";
+export * from "./highlightedText";

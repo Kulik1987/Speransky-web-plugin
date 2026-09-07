@@ -154,6 +154,7 @@ const ReviewType = () => {
           createdAt={item.created_at}
           isRadio
           selected={selectedChecklist === item.id}
+          searchText={searchQuery}
           onSelect={setSelectedChecklist}
           onEdit={handleEdit}
           onDuplicate={handleDuplicate}

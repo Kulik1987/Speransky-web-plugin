@@ -16,6 +16,7 @@ import { useStores } from "../../../store";
 import { useChecklistCardStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
 import { splitChecklistCopySuffix } from "../../../helpers";
+import { HighlightedText } from "../../atoms";
 
 const T = {
   edit: {
@@ -38,6 +39,7 @@ type ChecklistCardProps = {
   createdAt: string;
   isRadio?: boolean;
   selected?: boolean;
+  searchText?: string;
   onSelect?: (id: string) => void;
   onEdit: (id: string) => void;
   onDuplicate: (id: string) => void;
@@ -45,7 +47,7 @@ type ChecklistCardProps = {
 };
 
 const ChecklistCard = (props: ChecklistCardProps) => {
-  const { id, name, createdAt, isRadio = false, selected, onSelect, onEdit, onDuplicate, onDelete } = props;
+  const { id, name, createdAt, isRadio = false, selected, searchText, onSelect, onEdit, onDuplicate, onDelete } = props;
   const { menuStore } = useStores();
   const { locale } = menuStore;
   const styles = useChecklistCardStyles();
@@ -65,7 +67,7 @@ const ChecklistCard = (props: ChecklistCardProps) => {
       )}
       <div className={styles.info}>
         <Text className={styles.name}>
-          {base}
+          <HighlightedText sourceText={base} searchText={searchText ?? ""} />
           <span className={styles.nameCopyPrefix}>{suffix}</span>
         </Text>
         <Text className={styles.date}>{formattedDate}</Text>

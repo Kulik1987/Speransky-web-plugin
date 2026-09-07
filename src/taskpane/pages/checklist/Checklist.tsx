@@ -517,6 +517,7 @@ const Checklist = () => {
                     name={item.name}
                     createdAt={item.created_at}
                     selected={selectedChecklist === item.id}
+                    searchText={checklistSearch}
                     onSelect={setSelectedChecklist}
                     onEdit={handleEdit}
                     onDuplicate={handleDuplicate}

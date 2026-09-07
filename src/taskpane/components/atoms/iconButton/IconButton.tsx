@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Spinner, Tooltip } from "@fluentui/react-components";
-import { useIconButtonStyles } from "./styles";
+import { useCommonStyles } from "../../../theme/commonStyles";
 
 type IconButtonProps = {
   tooltip: string;
@@ -25,10 +25,14 @@ const IconButton = ({
   loading,
   className,
 }: IconButtonProps) => {
-  const styles = useIconButtonStyles();
+  const commonStyles = useCommonStyles();
 
   return (
-    <Tooltip content={{ children: tooltip, className: styles.tooltip }} relationship="label" positioning={positioning}>
+    <Tooltip
+      content={{ children: tooltip, className: commonStyles.tooltip }}
+      relationship="label"
+      positioning={positioning}
+    >
       <Button
         appearance={appearance}
         size={size}

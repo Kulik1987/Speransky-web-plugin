@@ -1,13 +1,14 @@
 import React, { useEffect } from "react";
 import { useStores } from "../../store";
 import { SuggestionCard } from "../../components/widgets";
-import { Button, Tooltip } from "@fluentui/react-components";
+import { Button, mergeClasses, Tooltip } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { ApplyService } from "../../services/applyService";
 import { ItemSkeleton } from "../../components/molecules";
 import { useSummaryStyles } from "./styles";
 import { RecommendationTypeEnum, SuggestionsErrorTagEnum } from "../../enums";
 import { ErrorText } from "../../components/atoms";
+import { useCommonStyles } from "../../theme/commonStyles";
 
 const T = {
   waitingNotification: {
@@ -46,6 +47,7 @@ const Summary = () => {
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
   const styles = useSummaryStyles();
+  const commonStyles = useCommonStyles();
 
   const { isSuggestionExist, suggestionsNew, suggestionsError, suggestionsErrorMessage, isAnalysisProcessing } =
     suggestionsStore;
@@ -141,7 +143,10 @@ const Summary = () => {
           </Button>
         )}
         <Tooltip
-          content={{ children: T.tooltipDownloadArchive[locale], className: styles.tooltip }}
+          content={{
+            children: T.tooltipDownloadArchive[locale],
+            className: mergeClasses(commonStyles.tooltip, commonStyles.tooltipWide),
+          }}
           relationship="description"
           positioning="above"
         >

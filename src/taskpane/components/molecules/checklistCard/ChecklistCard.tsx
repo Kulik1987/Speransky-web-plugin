@@ -8,6 +8,7 @@ import {
   MenuTrigger,
   Radio,
   Text,
+  Tooltip,
   mergeClasses,
 } from "@fluentui/react-components";
 import { MoreVertical24Regular } from "@fluentui/react-icons";
@@ -66,10 +67,16 @@ const ChecklistCard = (props: ChecklistCardProps) => {
         />
       )}
       <div className={styles.info}>
-        <Text className={styles.name}>
-          <HighlightedText sourceText={base} searchText={searchText ?? ""} />
-          <span className={styles.nameCopyPrefix}>{suffix}</span>
-        </Text>
+        <Tooltip
+          content={{ children: name, className: mergeClasses(commonStyles.tooltip, commonStyles.tooltipWide) }}
+          relationship="description"
+          positioning="above-start"
+        >
+          <Text className={styles.name}>
+            <HighlightedText sourceText={base} searchText={searchText ?? ""} />
+            <span className={styles.nameCopyPrefix}>{suffix}</span>
+          </Text>
+        </Tooltip>
         <Text className={styles.date}>{formattedDate}</Text>
       </div>
       <Menu>

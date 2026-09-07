@@ -45,8 +45,8 @@ const T = {
     en: "Determine contract type and parties",
   },
   checklistTypeMismatch: {
-    ru: "Чек-лист не соответствует типу договора",
-    en: "The checklist does not match the contract type",
+    ru: "Чек-лист не соответствует типу",
+    en: "The checklist does not match type",
   },
 };
 
@@ -198,7 +198,9 @@ const ReviewType = () => {
         onSearchChange={setSearchQuery}
         onStartReview={handleStartAnalysis}
         actionHandleClick={selectedTab === ReviewTypesEnums.CUSTOM ? navigateToChecklistPage : undefined}
-        warningMessage={isChecklistTypeMismatch ? T.checklistTypeMismatch[locale] : undefined}
+        warningMessage={
+          isChecklistTypeMismatch ? `${T.checklistTypeMismatch[locale]} «${suggestionsStore.documentType}»` : undefined
+        }
       />
     </div>
   );

@@ -66,12 +66,22 @@ type ReviewTypeBaseProps = {
   actionIcon?: ReactElement;
   actionHandleClick?: () => void;
   onStartReview: () => void;
+  warningMessage?: string;
 };
 
 const iconStyle = { width: "12px", height: "12px", padding: "5px" };
 
 const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
-  const { type, listContent, searchQuery = "", onSearchChange, actionIcon, actionHandleClick, onStartReview } = props;
+  const {
+    type,
+    listContent,
+    searchQuery = "",
+    onSearchChange,
+    actionIcon,
+    actionHandleClick,
+    onStartReview,
+    warningMessage,
+  } = props;
   const { menuStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
   const commonStyles = useCommonStyles();
@@ -142,6 +152,8 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
           )}
         </AccordionItem>
       </Accordion>
+
+      {warningMessage && <span className={commonStyles.error}>{warningMessage}</span>}
 
       <Button appearance="primary" size="large" disabled={!isPartySelected || !docType} onClick={onStartReview}>
         {T.btnStartReview[locale]}

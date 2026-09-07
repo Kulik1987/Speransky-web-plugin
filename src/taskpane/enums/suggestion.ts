@@ -32,6 +32,17 @@ export enum SourceTypeEnums {
   "PLUGIN" = "plugin",
 }
 
+export enum AnalysisErrorCodeEnum {
+  "CHECKLIST_CONTRACT_TYPE_MISMATCH" = "CHECKLIST_CONTRACT_TYPE_MISMATCH",
+}
+
+export enum SuggestionsErrorTagEnum {
+  "TIMEOUT_ERROR" = "timeout-error",
+  "SERVER_ERROR" = "server-error",
+  "FAILED_REQUEST" = "failed-request",
+  "CHECKLIST_CONTRACT_TYPE_MISMATCH" = "checklist-contract-type-mismatch",
+}
+
 export enum WebUrlEnums {
   "WEB_URL_LOCAL" = "http://localhost:5173",
   "WEB_URL_TEST" = "https://app-test.speransky.legal",

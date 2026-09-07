@@ -3,3 +3,4 @@ export * from "./diff";
 export * from "./validation";
 export * from "./resize";
 export * from "./checklistCopyName";
+export * from "./apiError";

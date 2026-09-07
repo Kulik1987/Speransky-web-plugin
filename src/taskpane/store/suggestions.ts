@@ -6,7 +6,8 @@ import api from "../api/v1";
 import { mockContractType, mockParties } from "./mock/mockParties";
 import mockSuggestions from "./mock/mockSuggestions_1";
 import { ContractPartieData, RecommendationRisks } from "../api/types";
-import { SourceTypeEnums } from "../enums";
+import { AnalysisErrorCodeEnum, SourceTypeEnums, SuggestionsErrorTagEnum } from "../enums";
+import { getApiErrorDetail, isServerNetworkError } from "../helpers";
 
 const APP_SET_MOCK = process.env.APP_SET_MOCK === "true";
 
@@ -30,7 +31,8 @@ class SuggestionsStore {
 
   // Анализ и рекомендации
   suggestionsNew: SuggestionT[] | null = null;
-  suggestionsError: string | null = null;
+  suggestionsError: SuggestionsErrorTagEnum | null = null;
+  suggestionsErrorMessage: string | null = null;
   isAnalysisProcessing: boolean = false;
   resultChecklistId: string | null = null;
   resultChecklistName: string | null = null;
@@ -124,7 +126,7 @@ class SuggestionsStore {
         } else {
           runInAction(() => {
             this.suggestionsNew = null;
-            this.suggestionsError = "timeout-error";
+            this.suggestionsError = SuggestionsErrorTagEnum.TIMEOUT_ERROR;
             this.isAnalysisProcessing = false;
           });
         }
@@ -150,7 +152,9 @@ class SuggestionsStore {
 
       runInAction(() => {
         this.suggestionsNew = null;
-        this.suggestionsError = "failed-request";
+        this.suggestionsError = isServerNetworkError(error)
+          ? SuggestionsErrorTagEnum.SERVER_ERROR
+          : SuggestionsErrorTagEnum.FAILED_REQUEST;
         this.isAnalysisProcessing = false;
       });
     }
@@ -197,9 +201,22 @@ class SuggestionsStore {
     } catch (error) {
       console.error("createAnalysisTask [error]", error);
 
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      const detail = getApiErrorDetail(error);
+      const isChecklistMismatch =
+        status === 409 && detail?.code === AnalysisErrorCodeEnum.CHECKLIST_CONTRACT_TYPE_MISMATCH;
+
+      let errorTag = SuggestionsErrorTagEnum.FAILED_REQUEST;
+      if (isChecklistMismatch) {
+        errorTag = SuggestionsErrorTagEnum.CHECKLIST_CONTRACT_TYPE_MISMATCH;
+      } else if (isServerNetworkError(error)) {
+        errorTag = SuggestionsErrorTagEnum.SERVER_ERROR;
+      }
+
       runInAction(() => {
         this.suggestionsNew = null;
-        this.suggestionsError = "failed-request";
+        this.suggestionsError = errorTag;
+        this.suggestionsErrorMessage = isChecklistMismatch ? detail?.message ?? null : null;
         this.isAnalysisProcessing = false;
       });
 
@@ -314,6 +331,7 @@ class SuggestionsStore {
   clearSuggestions = () => {
     this.suggestionsNew = null;
     this.suggestionsError = null;
+    this.suggestionsErrorMessage = null;
     this.resultChecklistId = null;
     this.resultChecklistName = null;
   };
@@ -327,6 +345,7 @@ class SuggestionsStore {
       this.isMetaDataProcessing = false;
       this.suggestionsNew = null;
       this.suggestionsError = null;
+      this.suggestionsErrorMessage = null;
       this.isAnalysisProcessing = false;
       this.formCustomInstructions = "";
       this.checklistId = null;

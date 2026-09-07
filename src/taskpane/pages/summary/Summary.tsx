@@ -6,7 +6,7 @@ import { observer } from "mobx-react";
 import { ApplyService } from "../../services/applyService";
 import { ItemSkeleton } from "../../components/molecules";
 import { useSummaryStyles } from "./styles";
-import { RecommendationTypeEnum } from "../../enums";
+import { RecommendationTypeEnum, SuggestionsErrorTagEnum } from "../../enums";
 import { ErrorText } from "../../components/atoms";
 
 const T = {
@@ -30,6 +30,14 @@ const T = {
     ru: "Ошибка получения рекомендаций.\n Попробуйте ещё раз.",
     en: "Error getting recommendations.\n Please try again.",
   },
+  errorDescriptionServer: {
+    ru: "Ошибка сервера.\n Попробуйте повторить позже.",
+    en: "Server error.\n Please try again later.",
+  },
+  errorDescriptionTimeout: {
+    ru: "Превышено время ожидания результатов.\n Попробуйте запустить анализ ещё раз.",
+    en: "The wait for results has timed out.\n Please try running the analysis again.",
+  },
 };
 
 const Summary = () => {
@@ -39,7 +47,8 @@ const Summary = () => {
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
   const styles = useSummaryStyles();
 
-  const { isSuggestionExist, suggestionsNew, suggestionsError, isAnalysisProcessing } = suggestionsStore;
+  const { isSuggestionExist, suggestionsNew, suggestionsError, suggestionsErrorMessage, isAnalysisProcessing } =
+    suggestionsStore;
   const isError = Boolean(suggestionsError);
 
   useEffect(() => {
@@ -98,8 +107,21 @@ const Summary = () => {
     await documentStore.downloadArchive();
   };
 
+  const getErrorText = () => {
+    if (suggestionsErrorMessage) return suggestionsErrorMessage;
+
+    switch (suggestionsError) {
+      case SuggestionsErrorTagEnum.TIMEOUT_ERROR:
+        return T.errorDescriptionTimeout[locale];
+      case SuggestionsErrorTagEnum.SERVER_ERROR:
+        return T.errorDescriptionServer[locale];
+      default:
+        return T.errorDescription[locale];
+    }
+  };
+
   if (isError || (!isAnalysisProcessing && !isSuggestionExist)) {
-    return <ErrorText error={T.errorDescription[locale]} />;
+    return <ErrorText error={getErrorText()} />;
   }
 
   if (isAnalysisProcessing) {

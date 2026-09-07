@@ -36,6 +36,10 @@ export enum AnalysisErrorCodeEnum {
   "CHECKLIST_CONTRACT_TYPE_MISMATCH" = "CHECKLIST_CONTRACT_TYPE_MISMATCH",
 }
 
+export enum ChecklistErrorCodeEnum {
+  "IN_USE_BY_RUNNING_ANALYSIS" = "CHECKLIST_IN_USE_BY_RUNNING_ANALYSIS",
+}
+
 export enum SuggestionsErrorTagEnum {
   "TIMEOUT_ERROR" = "timeout-error",
   "SERVER_ERROR" = "server-error",

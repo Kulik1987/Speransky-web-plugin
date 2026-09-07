@@ -19,3 +19,15 @@ export const getMaxLengthError = (value: string, locale: "ru" | "en", maxLength:
   if (value.length < maxLength) return undefined;
   return locale === "ru" ? `Не более ${maxLength} символов` : `Maximum ${maxLength} characters`;
 };
+
+/**
+ * @description функция возвращает сообщение об ошибке, если значение совпадает с одним из уже существующих
+ */
+export const getDuplicateNameError = (
+  value: string,
+  existingNames: string[],
+  locale: "ru" | "en"
+): string | undefined => {
+  if (!value || !existingNames.includes(value)) return undefined;
+  return locale === "ru" ? "Чек-лист с таким названием уже существует" : "A checklist with this name already exists";
+};

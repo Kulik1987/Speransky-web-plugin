@@ -28,9 +28,25 @@ const T = {
     ru: "Удалить",
     en: "Delete",
   },
+  deleteBlockedTitle: {
+    ru: "Не удалось удалить чек-лист",
+    en: "Failed to delete checklist",
+  },
+  deleteBlockedSubtitle: {
+    ru: "Чек-лист используется в запущенном анализе. Дождитесь его завершения.",
+    en: "The checklist is being used in a running analysis. Please wait for it to finish.",
+  },
+  deleteBlockedConfirm: {
+    ru: "Повторить",
+    en: "Retry",
+  },
   loadingTitle: {
     ru: "Определяем тип и стороны договора",
     en: "Determine contract type and parties",
+  },
+  checklistTypeMismatch: {
+    ru: "Чек-лист не соответствует типу",
+    en: "The checklist does not match type",
   },
 };
 
@@ -53,6 +69,7 @@ const ReviewType = () => {
 
   const [targetId, setTargetId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteBlocked, setDeleteBlocked] = useState<{ id: string; reason: "in_use" | "error" } | null>(null);
 
   useEffect(() => {
     checkList.getChecklists();
@@ -81,11 +98,26 @@ const ReviewType = () => {
     await checkList.duplicateChecklist(id);
   };
 
+  const attemptDelete = async (id: string) => {
+    const result = await checkList.deleteChecklist(id);
+    if (result === "in_use" || result === "error") {
+      setDeleteBlocked({ id, reason: result });
+      return;
+    }
+    setDeleteBlocked(null);
+  };
+
   const handleDelete = (id: string) => setTargetId(id);
   const handleDeleteConfirm = async () => {
     if (!targetId) return;
-    await checkList.deleteChecklist(targetId);
+    const id = targetId;
     setTargetId(null);
+    await attemptDelete(id);
+  };
+
+  const handleRetryDelete = async () => {
+    if (!deleteBlocked) return;
+    await attemptDelete(deleteBlocked.id);
   };
 
   const filteredContractTypes = searchQuery
@@ -106,6 +138,13 @@ const ReviewType = () => {
     ? (checkList.checklists ?? []).filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : checkList.checklists ?? [];
 
+  const selectedChecklistData = checkList.checklists?.find((item) => item.id === selectedChecklist);
+  const isChecklistTypeMismatch =
+    selectedTab === ReviewTypesEnums.CUSTOM &&
+    !!selectedChecklistData &&
+    !!suggestionsStore.documentType &&
+    selectedChecklistData.doc_type !== suggestionsStore.documentType;
+
   const reviewCustomChecklists = checkList.hasChecklists
     ? filteredChecklists.map((item) => (
         <ChecklistCard
@@ -115,6 +154,7 @@ const ReviewType = () => {
           createdAt={item.created_at}
           isRadio
           selected={selectedChecklist === item.id}
+          searchText={searchQuery}
           onSelect={setSelectedChecklist}
           onEdit={handleEdit}
           onDuplicate={handleDuplicate}
@@ -133,6 +173,15 @@ const ReviewType = () => {
         onAction={handleDeleteConfirm}
       />
 
+      <Modal
+        open={deleteBlocked !== null}
+        onClose={() => setDeleteBlocked(null)}
+        title={T.deleteBlockedTitle[locale]}
+        actionButtonTitle={T.deleteBlockedConfirm[locale]}
+        onAction={handleRetryDelete}
+        children={deleteBlocked?.reason === "in_use" ? <span>{T.deleteBlockedSubtitle[locale]}</span> : undefined}
+      />
+
       <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} className={styles.tablist}>
         <Tab value={ReviewTypesEnums.GENERAL} className={styles.tab}>
           {T.titleGeneral[locale]}
@@ -149,6 +198,9 @@ const ReviewType = () => {
         onSearchChange={setSearchQuery}
         onStartReview={handleStartAnalysis}
         actionHandleClick={selectedTab === ReviewTypesEnums.CUSTOM ? navigateToChecklistPage : undefined}
+        warningMessage={
+          isChecklistTypeMismatch ? `${T.checklistTypeMismatch[locale]} «${suggestionsStore.documentType}»` : undefined
+        }
       />
     </div>
   );

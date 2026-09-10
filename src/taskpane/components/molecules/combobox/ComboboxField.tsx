@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { Combobox, Field, mergeClasses, Option } from "@fluentui/react-components";
+import { Dismiss16Regular } from "@fluentui/react-icons";
 import { useCommonStyles } from "../../../theme/commonStyles";
 import { sanitizeFieldValue } from "../../../helpers";
 import { useComboboxFieldStyles } from "./styles";
@@ -21,6 +22,11 @@ const ComboboxField = ({ value, onChange, options, placeholder, maxLength, valid
 
   const filtered = search ? options.filter((o) => o.toLowerCase().includes(search.toLowerCase())) : options;
 
+  const handleClear = () => {
+    onChange("");
+    setSearch("");
+  };
+
   return (
     <Field validationState={validationMessage ? "error" : "none"} validationMessage={validationMessage}>
       <Combobox
@@ -28,7 +34,21 @@ const ComboboxField = ({ value, onChange, options, placeholder, maxLength, valid
         size="large"
         placeholder={placeholder}
         value={value}
+        selectedOptions={value ? [value] : []}
+        expandIcon={
+          value
+            ? {
+                children: <Dismiss16Regular />,
+                onClick: handleClear,
+                onMouseDown: (e) => e.preventDefault(),
+                className: styles.clearIcon,
+              }
+            : undefined
+        }
         onOptionSelect={(_, data) => {
+          if (data.optionValue === undefined) {
+            return;
+          }
           onChange(data.optionText ?? "");
           setSearch("");
         }}

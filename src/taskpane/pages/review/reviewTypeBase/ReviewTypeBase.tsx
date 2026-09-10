@@ -66,12 +66,22 @@ type ReviewTypeBaseProps = {
   actionIcon?: ReactElement;
   actionHandleClick?: () => void;
   onStartReview: () => void;
+  warningMessage?: string;
 };
 
 const iconStyle = { width: "12px", height: "12px", padding: "5px" };
 
 const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
-  const { type, listContent, searchQuery = "", onSearchChange, actionIcon, actionHandleClick, onStartReview } = props;
+  const {
+    type,
+    listContent,
+    searchQuery = "",
+    onSearchChange,
+    actionIcon,
+    actionHandleClick,
+    onStartReview,
+    warningMessage,
+  } = props;
   const { menuStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
   const commonStyles = useCommonStyles();
@@ -90,11 +100,15 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         size="large"
         placeholder={T.docTypePlaceholder[locale]}
         onOptionSelect={(_, data) => setDocType(data.optionValue ?? "")}
-        value={docType}
+        value={docType ?? undefined}
         disabled={!suggestionsStore.documentType}
-        className={mergeClasses(commonStyles.dropdown, docType && commonStyles.inputFill)}
+        className={mergeClasses(commonStyles.dropdown, docType ? commonStyles.inputFill : undefined)}
       >
-        <Option key={suggestionsStore.documentType} value={suggestionsStore.documentType}>
+        <Option
+          key={suggestionsStore.documentType}
+          value={suggestionsStore.documentType ?? undefined}
+          text={suggestionsStore.documentType ?? ""}
+        >
           {suggestionsStore.documentType}
         </Option>
       </Dropdown>
@@ -105,12 +119,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
         isFilled={isPartySelected}
       />
 
-      <Accordion
-        collapsible
-        className={commonStyles.accordion}
-        onToggle={handleToggle}
-        openItems={isOpen ? [1] : []}
-      >
+      <Accordion collapsible className={commonStyles.accordion} onToggle={handleToggle} openItems={isOpen ? [1] : []}>
         <AccordionItem className={commonStyles.accordionItem} value={1}>
           <AccordionHeader
             className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
@@ -131,7 +140,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
             )}
           </AccordionPanel>
 
-          {(actionIcon || actionHandleClick) && isOpen && (
+          {actionHandleClick && isOpen && (
             <IconButton
               tooltip={T.btnCreateChecklist[locale]}
               icon={actionIcon || <Add16Filled />}
@@ -143,6 +152,8 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
           )}
         </AccordionItem>
       </Accordion>
+
+      {warningMessage && <span className={commonStyles.error}>{warningMessage}</span>}
 
       <Button appearance="primary" size="large" disabled={!isPartySelected || !docType} onClick={onStartReview}>
         {T.btnStartReview[locale]}

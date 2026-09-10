@@ -19,16 +19,17 @@ import type { AccordionToggleData, AccordionToggleEvent } from "@fluentui/react-
 import {
   Add16Filled,
   ArrowLeft16Regular,
+  Dismiss16Regular,
   Save16Regular,
   TriangleDownFilled,
   TriangleRightFilled,
 } from "@fluentui/react-icons";
-import { ALL_PARTIES, ALL_CONTRACT_TYPES } from "../../constants";
+import { getContractTypesForParty, getPartiesForContractType } from "../../constants";
 import { ChecklistCard, ComboboxField } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
 import { IconButton, Modal, SearchBox } from "../../components/atoms";
-import { getMaxLengthError, normalizeFieldValue, sanitizeFieldValue } from "../../helpers";
+import { getDuplicateNameError, getMaxLengthError, normalizeFieldValue, sanitizeFieldValue } from "../../helpers";
 
 const T = {
   pageCreateTitle: {
@@ -75,6 +76,18 @@ const T = {
     ru: "Удалить",
     en: "Delete",
   },
+  modalDeleteBlockedTitle: {
+    ru: "Не удалось удалить чек-лист",
+    en: "Failed to delete checklist",
+  },
+  modalDeleteBlockedSubtitle: {
+    ru: "Чек-лист используется в запущенном анализе. Дождитесь его завершения.",
+    en: "The checklist is being used in a running analysis. Please wait for it to finish.",
+  },
+  modalDeleteBlockedConfirm: {
+    ru: "Повторить",
+    en: "Retry",
+  },
   modalSaveTitle: {
     ru: "Сохранить новый чек-лист?",
     en: "Save new checklist?",
@@ -107,6 +120,10 @@ const T = {
     ru: "Найти по названию",
     en: "Search by name",
   },
+  noChecklistMatches: {
+    ru: "Совпадений не найдено",
+    en: "No matches found",
+  },
 };
 
 const iconStyle = { width: "12px", height: "12px", padding: "5px" };
@@ -134,6 +151,7 @@ const Checklist = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [deleteBlocked, setDeleteBlocked] = useState<{ id: string; reason: "in_use" | "error" } | null>(null);
 
   useEffect(() => {
     checkList.setIsFormOpen(isFormOpen);
@@ -223,15 +241,33 @@ const Checklist = () => {
     await checkList.duplicateChecklist(id);
   };
 
-  const handleDelete = (id: string) => setTargetId(id);
-  const handleDeleteConfirm = async () => {
-    const wasEditing = targetId === checkList.editingChecklistId;
-    await checkList.deleteChecklist(targetId);
-    setTargetId(null);
+  const attemptDelete = async (id: string) => {
+    const wasEditing = id === checkList.editingChecklistId;
+    const result = await checkList.deleteChecklist(id);
+
+    if (result === "in_use" || result === "error") {
+      setDeleteBlocked({ id, reason: result });
+      return;
+    }
+
+    setDeleteBlocked(null);
     if (wasEditing) {
       resetForm();
       setIsChecklistPage(false);
     }
+  };
+
+  const handleDelete = (id: string) => setTargetId(id);
+  const handleDeleteConfirm = async () => {
+    if (!targetId) return;
+    const id = targetId;
+    setTargetId(null);
+    await attemptDelete(id);
+  };
+
+  const handleRetryDelete = async () => {
+    if (!deleteBlocked) return;
+    await attemptDelete(deleteBlocked.id);
   };
 
   const executeGoBack = () => {
@@ -259,20 +295,34 @@ const Checklist = () => {
     executeGoBack();
   };
 
+  const existingChecklistNames = (checkList.checklists ?? [])
+    .filter((item) => item.id !== checkList.editingChecklistId)
+    .map((item) => item.name);
+
+  const checklistNameMaxLengthError = getMaxLengthError(checklistName, locale, 255);
+  const checklistNameDuplicateError = getDuplicateNameError(checklistName, existingChecklistNames, locale);
+
   const validationDocType = getMaxLengthError(docType, locale, 255);
   const validationParty = getMaxLengthError(party, locale, 100);
   const validationName =
-    checklistNameTouched && !checklistName ? T.requiredField[locale] : getMaxLengthError(checklistName, locale, 255);
+    checklistNameTouched && !checklistName
+      ? T.requiredField[locale]
+      : checklistNameMaxLengthError ?? checklistNameDuplicateError;
 
   // Возвращает true, если чек-лист готов к сохранению:
   // заполнено название и все правила прошли валидацию обязательных полей
   const canSave =
     !!checklistName &&
-    !getMaxLengthError(checklistName, locale, 255) &&
+    !checklistNameMaxLengthError &&
+    !checklistNameDuplicateError &&
     checklistRules.length !== 0 &&
     checklistRules.every((rule) => {
-      const r = rule as { simple_rule?: string; check_condition?: string };
-      return !!(r.simple_rule || r.check_condition);
+      const r = rule as {
+        simple_rule?: string;
+        check_condition?: string;
+        risk_triggers?: { risk_trigger: string }[] | null;
+      };
+      return !!(r.simple_rule || r.check_condition) && !!r.risk_triggers?.length;
     });
 
   const checklistNameField = (
@@ -291,14 +341,27 @@ const Checklist = () => {
           setChecklistName(normalizeFieldValue(e.target.value));
         }}
         required
+        contentAfter={
+          checklistName
+            ? {
+                children: <Dismiss16Regular />,
+                onClick: () => {
+                  setIsChecklistNameManual(false);
+                  setChecklistName("");
+                },
+                onMouseDown: (e) => e.preventDefault(),
+                className: styles.clearIcon,
+              }
+            : undefined
+        }
         className={mergeClasses(commonStyles.input, checklistName && commonStyles.inputFill)}
       />
     </Field>
   );
 
   const filteredChecklists = checklistSearch
-    ? checkList.checklists.filter((item) => item.name.toLowerCase().includes(checklistSearch.toLowerCase()))
-    : checkList.checklists;
+    ? (checkList.checklists ?? []).filter((item) => item.name.toLowerCase().includes(checklistSearch.toLowerCase()))
+    : checkList.checklists ?? [];
 
   if (checkList.isDraftLoading) return <Spinner />;
 
@@ -310,6 +373,15 @@ const Checklist = () => {
         title={T.modalDeleteTitle[locale]}
         actionButtonTitle={T.modalDeleteConfirm[locale]}
         onAction={handleDeleteConfirm}
+      />
+
+      <Modal
+        open={deleteBlocked !== null}
+        onClose={() => setDeleteBlocked(null)}
+        title={T.modalDeleteBlockedTitle[locale]}
+        actionButtonTitle={T.modalDeleteBlockedConfirm[locale]}
+        onAction={handleRetryDelete}
+        children={deleteBlocked?.reason === "in_use" ? <span>{T.modalDeleteBlockedSubtitle[locale]}</span> : undefined}
       />
 
       <Modal
@@ -367,13 +439,15 @@ const Checklist = () => {
                 )
               }
             >
-              {isEditing ? checklistName : T.formCreatingTitle[locale]}
+              <span className={styles.accordionHeaderTitle}>
+                {isEditing ? checklistName : T.formCreatingTitle[locale]}
+              </span>
             </AccordionHeader>
             <AccordionPanel className={commonStyles.accordionPanel}>
               <ComboboxField
                 value={docType}
                 onChange={setDocType}
-                options={ALL_CONTRACT_TYPES}
+                options={getContractTypesForParty(party)}
                 placeholder={T.docTypePlaceholder[locale]}
                 maxLength={255}
                 validationMessage={validationDocType}
@@ -382,7 +456,7 @@ const Checklist = () => {
               <ComboboxField
                 value={party}
                 onChange={setParty}
-                options={ALL_PARTIES}
+                options={getPartiesForContractType(docType)}
                 placeholder={T.partyPlaceholder[locale]}
                 maxLength={100}
                 validationMessage={validationParty}
@@ -424,7 +498,7 @@ const Checklist = () => {
                 )
               }
             >
-              {T.listTitle[locale]}
+              <span className={styles.accordionHeaderTitle}>{T.listTitle[locale]}</span>
             </AccordionHeader>
             <AccordionPanel className={commonStyles.accordionPanel}>
               <SearchBox
@@ -433,19 +507,24 @@ const Checklist = () => {
                 placeholder={T.searchChecklistPlaceholder[locale]}
               />
 
-              {filteredChecklists.map((item) => (
-                <ChecklistCard
-                  key={item.id}
-                  id={item.id}
-                  name={item.name}
-                  createdAt={item.created_at}
-                  selected={selectedChecklist === item.id}
-                  onSelect={setSelectedChecklist}
-                  onEdit={handleEdit}
-                  onDuplicate={handleDuplicate}
-                  onDelete={handleDelete}
-                />
-              ))}
+              {filteredChecklists.length === 0 ? (
+                <span className={styles.noMatchesText}>{T.noChecklistMatches[locale]}</span>
+              ) : (
+                filteredChecklists.map((item) => (
+                  <ChecklistCard
+                    key={item.id}
+                    id={item.id}
+                    name={item.name}
+                    createdAt={item.created_at}
+                    selected={selectedChecklist === item.id}
+                    searchText={checklistSearch}
+                    onSelect={setSelectedChecklist}
+                    onEdit={handleEdit}
+                    onDuplicate={handleDuplicate}
+                    onDelete={handleDelete}
+                  />
+                ))
+              )}
             </AccordionPanel>
           </AccordionItem>
         )}

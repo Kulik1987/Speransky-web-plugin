@@ -84,6 +84,15 @@ export const useCommonStyles = makeStyles({
     whiteSpace: "pre-line",
     lineHeight: tokens.lineHeightBase400,
   },
+  tooltip: {
+    backgroundColor: tokens.colorBrandForegroundOnLightPressed,
+    color: "#FFFFFF",
+    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
+    ...shorthands.borderRadius("5px"),
+  },
+  tooltipWide: {
+    maxWidth: "270px",
+  },
   pageTitle: {
     ...shorthands.margin(0),
     color: customColors.text.primary[90],

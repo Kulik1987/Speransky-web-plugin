@@ -54,7 +54,7 @@ const Review = () => {
     console.log("navigate to [page review]");
 
     const loadParties = async () => {
-      if (!parties && !isMetaDataProcessing) {
+      if (!parties && !isMetaDataProcessing && documentStore.documentId) {
         await suggestionsStore.requestMetaData(documentStore.documentId);
       }
     };

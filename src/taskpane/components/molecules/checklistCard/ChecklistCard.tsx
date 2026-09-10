@@ -8,6 +8,7 @@ import {
   MenuTrigger,
   Radio,
   Text,
+  Tooltip,
   mergeClasses,
 } from "@fluentui/react-components";
 import { MoreVertical24Regular } from "@fluentui/react-icons";
@@ -15,6 +16,8 @@ import { observer } from "mobx-react";
 import { useStores } from "../../../store";
 import { useChecklistCardStyles } from "./styles";
 import { useCommonStyles } from "../../../theme/commonStyles";
+import { splitChecklistCopySuffix } from "../../../helpers";
+import { HighlightedText } from "../../atoms";
 
 const T = {
   edit: {
@@ -37,46 +40,43 @@ type ChecklistCardProps = {
   createdAt: string;
   isRadio?: boolean;
   selected?: boolean;
+  searchText?: string;
   onSelect?: (id: string) => void;
   onEdit: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
 };
 
-const COPY_PREFIX = "Копия ";
-
-const renderName = (name: string, copyPrefixClass: string): React.ReactNode => {
-  if (name.startsWith(COPY_PREFIX)) {
-    return (
-      <>
-        <span className={copyPrefixClass}>{COPY_PREFIX}</span>
-        {name.slice(COPY_PREFIX.length)}
-      </>
-    );
-  }
-  return name;
-};
-
 const ChecklistCard = (props: ChecklistCardProps) => {
-  const { id, name, createdAt, isRadio = false, selected, onSelect, onEdit, onDuplicate, onDelete } = props;
+  const { id, name, createdAt, isRadio = false, selected, searchText, onSelect, onEdit, onDuplicate, onDelete } = props;
   const { menuStore } = useStores();
   const { locale } = menuStore;
   const styles = useChecklistCardStyles();
   const commonStyles = useCommonStyles();
 
   const formattedDate = new Date(createdAt).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US");
+  const { base, suffix } = splitChecklistCopySuffix(name);
 
   return (
-    <div className={mergeClasses(styles.card, selected && styles.cardSelected)} onClick={() => onSelect(id)}>
+    <div className={mergeClasses(styles.card, selected && styles.cardSelected)} onClick={() => onSelect?.(id)}>
       {isRadio && (
         <Radio
           checked={selected}
-          onChange={() => onSelect(id)}
+          onChange={() => onSelect?.(id)}
           className={mergeClasses(commonStyles.radio, styles.radio)}
         />
       )}
       <div className={styles.info}>
-        <Text className={styles.name}>{renderName(name, styles.nameCopyPrefix)}</Text>
+        <Tooltip
+          content={{ children: name, className: mergeClasses(commonStyles.tooltip, commonStyles.tooltipWide) }}
+          relationship="description"
+          positioning="above-start"
+        >
+          <Text className={styles.name}>
+            <HighlightedText sourceText={base} searchText={searchText ?? ""} />
+            <span className={styles.nameCopyPrefix}>{suffix}</span>
+          </Text>
+        </Tooltip>
         <Text className={styles.date}>{formattedDate}</Text>
       </div>
       <Menu>

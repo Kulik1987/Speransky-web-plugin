@@ -7,8 +7,12 @@ import {
   PayloadChecklistAddRuleDto,
   PayloadChecklistUpdateDto,
 } from "../api/types";
+import { getApiErrorDetail, getCopyName } from "../helpers";
+import { ChecklistErrorCodeEnum } from "../enums";
 
 export type DraftRule = PayloadChecklistAddRuleDto & { id?: string };
+
+export type DeleteChecklistResult = "success" | "in_use" | "error";
 
 interface OriginalDraft {
   checklistName: string;
@@ -230,9 +234,10 @@ class CheckList {
 
     try {
       const { data } = await this.checklistApi.get(checklistId);
+      const existingNames = this.checklists?.map((c) => c.name) ?? [];
 
       await this.checklistApi.create({
-        name: "Копия - " + data.name,
+        name: getCopyName(data.name, existingNames),
         description: data.description,
         doc_type: data.doc_type,
         party: data.party,
@@ -317,7 +322,7 @@ class CheckList {
   };
 
   /** @description Удаляет чек-лист */
-  deleteChecklist = async (checklistId: string) => {
+  deleteChecklist = async (checklistId: string): Promise<DeleteChecklistResult> => {
     try {
       await this.checklistApi.delete(checklistId);
 
@@ -328,10 +333,12 @@ class CheckList {
       await this.getChecklists();
 
       console.log("deleteChecklist [success]");
-      return true;
+      return "success";
     } catch (error) {
       console.error("deleteChecklist [error]", error);
-      return false;
+
+      const errorCode = getApiErrorDetail(error)?.code;
+      return errorCode === ChecklistErrorCodeEnum.IN_USE_BY_RUNNING_ANALYSIS ? "in_use" : "error";
     }
   };
 

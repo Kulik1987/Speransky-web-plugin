@@ -1,13 +1,14 @@
 import React, { useEffect } from "react";
 import { useStores } from "../../store";
 import { SuggestionCard } from "../../components/widgets";
-import { Button, Tooltip } from "@fluentui/react-components";
+import { Button, mergeClasses, Tooltip } from "@fluentui/react-components";
 import { observer } from "mobx-react";
 import { ApplyService } from "../../services/applyService";
 import { ItemSkeleton } from "../../components/molecules";
 import { useSummaryStyles } from "./styles";
-import { RecommendationTypeEnum } from "../../enums";
+import { RecommendationTypeEnum, SuggestionsErrorTagEnum } from "../../enums";
 import { ErrorText } from "../../components/atoms";
+import { useCommonStyles } from "../../theme/commonStyles";
 
 const T = {
   waitingNotification: {
@@ -30,6 +31,14 @@ const T = {
     ru: "Ошибка получения рекомендаций.\n Попробуйте ещё раз.",
     en: "Error getting recommendations.\n Please try again.",
   },
+  errorDescriptionServer: {
+    ru: "Ошибка сервера.\n Попробуйте повторить позже.",
+    en: "Server error.\n Please try again later.",
+  },
+  errorDescriptionTimeout: {
+    ru: "Превышено время ожидания результатов.\n Попробуйте запустить анализ ещё раз.",
+    en: "The wait for results has timed out.\n Please try running the analysis again.",
+  },
 };
 
 const Summary = () => {
@@ -38,8 +47,10 @@ const Summary = () => {
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
   const styles = useSummaryStyles();
+  const commonStyles = useCommonStyles();
 
-  const { isSuggestionExist, suggestionsNew, suggestionsError, isAnalysisProcessing } = suggestionsStore;
+  const { isSuggestionExist, suggestionsNew, suggestionsError, suggestionsErrorMessage, isAnalysisProcessing } =
+    suggestionsStore;
   const isError = Boolean(suggestionsError);
 
   useEffect(() => {
@@ -55,6 +66,8 @@ const Summary = () => {
   }, []);
 
   const handleApplyAll = async () => {
+    if (!suggestionsNew) return;
+
     suggestionsNew.forEach(async (itemSuggestion, indexSuggestion) => {
       if (itemSuggestion.isDismiss) return;
 
@@ -96,8 +109,21 @@ const Summary = () => {
     await documentStore.downloadArchive();
   };
 
+  const getErrorText = () => {
+    if (suggestionsErrorMessage) return suggestionsErrorMessage;
+
+    switch (suggestionsError) {
+      case SuggestionsErrorTagEnum.TIMEOUT_ERROR:
+        return T.errorDescriptionTimeout[locale];
+      case SuggestionsErrorTagEnum.SERVER_ERROR:
+        return T.errorDescriptionServer[locale];
+      default:
+        return T.errorDescription[locale];
+    }
+  };
+
   if (isError || (!isAnalysisProcessing && !isSuggestionExist)) {
-    return <ErrorText error={T.errorDescription[locale]} />;
+    return <ErrorText error={getErrorText()} />;
   }
 
   if (isAnalysisProcessing) {
@@ -117,7 +143,10 @@ const Summary = () => {
           </Button>
         )}
         <Tooltip
-          content={{ children: T.tooltipDownloadArchive[locale], className: styles.tooltip }}
+          content={{
+            children: T.tooltipDownloadArchive[locale],
+            className: mergeClasses(commonStyles.tooltip, commonStyles.tooltipWide),
+          }}
           relationship="description"
           positioning="above"
         >

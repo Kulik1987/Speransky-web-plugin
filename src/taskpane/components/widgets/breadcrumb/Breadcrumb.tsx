@@ -97,7 +97,7 @@ const BREADCRUMB_CONFIG: Partial<Record<RoutePathEnum, BreadcrumbStep[]>> = {
 };
 
 const Breadcrumb = () => {
-  const { menuStore, authStore, checkList } = useStores();
+  const { menuStore, authStore, checkList, suggestionsStore } = useStores();
   const { locale } = menuStore;
   const location = useLocation();
   const { pathname } = location;
@@ -109,9 +109,10 @@ const Breadcrumb = () => {
 
   const isSummaryPage = pathname === RoutePathEnum.SUMMARY;
   const isChecklistPage = pathname === RoutePathEnum.CHECKLIST;
+  const hasUnsavedRecommendations = isSummaryPage && suggestionsStore.isSuggestionExist;
 
   const handleStepClick = (path: RoutePathEnum, state?: Record<string, unknown>) => {
-    if (isSummaryPage || (isChecklistPage && checkList.isFormOpen)) {
+    if (hasUnsavedRecommendations || (isChecklistPage && checkList.isFormOpen)) {
       setPendingNav({ path, state });
       setIsModalOpen(true);
     } else {

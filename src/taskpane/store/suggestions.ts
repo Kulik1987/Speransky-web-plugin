@@ -1,11 +1,13 @@
 /* global process */
+import axios from "axios";
 import { makeAutoObservable, runInAction, reaction } from "mobx";
 import type RootStore from ".";
 import api from "../api/v1";
 import { mockContractType, mockParties } from "./mock/mockParties";
 import mockSuggestions from "./mock/mockSuggestions_1";
 import { ContractPartieData, RecommendationRisks } from "../api/types";
-import { SourceTypeEnums } from "../enums";
+import { AnalysisErrorCodeEnum, SourceTypeEnums, SuggestionsErrorTagEnum } from "../enums";
+import { getApiErrorDetail, isServerNetworkError } from "../helpers";
 
 const APP_SET_MOCK = process.env.APP_SET_MOCK === "true";
 
@@ -29,8 +31,11 @@ class SuggestionsStore {
 
   // Анализ и рекомендации
   suggestionsNew: SuggestionT[] | null = null;
-  suggestionsError: string | null = null;
+  suggestionsError: SuggestionsErrorTagEnum | null = null;
+  suggestionsErrorMessage: string | null = null;
   isAnalysisProcessing: boolean = false;
+  resultChecklistId: string | null = null;
+  resultChecklistName: string | null = null;
 
   // Кастомная инструкция пользователя
   formCustomInstructions: string | null = null;
@@ -65,6 +70,7 @@ class SuggestionsStore {
   };
 
   setSuggestionProperty = (indexSuggestion: number, values: SuggestionPropertyT) => {
+    if (!this.suggestionsNew) return;
     const expand = this.suggestionsNew.map((item, index) => {
       if (index === indexSuggestion) return { ...item, ...values };
       return item;
@@ -75,7 +81,7 @@ class SuggestionsStore {
   /**
    * @description Получает JSON-рекомендации
    */
-  getSuggestions = async (retryCount = 0) => {
+  getSuggestions = async (retryCount = 0): Promise<void> => {
     const MAX_RETRIES = 60; // Количество повторных запросов при ожидании ответа
     const RETRY_DELAY = 20000; // Интервал запроса 20 секунд
 
@@ -120,7 +126,7 @@ class SuggestionsStore {
         } else {
           runInAction(() => {
             this.suggestionsNew = null;
-            this.suggestionsError = "timeout-error";
+            this.suggestionsError = SuggestionsErrorTagEnum.TIMEOUT_ERROR;
             this.isAnalysisProcessing = false;
           });
         }
@@ -130,10 +136,12 @@ class SuggestionsStore {
 
       runInAction(() => {
         this.suggestionsNew = response.data.risks;
+        this.resultChecklistId = response.data.checklist_id;
+        this.resultChecklistName = response.data.checklist_name;
         this.isAnalysisProcessing = false;
       });
     } catch (error) {
-      const status = error?.response?.status ?? error?.status;
+      const status = axios.isAxiosError(error) ? error.response?.status : (error as { status?: number })?.status;
       const isPolling409 = status === 409 && retryCount < MAX_RETRIES;
 
       if (isPolling409) {
@@ -144,7 +152,9 @@ class SuggestionsStore {
 
       runInAction(() => {
         this.suggestionsNew = null;
-        this.suggestionsError = "failed-request";
+        this.suggestionsError = isServerNetworkError(error)
+          ? SuggestionsErrorTagEnum.SERVER_ERROR
+          : SuggestionsErrorTagEnum.FAILED_REQUEST;
         this.isAnalysisProcessing = false;
       });
     }
@@ -191,9 +201,22 @@ class SuggestionsStore {
     } catch (error) {
       console.error("createAnalysisTask [error]", error);
 
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      const detail = getApiErrorDetail(error);
+      const isChecklistMismatch =
+        status === 409 && detail?.code === AnalysisErrorCodeEnum.CHECKLIST_CONTRACT_TYPE_MISMATCH;
+
+      let errorTag = SuggestionsErrorTagEnum.FAILED_REQUEST;
+      if (isChecklistMismatch) {
+        errorTag = SuggestionsErrorTagEnum.CHECKLIST_CONTRACT_TYPE_MISMATCH;
+      } else if (isServerNetworkError(error)) {
+        errorTag = SuggestionsErrorTagEnum.SERVER_ERROR;
+      }
+
       runInAction(() => {
         this.suggestionsNew = null;
-        this.suggestionsError = "failed-request";
+        this.suggestionsError = errorTag;
+        this.suggestionsErrorMessage = isChecklistMismatch ? detail?.message ?? null : null;
         this.isAnalysisProcessing = false;
       });
 
@@ -238,7 +261,7 @@ class SuggestionsStore {
   /**
    * @description Запрашивает тип и стороны договора по document_id
    */
-  requestMetaData = async (documentId: string, retryCount = 0) => {
+  requestMetaData = async (documentId: string, retryCount = 0): Promise<void> => {
     const MAX_RETRIES = 15; // Количество повторных запросов при ожидании ответа
     const RETRY_DELAY = 5000; // Интервал запроса 5 секунд
 
@@ -279,7 +302,7 @@ class SuggestionsStore {
       console.log("requestMetaData [success]", { parties });
       return;
     } catch (error) {
-      const status = error?.response?.status ?? error?.status;
+      const status = axios.isAxiosError(error) ? error.response?.status : (error as { status?: number })?.status;
       const is409Error = status === 409 && retryCount < MAX_RETRIES;
 
       if (is409Error) {
@@ -308,6 +331,9 @@ class SuggestionsStore {
   clearSuggestions = () => {
     this.suggestionsNew = null;
     this.suggestionsError = null;
+    this.suggestionsErrorMessage = null;
+    this.resultChecklistId = null;
+    this.resultChecklistName = null;
   };
 
   resetStore = () => {
@@ -319,9 +345,12 @@ class SuggestionsStore {
       this.isMetaDataProcessing = false;
       this.suggestionsNew = null;
       this.suggestionsError = null;
+      this.suggestionsErrorMessage = null;
       this.isAnalysisProcessing = false;
       this.formCustomInstructions = "";
       this.checklistId = null;
+      this.resultChecklistId = null;
+      this.resultChecklistName = null;
     });
   };
 }

@@ -37,4 +37,22 @@ export const useChecklistStyles = makeStyles({
       fontWeight: tokens.fontWeightSemibold,
     },
   },
+  accordionHeaderTitle: {
+    display: "block",
+    flexGrow: 1,
+    minWidth: 0,
+    whiteSpace: "nowrap",
+    ...shorthands.overflow("hidden"),
+    textOverflow: "ellipsis",
+  },
+  clearIcon: {
+    ...shorthands.padding("4px"),
+    cursor: "pointer",
+  },
+  noMatchesText: {
+    color: customColors.text.primary[65],
+    fontSize: tokens.fontSizeBase300,
+    lineHeight: tokens.lineHeightBase400,
+    textAlign: "center",
+  },
 });

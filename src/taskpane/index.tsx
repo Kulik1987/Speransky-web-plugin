@@ -5,7 +5,10 @@ import App from "./app/App";
 import { FluentProvider } from "@fluentui/react-components";
 import { lightTheme } from "./theme/theme";
 
-const rootElement: HTMLElement = document.getElementById("container");
+const rootElement = document.getElementById("container");
+if (!rootElement) {
+  throw new Error('Root element with id "container" not found');
+}
 const root = createRoot(rootElement);
 
 /* Render application after Office initializes */

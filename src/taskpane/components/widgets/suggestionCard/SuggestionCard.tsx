@@ -2,12 +2,13 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { useStores } from "../../../store";
-import { Text, tokens } from "@fluentui/react-components";
+import { Text, tokens, Tooltip } from "@fluentui/react-components";
 import {
   CheckboxChecked24Regular,
   CommentNote24Regular,
   Delete24Regular,
   LocationRipple24Regular,
+  PersonNote16Regular,
 } from "@fluentui/react-icons";
 import { IconButton, Modal, PartyFlag, PriorityFlag } from "../../atoms";
 import { ApplyService } from "../../../services/applyService";
@@ -61,6 +62,7 @@ const T = {
 
 const SuggestionCard = (props: SuggestionPropT) => {
   const { suggestionsStore, menuStore, configStore } = useStores();
+  const { resultChecklistId, resultChecklistName } = suggestionsStore;
   const { locale } = menuStore;
   const { optionsSupportedCurrentApi } = configStore;
   const { isAccessToRangeInsertComment } = optionsSupportedCurrentApi;
@@ -203,9 +205,22 @@ const SuggestionCard = (props: SuggestionPropT) => {
         onAction={handleDeleteConfirm}
       />
 
-      <div className={styles.flagBlock}>
-        <PriorityFlag flag={risk_level} />
-        <PartyFlag flag={relevant_party} />
+      <div className={styles.topBlock}>
+        <div className={styles.flagBlock}>
+          <PriorityFlag flag={risk_level} />
+          <PartyFlag flag={relevant_party} />
+        </div>
+        {resultChecklistId && (
+          <span onClick={(e) => e.stopPropagation()}>
+            <IconButton
+              tooltip={resultChecklistName || ""}
+              icon={<PersonNote16Regular color={customColors.accent.note} />}
+              onClick={() => {}}
+              positioning="above-start"
+              className={styles.checklistIcon}
+            />
+          </span>
+        )}
       </div>
 
       <div className={styles.changesBlock}>
@@ -262,7 +277,7 @@ const SuggestionCard = (props: SuggestionPropT) => {
         </div>
         <IconButton
           tooltip={T.buttonDismiss[locale]}
-          icon={<Delete24Regular color={customColors.accent.delete} />}
+          icon={<Delete24Regular color={tokens.colorBrandForeground2} />}
           onClick={handleDeleteRecommendation}
           positioning="above-end"
         />

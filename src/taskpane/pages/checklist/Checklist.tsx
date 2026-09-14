@@ -25,11 +25,12 @@ import {
   TriangleRightFilled,
 } from "@fluentui/react-icons";
 import { getContractTypesForParty, getPartiesForContractType } from "../../constants";
-import { ChecklistCard, ComboboxField } from "../../components/molecules";
+import { ChecklistCard, ComboboxField, RetryableError } from "../../components/molecules";
 import { ChecklistForm } from "../../components/organisms";
 import { DraftRule } from "../../store/checklist";
 import { IconButton, Modal, SearchBox } from "../../components/atoms";
 import { getDuplicateNameError, getMaxLengthError, normalizeFieldValue, sanitizeFieldValue } from "../../helpers";
+import { useChecklistCardActions } from "../../hooks/useChecklistCardActions";
 
 const T = {
   pageCreateTitle: {
@@ -68,25 +69,25 @@ const T = {
     ru: "Пользовательские чек-листы",
     en: "Custom checklists",
   },
-  modalDeleteTitle: {
-    ru: "Удалить чек-лист?",
-    en: "Delete checklist?",
-  },
-  modalDeleteConfirm: {
-    ru: "Удалить",
-    en: "Delete",
-  },
-  modalDeleteBlockedTitle: {
-    ru: "Не удалось удалить чек-лист",
-    en: "Failed to delete checklist",
-  },
-  modalDeleteBlockedSubtitle: {
-    ru: "Чек-лист используется в запущенном анализе. Дождитесь его завершения.",
-    en: "The checklist is being used in a running analysis. Please wait for it to finish.",
-  },
-  modalDeleteBlockedConfirm: {
+  retry: {
     ru: "Повторить",
     en: "Retry",
+  },
+  modalSaveErrorTitle: {
+    ru: "Не удалось сохранить чек-лист",
+    en: "Failed to save the checklist",
+  },
+  modalLoadErrorTitle: {
+    ru: "Не удалось загрузить чек-лист",
+    en: "Failed to load the checklist",
+  },
+  networkErrorSubtitle: {
+    ru: "Нет соединения с сервером. Проверьте интернет-соединение или отключите VPN.",
+    en: "No connection to the server. Check your internet connection or disable VPN.",
+  },
+  errorLoadChecklists: {
+    ru: "Не удалось загрузить список чек-листов.",
+    en: "Failed to load the checklist list.",
   },
   modalSaveTitle: {
     ru: "Сохранить новый чек-лист?",
@@ -151,7 +152,7 @@ const Checklist = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
-  const [deleteBlocked, setDeleteBlocked] = useState<{ id: string; reason: "in_use" | "error" } | null>(null);
+  const [saveError, setSaveError] = useState<"network_error" | "error" | null>(null);
 
   useEffect(() => {
     checkList.setIsFormOpen(isFormOpen);
@@ -165,7 +166,6 @@ const Checklist = () => {
   }, []);
 
   const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
-  const [targetId, setTargetId] = useState<string | null>(null);
   const [isChecklistPage, setIsChecklistPage] = useState(false);
 
   useEffect(() => {
@@ -181,25 +181,37 @@ const Checklist = () => {
     }
   }, [docType, party, checkList.editingChecklistId]);
 
+  const loadEditingChecklist = useCallback(
+    (id: string) => {
+      setIsFormOpen(false);
+      setChecklistRules([]);
+      setDeletedRuleIds([]);
+
+      checkList.getChecklistById(id).then((data) => {
+        if (!data) return;
+        setDocType(data.doc_type ?? "");
+        setParty(data.party || T.allPartiesValue[locale]);
+        setChecklistName(data.name);
+        setIsChecklistNameManual(true);
+        setChecklistRules([...checkList.checklistRules]);
+        setIsFormOpen(true);
+        setOpenItems([1]);
+      });
+    },
+    [checkList, locale]
+  );
+
   useEffect(() => {
     const id = checkList.editingChecklistId;
     if (!id) return;
+    loadEditingChecklist(id);
+  }, [checkList.editingChecklistId, loadEditingChecklist]);
 
-    setIsFormOpen(false);
-    setChecklistRules([]);
-    setDeletedRuleIds([]);
+  const handleRetryLoadChecklist = () => {
+    if (checkList.editingChecklistId) loadEditingChecklist(checkList.editingChecklistId);
+  };
 
-    checkList.getChecklistById(id).then((data) => {
-      if (!data) return;
-      setDocType(data.doc_type ?? "");
-      setParty(data.party || T.allPartiesValue[locale]);
-      setChecklistName(data.name);
-      setIsChecklistNameManual(true);
-      setChecklistRules([...checkList.checklistRules]);
-      setIsFormOpen(true);
-      setOpenItems([1]);
-    });
-  }, [checkList.editingChecklistId]);
+  const handleCancelLoadChecklist = () => checkList.setEditingChecklistId(null);
 
   const resetForm = () => {
     setIsFormOpen(false);
@@ -219,16 +231,19 @@ const Checklist = () => {
 
   const handleSubmitChecklist = async () => {
     setIsSaveModalOpen(false);
-    const success = await checkList.submitDraft(
+    setSaveError(null);
+    const result = await checkList.submitDraft(
       checklistName,
       docType,
       party === T.allPartiesValue[locale] ? "" : party,
       checklistRules,
       deletedRuleIds
     );
-    if (success) {
+    if (result === "success") {
       resetForm();
       setOpenItems([2]);
+    } else {
+      setSaveError(result);
     }
   };
 
@@ -237,38 +252,18 @@ const Checklist = () => {
     checkList.setEditingChecklistId(id);
   };
 
-  const handleDuplicate = async (id: string) => {
-    await checkList.duplicateChecklist(id);
-  };
-
-  const attemptDelete = async (id: string) => {
-    const wasEditing = id === checkList.editingChecklistId;
-    const result = await checkList.deleteChecklist(id);
-
-    if (result === "in_use" || result === "error") {
-      setDeleteBlocked({ id, reason: result });
-      return;
-    }
-
-    setDeleteBlocked(null);
-    if (wasEditing) {
-      resetForm();
-      setIsChecklistPage(false);
-    }
-  };
-
-  const handleDelete = (id: string) => setTargetId(id);
-  const handleDeleteConfirm = async () => {
-    if (!targetId) return;
-    const id = targetId;
-    setTargetId(null);
-    await attemptDelete(id);
-  };
-
-  const handleRetryDelete = async () => {
-    if (!deleteBlocked) return;
-    await attemptDelete(deleteBlocked.id);
-  };
+  const {
+    handleDelete,
+    handleDuplicate,
+    modals: checklistActionModals,
+  } = useChecklistCardActions({
+    onDeleteSuccess: (id) => {
+      if (id === checkList.editingChecklistId) {
+        resetForm();
+        setIsChecklistPage(false);
+      }
+    },
+  });
 
   const executeGoBack = () => {
     if (isEditing && isChecklistPage) {
@@ -367,22 +362,7 @@ const Checklist = () => {
 
   return (
     <div className={styles.container}>
-      <Modal
-        open={targetId !== null}
-        onClose={() => setTargetId(null)}
-        title={T.modalDeleteTitle[locale]}
-        actionButtonTitle={T.modalDeleteConfirm[locale]}
-        onAction={handleDeleteConfirm}
-      />
-
-      <Modal
-        open={deleteBlocked !== null}
-        onClose={() => setDeleteBlocked(null)}
-        title={T.modalDeleteBlockedTitle[locale]}
-        actionButtonTitle={T.modalDeleteBlockedConfirm[locale]}
-        onAction={handleRetryDelete}
-        children={deleteBlocked?.reason === "in_use" ? <span>{T.modalDeleteBlockedSubtitle[locale]}</span> : undefined}
-      />
+      {checklistActionModals}
 
       <Modal
         open={isSaveModalOpen}
@@ -391,6 +371,26 @@ const Checklist = () => {
         actionButtonTitle={T.modalSaveConfirm[locale]}
         onAction={handleSubmitChecklist}
         children={checklistNameField}
+      />
+
+      <Modal
+        open={saveError !== null}
+        onClose={() => setSaveError(null)}
+        title={T.modalSaveErrorTitle[locale]}
+        actionButtonTitle={T.retry[locale]}
+        onAction={handleSubmitChecklist}
+        children={saveError === "network_error" ? <span>{T.networkErrorSubtitle[locale]}</span> : undefined}
+      />
+
+      <Modal
+        open={checkList.loadChecklistError !== null}
+        onClose={handleCancelLoadChecklist}
+        title={T.modalLoadErrorTitle[locale]}
+        actionButtonTitle={T.retry[locale]}
+        onAction={handleRetryLoadChecklist}
+        children={
+          checkList.loadChecklistError === "network_error" ? <span>{T.networkErrorSubtitle[locale]}</span> : undefined
+        }
       />
 
       <Modal
@@ -486,7 +486,7 @@ const Checklist = () => {
           </AccordionItem>
         )}
 
-        {checkList.hasChecklists && (
+        {(checkList.hasChecklists || checkList.checklistsError) && (
           <AccordionItem className={commonStyles.accordionItem} value={2}>
             <AccordionHeader
               className={mergeClasses(commonStyles.accordionHeader, styles.accordionHeader)}
@@ -501,29 +501,43 @@ const Checklist = () => {
               <span className={styles.accordionHeaderTitle}>{T.listTitle[locale]}</span>
             </AccordionHeader>
             <AccordionPanel className={commonStyles.accordionPanel}>
-              <SearchBox
-                value={checklistSearch}
-                onChange={setChecklistSearch}
-                placeholder={T.searchChecklistPlaceholder[locale]}
-              />
-
-              {filteredChecklists.length === 0 ? (
-                <span className={styles.noMatchesText}>{T.noChecklistMatches[locale]}</span>
+              {checkList.checklistsError ? (
+                <RetryableError
+                  error={
+                    checkList.checklistsError === "network_error"
+                      ? T.networkErrorSubtitle[locale]
+                      : T.errorLoadChecklists[locale]
+                  }
+                  retryText={T.retry[locale]}
+                  onRetry={() => checkList.getChecklists()}
+                />
               ) : (
-                filteredChecklists.map((item) => (
-                  <ChecklistCard
-                    key={item.id}
-                    id={item.id}
-                    name={item.name}
-                    createdAt={item.created_at}
-                    selected={selectedChecklist === item.id}
-                    searchText={checklistSearch}
-                    onSelect={setSelectedChecklist}
-                    onEdit={handleEdit}
-                    onDuplicate={handleDuplicate}
-                    onDelete={handleDelete}
+                <>
+                  <SearchBox
+                    value={checklistSearch}
+                    onChange={setChecklistSearch}
+                    placeholder={T.searchChecklistPlaceholder[locale]}
                   />
-                ))
+
+                  {filteredChecklists.length === 0 ? (
+                    <span className={styles.noMatchesText}>{T.noChecklistMatches[locale]}</span>
+                  ) : (
+                    filteredChecklists.map((item) => (
+                      <ChecklistCard
+                        key={item.id}
+                        id={item.id}
+                        name={item.name}
+                        createdAt={item.created_at}
+                        selected={selectedChecklist === item.id}
+                        searchText={checklistSearch}
+                        onSelect={setSelectedChecklist}
+                        onEdit={handleEdit}
+                        onDuplicate={handleDuplicate}
+                        onDelete={handleDelete}
+                      />
+                    ))
+                  )}
+                </>
               )}
             </AccordionPanel>
           </AccordionItem>

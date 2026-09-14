@@ -7,12 +7,13 @@ import {
   PayloadChecklistAddRuleDto,
   PayloadChecklistUpdateDto,
 } from "../api/types";
-import { getApiErrorDetail, getCopyName } from "../helpers";
+import { getApiErrorDetail, getCopyName, isServerNetworkError } from "../helpers";
 import { ChecklistErrorCodeEnum } from "../enums";
 
 export type DraftRule = PayloadChecklistAddRuleDto & { id?: string };
 
 export type DeleteChecklistResult = "success" | "in_use" | "error";
+export type WriteChecklistResult = "success" | "network_error" | "error";
 
 interface OriginalDraft {
   checklistName: string;
@@ -50,6 +51,7 @@ class CheckList {
   // Состояние операций записи
   isSaving: boolean = false;
   isDraftLoading: boolean = false;
+  loadChecklistError: string | null = null;
   isFormOpen: boolean = false;
 
   // Черновик: поля формы создания/редактирования чек-листа
@@ -139,7 +141,7 @@ class CheckList {
     party?: string,
     rules?: DraftRule[],
     deletedRuleIds?: string[]
-  ): Promise<boolean> => {
+  ): Promise<WriteChecklistResult> => {
     this.checklistName = name ?? this.checklistName;
     this.checklistDocType = docType ?? this.checklistDocType;
     this.checklistParty = party ?? this.checklistParty;
@@ -152,7 +154,7 @@ class CheckList {
    * Создание: создает чек-лист с правилами.
    * Редактирование: обновляет метаданные + параллельно обновляет/добавляет/удаляет правила по id.
    */
-  saveChecklist = async (deletedRuleIds?: string[]): Promise<boolean> => {
+  saveChecklist = async (deletedRuleIds?: string[]): Promise<WriteChecklistResult> => {
     runInAction(() => {
       this.isSaving = true;
     });
@@ -213,10 +215,10 @@ class CheckList {
       this.clearDraft();
 
       console.log("saveChecklist [success]");
-      return true;
+      return "success";
     } catch (error) {
       console.error("saveChecklist [error]", error);
-      return false;
+      return isServerNetworkError(error) ? "network_error" : "error";
     } finally {
       runInAction(() => {
         this.isSaving = false;
@@ -227,7 +229,7 @@ class CheckList {
   /**
    * @description Создаёт копию чек-листа с префиксом "Копия - " в названии
    */
-  duplicateChecklist = async (checklistId: string): Promise<boolean> => {
+  duplicateChecklist = async (checklistId: string): Promise<WriteChecklistResult> => {
     runInAction(() => {
       this.isSaving = true;
     });
@@ -257,10 +259,10 @@ class CheckList {
       await this.getChecklists();
 
       console.log("duplicateChecklist [success]");
-      return true;
+      return "success";
     } catch (error) {
       console.error("duplicateChecklist [error]", error);
-      return false;
+      return isServerNetworkError(error) ? "network_error" : "error";
     } finally {
       runInAction(() => {
         this.isSaving = false;
@@ -289,7 +291,7 @@ class CheckList {
 
       runInAction(() => {
         this.checklists = null;
-        this.checklistsError = "failed-to-load";
+        this.checklistsError = isServerNetworkError(error) ? "network_error" : "error";
         this.isChecklistsLoading = false;
       });
     }
@@ -299,6 +301,7 @@ class CheckList {
   getChecklistById = async (checklistId: string) => {
     runInAction(() => {
       this.isDraftLoading = true;
+      this.loadChecklistError = null;
     });
 
     try {
@@ -316,6 +319,7 @@ class CheckList {
 
       runInAction(() => {
         this.isDraftLoading = false;
+        this.loadChecklistError = isServerNetworkError(error) ? "network_error" : "error";
       });
       return null;
     }
@@ -353,6 +357,7 @@ class CheckList {
       this.checklistsError = null;
       this.isChecklistsLoading = false;
       this.isDraftLoading = false;
+      this.loadChecklistError = null;
       this.isSaving = false;
       this.isFormOpen = false;
       this.clearDraft();

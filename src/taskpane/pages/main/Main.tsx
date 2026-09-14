@@ -9,9 +9,10 @@ import {
 import { useStores } from "../../store";
 import { useMainStyles } from "./styles";
 import { Card } from "../../components/molecules";
-import { RoutePathEnum } from "../../enums";
+import { ErrorText } from "../../components/atoms";
+import { DetectTypeErrorTagEnum, RoutePathEnum } from "../../enums";
 // import { Anonymizer } from "../review/anonymizer";
-import { Text } from "@fluentui/react-components";
+import { Link, Text } from "@fluentui/react-components";
 import { useCommonStyles } from "../../theme/commonStyles";
 
 const T = {
@@ -55,6 +56,18 @@ const T = {
     ru: "Создавайте свои правила для проверки",
     en: "Create your own rules for review",
   },
+  errorNetwork: {
+    ru: "Не работает? Попробуйте отключить VPN.",
+    en: "Not working? Try disabling VPN.",
+  },
+  errorGeneric: {
+    ru: "Не удалось определить тип документа.\n Попробуйте ещё раз.",
+    en: "Failed to detect the document type.\n Please try again.",
+  },
+  retry: {
+    ru: "Повторить",
+    en: "Retry",
+  },
 };
 
 const Main = () => {
@@ -79,19 +92,33 @@ const Main = () => {
   }, []);
 
   const isLoading = documentStore.isFetchingDetectDocumentType;
+  const detectDocumentTypeError = documentStore.detectDocumentTypeError;
+
+  const handleRetryDetectDocumentType = () => {
+    documentStore.detectDocumentType().catch(() => {});
+  };
+
+  const errorText =
+    detectDocumentTypeError === DetectTypeErrorTagEnum.NETWORK_ERROR ? T.errorNetwork[locale] : T.errorNetwork[locale];
 
   return (
     <div className={styles.root}>
       <Text as="h1" weight="semibold" className={commonStyles.pageTitle}>
         {T.pageTitle[locale]}
       </Text>
+      {detectDocumentTypeError && (
+        <div className={styles.errorBlock}>
+          <ErrorText error={errorText} />
+          <Link onClick={handleRetryDetectDocumentType}>{T.retry[locale]}</Link>
+        </div>
+      )}
       <Card
         title={T.reviewTitle[locale]}
         subtitle={T.reviewSubtitle[locale]}
         text={T.reviewText[locale]}
         icon={<ClipboardTaskListRtl24Regular />}
         onClick={handleNavigateToReview}
-        disabled={isLoading}
+        disabled={isLoading || Boolean(detectDocumentTypeError)}
       />
       <Card
         title={T.checklistTitle[locale]}

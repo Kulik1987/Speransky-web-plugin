@@ -6,4 +6,10 @@ export const useMainStyles = makeStyles({
     flexDirection: "column",
     ...shorthands.gap(tokens.spacingVerticalXXL),
   },
+  errorBlock: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    ...shorthands.gap(tokens.spacingVerticalS),
+  },
 });

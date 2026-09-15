@@ -8,11 +8,10 @@ import {
 } from "@fluentui/react-icons";
 import { useStores } from "../../store";
 import { useMainStyles } from "./styles";
-import { Card } from "../../components/molecules";
-import { ErrorText } from "../../components/atoms";
+import { Card, RetryableError } from "../../components/molecules";
 import { DetectTypeErrorTagEnum, RoutePathEnum } from "../../enums";
 // import { Anonymizer } from "../review/anonymizer";
-import { Link, Text } from "@fluentui/react-components";
+import { Text } from "@fluentui/react-components";
 import { useCommonStyles } from "../../theme/commonStyles";
 
 const T = {
@@ -99,26 +98,33 @@ const Main = () => {
   };
 
   const errorText =
-    detectDocumentTypeError === DetectTypeErrorTagEnum.NETWORK_ERROR ? T.errorNetwork[locale] : T.errorNetwork[locale];
+    detectDocumentTypeError === DetectTypeErrorTagEnum.NETWORK_ERROR ? T.errorNetwork[locale] : T.errorGeneric[locale];
+
+  if (detectDocumentTypeError) {
+    return (
+      <div className={styles.root}>
+        <RetryableError
+          error={errorText}
+          retryText={T.retry[locale]}
+          onRetry={handleRetryDetectDocumentType}
+          variant="button"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.root}>
       <Text as="h1" weight="semibold" className={commonStyles.pageTitle}>
         {T.pageTitle[locale]}
       </Text>
-      {detectDocumentTypeError && (
-        <div className={styles.errorBlock}>
-          <ErrorText error={errorText} />
-          <Link onClick={handleRetryDetectDocumentType}>{T.retry[locale]}</Link>
-        </div>
-      )}
       <Card
         title={T.reviewTitle[locale]}
         subtitle={T.reviewSubtitle[locale]}
         text={T.reviewText[locale]}
         icon={<ClipboardTaskListRtl24Regular />}
         onClick={handleNavigateToReview}
-        disabled={isLoading || Boolean(detectDocumentTypeError)}
+        disabled={isLoading}
       />
       <Card
         title={T.checklistTitle[locale]}

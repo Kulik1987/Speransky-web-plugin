@@ -12,7 +12,7 @@ import {
   removePersonData,
 } from "../helpers/anonymizer";
 import { DetectTypeErrorTagEnum, SourceTypeEnums } from "../enums";
-import { isServerNetworkError } from "../helpers";
+import { isNetworkConnectivityError } from "../helpers";
 
 const APP_SET_ANONYMIZER = process.env.APP_SET_ANONYMIZER === "true";
 
@@ -281,7 +281,7 @@ class DocumentStore {
     } catch (error) {
       console.error("detectDocumentType [error]:", error);
       runInAction(() => {
-        this.detectDocumentTypeError = isServerNetworkError(error)
+        this.detectDocumentTypeError = isNetworkConnectivityError(error)
           ? DetectTypeErrorTagEnum.NETWORK_ERROR
           : DetectTypeErrorTagEnum.FAILED_REQUEST;
       });

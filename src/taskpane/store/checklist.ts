@@ -7,7 +7,7 @@ import {
   PayloadChecklistAddRuleDto,
   PayloadChecklistUpdateDto,
 } from "../api/types";
-import { getApiErrorDetail, getCopyName, isServerNetworkError } from "../helpers";
+import { getApiErrorDetail, getCopyName, isNetworkConnectivityError } from "../helpers";
 import { ChecklistErrorCodeEnum } from "../enums";
 
 export type DraftRule = PayloadChecklistAddRuleDto & { id?: string };
@@ -218,7 +218,7 @@ class CheckList {
       return "success";
     } catch (error) {
       console.error("saveChecklist [error]", error);
-      return isServerNetworkError(error) ? "network_error" : "error";
+      return isNetworkConnectivityError(error) ? "network_error" : "error";
     } finally {
       runInAction(() => {
         this.isSaving = false;
@@ -262,7 +262,7 @@ class CheckList {
       return "success";
     } catch (error) {
       console.error("duplicateChecklist [error]", error);
-      return isServerNetworkError(error) ? "network_error" : "error";
+      return isNetworkConnectivityError(error) ? "network_error" : "error";
     } finally {
       runInAction(() => {
         this.isSaving = false;
@@ -291,7 +291,7 @@ class CheckList {
 
       runInAction(() => {
         this.checklists = null;
-        this.checklistsError = isServerNetworkError(error) ? "network_error" : "error";
+        this.checklistsError = isNetworkConnectivityError(error) ? "network_error" : "error";
         this.isChecklistsLoading = false;
       });
     }
@@ -319,7 +319,7 @@ class CheckList {
 
       runInAction(() => {
         this.isDraftLoading = false;
-        this.loadChecklistError = isServerNetworkError(error) ? "network_error" : "error";
+        this.loadChecklistError = isNetworkConnectivityError(error) ? "network_error" : "error";
       });
       return null;
     }

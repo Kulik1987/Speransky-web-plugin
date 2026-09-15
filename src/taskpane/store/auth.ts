@@ -225,7 +225,7 @@ class AuthStore {
       });
     } catch (error) {
       console.error("checkOtpCode: otpVerify error", error);
-      // Сеть/сервер недоступны (в т.ч. из-за VPN)
+      // Намеренно широкая проверка — сузить нельзя, иначе 5xx пометится как INVALID_CODE и очистит введённый код
       const errorType = isServerNetworkError(error) ? OtpErrorTagEnum.NETWORK_ERROR : OtpErrorTagEnum.INVALID_CODE;
       return { status: "error" as const, errorType, message: "Ошибка проверки otp кода", error };
     }

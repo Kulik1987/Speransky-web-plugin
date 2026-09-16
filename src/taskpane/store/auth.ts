@@ -4,6 +4,7 @@ import type RootStore from ".";
 import api from "../api/v1";
 import { setAuthRefreshFunction } from "../api/instanceAxios";
 import { ResponseJwtMeDto } from "../api/types";
+import { isServerNetworkError } from "../helpers";
 
 export enum AuthStepperEnum {
   EMAIL = "auth.email", // экран запроса email
@@ -11,6 +12,11 @@ export enum AuthStepperEnum {
   ACCESSED = "access.success", // есть доступ к анализу договора
   FORBIDDEN = "access.forbidden", // отсутствует доступ к анализу договора
   ERROR = "request.error", // ошибка авторизации
+}
+
+export enum OtpErrorTagEnum {
+  "INVALID_CODE" = "invalid-code",
+  "NETWORK_ERROR" = "network-error",
 }
 
 const initialState = {
@@ -209,25 +215,39 @@ class AuthStore {
   checkOtpCode = async (code: string) => {
     try {
       const { data } = await this.authApi.otpVerify(this.clientId as string, code);
-      if (data?.access_token) {
-        runInAction(() => {
-          this.setAccessToken(data.access_token);
-          this.setRefreshToken(data.refresh_token);
-        });
-
-        await this.runCheckCanUsePlugin();
-        await this.runGetClientData();
-
-        runInAction(() => {
-          this.setIsClientVerify(true);
-        });
-
-        return { status: "success", message: "Проверка otp кода прошла успешно" };
-      } else {
+      if (!data?.access_token) {
         throw new Error("No access token received");
       }
+
+      runInAction(() => {
+        this.setAccessToken(data.access_token);
+        this.setRefreshToken(data.refresh_token);
+      });
     } catch (error) {
-      return { status: "error", message: "Ошибка проверки otp кода", error };
+      console.error("checkOtpCode: otpVerify error", error);
+      // Намеренно широкая проверка — сузить нельзя, иначе 5xx пометится как INVALID_CODE и очистит введённый код
+      const errorType = isServerNetworkError(error) ? OtpErrorTagEnum.NETWORK_ERROR : OtpErrorTagEnum.INVALID_CODE;
+      return { status: "error" as const, errorType, message: "Ошибка проверки otp кода", error };
+    }
+
+    try {
+      // Код уже принят сервером, значит дальнейшие сбои не относятся к коду
+      await this.runCheckCanUsePlugin();
+      await this.runGetClientData();
+
+      runInAction(() => {
+        this.setIsClientVerify(true);
+      });
+
+      return { status: "success" as const, message: "Проверка otp кода прошла успешно" };
+    } catch (error) {
+      console.error("checkOtpCode: post-verify error", error);
+      return {
+        status: "error" as const,
+        errorType: OtpErrorTagEnum.NETWORK_ERROR,
+        message: "Ошибка после проверки otp кода",
+        error,
+      };
     }
   };
 

@@ -67,6 +67,7 @@ type ReviewTypeBaseProps = {
   actionHandleClick?: () => void;
   onStartReview: () => void;
   warningMessage?: string;
+  hideSearch?: boolean;
 };
 
 const iconStyle = { width: "12px", height: "12px", padding: "5px" };
@@ -81,6 +82,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
     actionHandleClick,
     onStartReview,
     warningMessage,
+    hideSearch,
   } = props;
   const { menuStore, suggestionsStore } = useStores();
   const { locale } = menuStore;
@@ -129,7 +131,7 @@ const ReviewTypeBase = (props: ReviewTypeBaseProps) => {
           </AccordionHeader>
 
           <AccordionPanel className={commonStyles.accordionPanel}>
-            {!isGeneral && listContent && (
+            {!isGeneral && listContent && !hideSearch && (
               <SearchBox value={searchQuery} onChange={onSearchChange} placeholder={T.searchBoxPlaceholder[locale]} />
             )}
             {listContent || (

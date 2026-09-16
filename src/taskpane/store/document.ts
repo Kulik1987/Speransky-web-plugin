@@ -11,13 +11,15 @@ import {
   removePayment,
   removePersonData,
 } from "../helpers/anonymizer";
-import { SourceTypeEnums } from "../enums";
+import { DetectTypeErrorTagEnum, SourceTypeEnums } from "../enums";
+import { isNetworkConnectivityError } from "../helpers";
 
 const APP_SET_ANONYMIZER = process.env.APP_SET_ANONYMIZER === "true";
 
 class DocumentStore {
   rootStore: RootStore;
   isFetchingDetectDocumentType: boolean = false;
+  detectDocumentTypeError: DetectTypeErrorTagEnum | null = null;
   textContractSource: string | null = null;
   textContractAnonymized: string | null = null;
   docxFile: Blob | null = null;
@@ -242,6 +244,7 @@ class DocumentStore {
   detectDocumentType = async () => {
     try {
       this.isFetchingDetectDocumentType = true;
+      this.detectDocumentTypeError = null;
       // Получаем документ и его имя
       const [blob, fileName] = await Promise.all([this.getDocumentAsBlob(), this.getDocumentName()]);
       if (!blob) {
@@ -277,6 +280,11 @@ class DocumentStore {
       return response.data;
     } catch (error) {
       console.error("detectDocumentType [error]:", error);
+      runInAction(() => {
+        this.detectDocumentTypeError = isNetworkConnectivityError(error)
+          ? DetectTypeErrorTagEnum.NETWORK_ERROR
+          : DetectTypeErrorTagEnum.FAILED_REQUEST;
+      });
       throw error;
     } finally {
       this.isFetchingDetectDocumentType = false;

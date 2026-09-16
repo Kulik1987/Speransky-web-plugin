@@ -7,9 +7,9 @@ import { ReviewTypesEnums, RoutePathEnum } from "../../../enums";
 import { useReviewTypeStyles } from "./styles";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ReviewTypeBase } from "../reviewTypeBase";
-import { ChecklistCard } from "../../../components/molecules";
-import { Modal } from "../../../components/atoms";
+import { ChecklistCard, RetryableError } from "../../../components/molecules";
 import { SUPPORTED_CONTRACT_TYPES } from "../../../constants";
+import { useChecklistCardActions } from "../../../hooks/useChecklistCardActions";
 
 const T = {
   titleGeneral: {
@@ -20,26 +20,6 @@ const T = {
     ru: "Индивидуальная",
     en: "Custom",
   },
-  deleteTitle: {
-    ru: "Удалить чек-лист?",
-    en: "Delete checklist?",
-  },
-  deleteConfirm: {
-    ru: "Удалить",
-    en: "Delete",
-  },
-  deleteBlockedTitle: {
-    ru: "Не удалось удалить чек-лист",
-    en: "Failed to delete checklist",
-  },
-  deleteBlockedSubtitle: {
-    ru: "Чек-лист используется в запущенном анализе. Дождитесь его завершения.",
-    en: "The checklist is being used in a running analysis. Please wait for it to finish.",
-  },
-  deleteBlockedConfirm: {
-    ru: "Повторить",
-    en: "Retry",
-  },
   loadingTitle: {
     ru: "Определяем тип и стороны договора",
     en: "Determine contract type and parties",
@@ -47,6 +27,18 @@ const T = {
   checklistTypeMismatch: {
     ru: "Чек-лист не соответствует типу",
     en: "The checklist does not match type",
+  },
+  retry: {
+    ru: "Повторить",
+    en: "Retry",
+  },
+  networkErrorSubtitle: {
+    ru: "Нет соединения с сервером. Проверьте интернет-соединение или отключите VPN.",
+    en: "No connection to the server. Check your internet connection or disable VPN.",
+  },
+  errorLoadChecklists: {
+    ru: "Не удалось загрузить список чек-листов.",
+    en: "Failed to load the checklist list.",
   },
 };
 
@@ -67,9 +59,7 @@ const ReviewType = () => {
     return docType && SUPPORTED_CONTRACT_TYPES.includes(docType) ? docType : "";
   });
 
-  const [targetId, setTargetId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [deleteBlocked, setDeleteBlocked] = useState<{ id: string; reason: "in_use" | "error" } | null>(null);
 
   useEffect(() => {
     checkList.getChecklists();
@@ -94,31 +84,7 @@ const ReviewType = () => {
     navigate(RoutePathEnum.CHECKLIST);
   };
 
-  const handleDuplicate = async (id: string) => {
-    await checkList.duplicateChecklist(id);
-  };
-
-  const attemptDelete = async (id: string) => {
-    const result = await checkList.deleteChecklist(id);
-    if (result === "in_use" || result === "error") {
-      setDeleteBlocked({ id, reason: result });
-      return;
-    }
-    setDeleteBlocked(null);
-  };
-
-  const handleDelete = (id: string) => setTargetId(id);
-  const handleDeleteConfirm = async () => {
-    if (!targetId) return;
-    const id = targetId;
-    setTargetId(null);
-    await attemptDelete(id);
-  };
-
-  const handleRetryDelete = async () => {
-    if (!deleteBlocked) return;
-    await attemptDelete(deleteBlocked.id);
-  };
+  const { handleDelete, handleDuplicate, modals: checklistActionModals } = useChecklistCardActions();
 
   const filteredContractTypes = searchQuery
     ? SUPPORTED_CONTRACT_TYPES.filter((item: string) => item.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -145,42 +111,35 @@ const ReviewType = () => {
     !!suggestionsStore.documentType &&
     selectedChecklistData.doc_type !== suggestionsStore.documentType;
 
-  const reviewCustomChecklists = checkList.hasChecklists
-    ? filteredChecklists.map((item) => (
-        <ChecklistCard
-          key={item.id}
-          id={item.id}
-          name={item.name}
-          createdAt={item.created_at}
-          isRadio
-          selected={selectedChecklist === item.id}
-          searchText={searchQuery}
-          onSelect={setSelectedChecklist}
-          onEdit={handleEdit}
-          onDuplicate={handleDuplicate}
-          onDelete={handleDelete}
-        />
-      ))
-    : null;
+  const reviewCustomChecklists = checkList.checklistsError ? (
+    <RetryableError
+      error={
+        checkList.checklistsError === "network_error" ? T.networkErrorSubtitle[locale] : T.errorLoadChecklists[locale]
+      }
+      retryText={T.retry[locale]}
+      onRetry={() => checkList.getChecklists()}
+    />
+  ) : checkList.hasChecklists ? (
+    filteredChecklists.map((item) => (
+      <ChecklistCard
+        key={item.id}
+        id={item.id}
+        name={item.name}
+        createdAt={item.created_at}
+        isRadio
+        selected={selectedChecklist === item.id}
+        searchText={searchQuery}
+        onSelect={setSelectedChecklist}
+        onEdit={handleEdit}
+        onDuplicate={handleDuplicate}
+        onDelete={handleDelete}
+      />
+    ))
+  ) : null;
 
   return (
     <div className={styles.container}>
-      <Modal
-        open={targetId !== null}
-        onClose={() => setTargetId(null)}
-        title={T.deleteTitle[locale]}
-        actionButtonTitle={T.deleteConfirm[locale]}
-        onAction={handleDeleteConfirm}
-      />
-
-      <Modal
-        open={deleteBlocked !== null}
-        onClose={() => setDeleteBlocked(null)}
-        title={T.deleteBlockedTitle[locale]}
-        actionButtonTitle={T.deleteBlockedConfirm[locale]}
-        onAction={handleRetryDelete}
-        children={deleteBlocked?.reason === "in_use" ? <span>{T.deleteBlockedSubtitle[locale]}</span> : undefined}
-      />
+      {checklistActionModals}
 
       <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} className={styles.tablist}>
         <Tab value={ReviewTypesEnums.GENERAL} className={styles.tab}>
@@ -201,6 +160,7 @@ const ReviewType = () => {
         warningMessage={
           isChecklistTypeMismatch ? `${T.checklistTypeMismatch[locale]} «${suggestionsStore.documentType}»` : undefined
         }
+        hideSearch={!!checkList.checklistsError}
       />
     </div>
   );

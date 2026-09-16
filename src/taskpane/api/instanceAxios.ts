@@ -3,6 +3,8 @@ import { AxiosResponse } from "axios";
 
 const instance = axios.create({
   baseURL: "",
+  // Без таймаута запрос, "зависший" из-за VPN/прокси, не завершится никогда
+  timeout: 30000,
 });
 
 let authRefreshFunction: ((refreshToken: string) => Promise<AxiosResponse>) | null = null;

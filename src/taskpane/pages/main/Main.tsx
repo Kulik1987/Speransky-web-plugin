@@ -8,8 +8,8 @@ import {
 } from "@fluentui/react-icons";
 import { useStores } from "../../store";
 import { useMainStyles } from "./styles";
-import { Card } from "../../components/molecules";
-import { RoutePathEnum } from "../../enums";
+import { Card, RetryableError } from "../../components/molecules";
+import { DetectTypeErrorTagEnum, RoutePathEnum } from "../../enums";
 // import { Anonymizer } from "../review/anonymizer";
 import { Text } from "@fluentui/react-components";
 import { useCommonStyles } from "../../theme/commonStyles";
@@ -55,6 +55,18 @@ const T = {
     ru: "Создавайте свои правила для проверки",
     en: "Create your own rules for review",
   },
+  errorNetwork: {
+    ru: "Не работает? Попробуйте отключить VPN.",
+    en: "Not working? Try disabling VPN.",
+  },
+  errorGeneric: {
+    ru: "Не удалось определить тип документа.\n Попробуйте ещё раз.",
+    en: "Failed to detect the document type.\n Please try again.",
+  },
+  retry: {
+    ru: "Повторить",
+    en: "Retry",
+  },
 };
 
 const Main = () => {
@@ -79,6 +91,27 @@ const Main = () => {
   }, []);
 
   const isLoading = documentStore.isFetchingDetectDocumentType;
+  const detectDocumentTypeError = documentStore.detectDocumentTypeError;
+
+  const handleRetryDetectDocumentType = () => {
+    documentStore.detectDocumentType().catch(() => {});
+  };
+
+  const errorText =
+    detectDocumentTypeError === DetectTypeErrorTagEnum.NETWORK_ERROR ? T.errorNetwork[locale] : T.errorGeneric[locale];
+
+  if (detectDocumentTypeError) {
+    return (
+      <div className={styles.root}>
+        <RetryableError
+          error={errorText}
+          retryText={T.retry[locale]}
+          onRetry={handleRetryDetectDocumentType}
+          variant="button"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.root}>

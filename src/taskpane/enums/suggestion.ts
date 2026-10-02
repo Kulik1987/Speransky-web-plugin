@@ -47,6 +47,11 @@ export enum SuggestionsErrorTagEnum {
   "CHECKLIST_CONTRACT_TYPE_MISMATCH" = "checklist-contract-type-mismatch",
 }
 
+export enum DetectTypeErrorTagEnum {
+  "NETWORK_ERROR" = "network-error",
+  "FAILED_REQUEST" = "failed-request",
+}
+
 export enum WebUrlEnums {
   "WEB_URL_LOCAL" = "http://localhost:5173",
   "WEB_URL_TEST" = "https://app-test.speransky.legal",
